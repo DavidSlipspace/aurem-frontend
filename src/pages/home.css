@@ -1,0 +1,103 @@
+.home-page {
+  min-height: 100vh;
+}
+
+.home-navbar {
+  height: 64px;
+  padding: 0 32px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-brand {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.home-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-weight: 600;
+}
+
+.home-user button {
+  margin: 0;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.home-content {
+  padding: 32px;
+}
+
+.home-header {
+  margin-bottom: 24px;
+}
+
+.home-header h1 {
+  margin: 0 0 8px;
+}
+
+.home-header p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.case-table-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.case-table-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.case-table-card thead {
+  background: var(--color-table-header);
+}
+
+.case-table-card th,
+.case-table-card td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.case-table-card th {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.case-table-card tbody tr:hover {
+  background: var(--color-table-row-hover);
+}
+
+.case-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #ecfdf3;
+  color: var(--color-success);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--color-text-secondary);
+}
