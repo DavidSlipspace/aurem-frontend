@@ -9,13 +9,6 @@ type HomePageProps = {
 };
 
 export function HomePage({ user, cases, onLogout }: HomePageProps) {
-  function formatCurrencyCents(amount: number) {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD"
-    }).format(amount / 100);
-  }
-
   return (
     <main className="home-page">
       <nav className="home-navbar">
@@ -40,10 +33,8 @@ export function HomePage({ user, cases, onLogout }: HomePageProps) {
             <thead>
               <tr>
                 <th>Case Reference</th>
-                <th>Company</th>
-                <th>GP User</th>
-                <th>IP User</th>
-                <th>Budget</th>
+                <th>Case Manager</th>
+                <th>IPCM</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -53,10 +44,8 @@ export function HomePage({ user, cases, onLogout }: HomePageProps) {
                 cases.map((caseItem) => (
                   <tr key={caseItem.id}>
                     <td>{caseItem.caseReferenceId}</td>
-                    <td>{caseItem.companyName}</td>
-                    <td>{caseItem.gpName}</td>
-                    <td>{caseItem.ipName}</td>
-                    <td>{formatCurrencyCents(caseItem.budget)}</td>
+                    <td>{caseItem.caseManagerName}</td>
+                    <td>{caseItem.ipcmName}</td>
                     <td>
                       <span className="case-status">{caseItem.status}</span>
                     </td>
@@ -64,7 +53,7 @@ export function HomePage({ user, cases, onLogout }: HomePageProps) {
                 ))
               ) : (
                 <tr>
-                  <td className="empty-state" colSpan={6}>
+                  <td className="empty-state" colSpan={4}>
                     No active cases found.
                   </td>
                 </tr>
