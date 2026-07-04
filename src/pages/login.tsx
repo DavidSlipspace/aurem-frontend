@@ -7,7 +7,11 @@ import type { CaseResponse } from "../types/case";
 import "./login.css";
 
 type LoginPageProps = {
-  onLoginSuccess: (user: UserResponse, cases: CaseResponse[]) => void;
+  onLoginSuccess: (
+    idToken: string,
+    user: UserResponse,
+    cases: CaseResponse[]
+  ) => void;
 };
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
@@ -28,7 +32,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       const user = await getUser(idToken);
       const casesResponse = await getCases(idToken);
 
-      onLoginSuccess(user, casesResponse.cases);
+      onLoginSuccess(idToken, user, casesResponse.cases);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Login failed.");
     } finally {

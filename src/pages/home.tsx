@@ -1,27 +1,13 @@
-import type { UserResponse } from "../types/user";
 import type { CaseResponse } from "../types/case";
 import "./home.css";
 
 type HomePageProps = {
-  user: UserResponse;
   cases: CaseResponse[];
-  onLogout: () => void;
 };
 
-export function HomePage({ user, cases, onLogout }: HomePageProps) {
+export function HomePage({ cases }: HomePageProps) {
   return (
     <main className="home-page">
-      <nav className="home-navbar">
-        <div className="home-brand">Aurem</div>
-
-        <div className="home-user">
-          <span>
-            Welcome {user.role}, {user.firstName}
-          </span>
-          <button onClick={onLogout}>Logout</button>
-        </div>
-      </nav>
-
       <section className="home-content">
         <div className="home-header">
           <h1>Active Cases</h1>
