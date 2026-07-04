@@ -1,148 +1,56 @@
-import { FormEvent, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import { LoginPage } from "./pages/login";
+import { HomePage } from "./pages/home";
+import { GcProfilesPage } from "./pages/gcProfile";
+import { Navbar } from "./components/Navbar";
+import type { UserResponse } from "./types/user";
+import type { CaseResponse } from "./types/case";
 import "./App.css";
 
-type GetUserResponse = {
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  welcomeMessage: string;
-};
+type Page = "cases" | "gcProfiles";
 
 export default function App() {
-  const [email, setEmail] = useState("dhoffman1155@gmail.com");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [user, setUser] = useState<GetUserResponse | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [idToken, setIdToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserResponse | null>(null);
+  const [cases, setCases] = useState<CaseResponse[]>([]);
+  const [activePage, setActivePage] = useState<Page>("cases");
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setErrorMessage("");
-    setIsLoading(true);
-
-    try {
-      const authResponse = await axios.post(
-        import.meta.env.VITE_COGNITO_AUTH_URL,
-        {
-          AuthFlow: "USER_PASSWORD_AUTH",
-          ClientId: import.meta.env.VITE_COGNITO_CLIENT_ID,
-          AuthParameters: {
-            USERNAME: email,
-            PASSWORD: password
-          }
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-amz-json-1.1",
-            "X-Amz-Target": "AWSCognitoIdentityProviderService.InitiateAuth"
-          }
-        }
-      );
-
-      const idToken = authResponse.data.AuthenticationResult?.IdToken;
-
-      if (!idToken) {
-        throw new Error("Authentication succeeded but no ID token was returned.");
-      }
-
-      const userResponse = await axios.get<GetUserResponse>(
-        `${import.meta.env.VITE_API_BASE_URL}/getUser`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`
-          }
-        }
-      );
-
-      setUser(userResponse.data);
-    } catch (error) {
-      console.error(error);
-
-      if (axios.isAxiosError(error)) {
-        console.error("Request URL:", error.config?.url);
-        console.error("Status:", error.response?.status);
-        console.error("Response Data:", error.response?.data);
-
-        setErrorMessage(
-          error.response?.data?.message ??
-            error.response?.data?.__type ??
-            `Request failed with status ${error.response?.status ?? "unknown"}`
-        );
-      } else {
-        setErrorMessage("Unexpected login error.");
-      }
-
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+  function handleLoginSuccess(
+    token: string,
+    userData: UserResponse,
+    caseData: CaseResponse[]
+  ) {
+    setIdToken(token);
+    setUser(userData);
+    setCases(caseData);
+    setActivePage("cases");
   }
 
   function handleLogout() {
+    setIdToken(null);
     setUser(null);
-    setPassword("");
-    setErrorMessage("");
+    setCases([]);
+    setActivePage("cases");
   }
 
-  if (user) {
-    return (
-      <main className="page">
-        <section className="card">
-          <h1>{user.welcomeMessage}</h1>
-          <p>{user.email}</p>
-          <button onClick={handleLogout}>Logout</button>
-        </section>
-      </main>
-    );
+  if (!user || !idToken) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
-    <main className="page">
-      <section className="card">
-        <h1>Aurem</h1>
-        <p className="subtitle">Sign in to continue</p>
+    <>
+      <Navbar
+        user={user}
+        activePage={activePage}
+        onPageChange={setActivePage}
+        onLogout={handleLogout}
+      />
 
-        <form onSubmit={handleLogin}>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            required
-          />
+      {activePage === "cases" && <HomePage cases={cases} />}
 
-          <label htmlFor="password">Password</label>
-          <div className="password-field">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-
-            <button
-              type="button"
-              className="password-toggle"
-              onClick={() => setShowPassword((current) => !current)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-
-          {errorMessage && <p className="error">{errorMessage}</p>}
-
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
-      </section>
-    </main>
+      {activePage === "gcProfiles" && (
+        <GcProfilesPage idToken={idToken} />
+      )}
+    </>
   );
 }
