@@ -95,6 +95,45 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
     setShowForm(false);
   }
 
+  async function handleDeactivate(profile: GcProfile) {
+  const confirmed = window.confirm(
+    `Deactivate ${profile.legalFirstName} ${profile.legalLastName}?`
+  );
+
+  if (!confirmed) return;
+
+  setIsLoading(true);
+  setErrorMessage("");
+  setSuccessMessage("");
+
+  try {
+    await updateGcProfile(idToken, profile.id, {
+      legalFirstName: profile.legalFirstName,
+      legalMiddleName: profile.legalMiddleName ?? "",
+      legalLastName: profile.legalLastName,
+      dateOfBirth: profile.dateOfBirth?.substring(0, 10),
+      email: profile.email,
+      phone: profile.phone,
+      tsaPrecheckNumber: profile.tsaPrecheckNumber ?? "",
+      frequentFlyerProgram: profile.frequentFlyerProgram ?? "",
+      frequentFlyerNumber: profile.frequentFlyerNumber ?? "",
+      hotelRewardsProgram: profile.hotelRewardsProgram ?? "",
+      hotelRewardsNumber: profile.hotelRewardsNumber ?? "",
+      seatPreference: profile.seatPreference ?? "",
+      status: "inactive"
+    });
+
+    setSuccessMessage("GC profile deactivated.");
+    await loadProfiles();
+  } catch (error) {
+    setErrorMessage(
+      error instanceof Error ? error.message : "Unable to deactivate GC profile."
+    );
+  } finally {
+    setIsLoading(false);
+  }
+}
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -302,12 +341,23 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                       <span className="gc-status">{profile.status}</span>
                     </td>
                     <td>
-                      <button
-                        className="table-action-button"
-                        onClick={() => handleEdit(profile)}
-                      >
-                        Edit
-                      </button>
+                      <div className="table-actions">
+                        <button
+                          className="table-action-button"
+                          onClick={() => handleEdit(profile)}
+                        >
+                          Edit
+                        </button>
+
+                        {profile.status === "active" && (
+                          <button
+                            className="table-action-button danger"
+                            onClick={() => handleDeactivate(profile)}
+                          >
+                            Deactivate
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

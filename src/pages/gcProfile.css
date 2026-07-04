@@ -133,6 +133,15 @@
   cursor: pointer;
 }
 
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-action-button.danger {
+  color: var(--color-error);
+}
+
 .gc-error {
   color: var(--color-error);
   margin: 0 0 16px;
