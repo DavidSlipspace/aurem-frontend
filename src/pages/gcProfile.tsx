@@ -128,7 +128,7 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
         <div className="gc-header">
           <div>
             <h1>GC Profiles</h1>
-            <p>Create and manage gestational carrier travel profiles.</p>
+            <p>Create and manage travel profiles.</p>
           </div>
 
           <button onClick={handleNewProfile}>+ New GC Profile</button>
