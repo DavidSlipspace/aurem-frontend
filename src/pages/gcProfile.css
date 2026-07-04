@@ -115,11 +115,19 @@
   display: inline-block;
   padding: 4px 10px;
   border-radius: 999px;
-  background: #ecfdf3;
-  color: var(--color-success);
   font-weight: 700;
   font-size: 12px;
   text-transform: capitalize;
+}
+
+.status-active {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.status-inactive {
+  background: #fef3f2;
+  color: #b42318;
 }
 
 .table-action-button {
@@ -131,6 +139,23 @@
   color: var(--color-text-primary);
   font-weight: 700;
   cursor: pointer;
+}
+
+.table-action-button.success {
+  color: #027a48;
+}
+
+.table-action-button.danger {
+  color: #b42318;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.table-action-button.danger {
+  color: var(--color-error);
 }
 
 .gc-error {

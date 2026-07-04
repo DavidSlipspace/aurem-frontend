@@ -95,6 +95,57 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
     setShowForm(false);
   }
 
+  async function handleStatusChange(
+    profile: GcProfile,
+    newStatus: "active" | "inactive"
+  ) {
+    const action = newStatus === "active" ? "activate" : "deactivate";
+
+    const confirmed = window.confirm(
+      `Are you sure you want to ${action} ${profile.legalFirstName} ${profile.legalLastName}?`
+    );
+
+    if (!confirmed) return;
+
+    setIsLoading(true);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      await updateGcProfile(idToken, profile.id, {
+        legalFirstName: profile.legalFirstName,
+        legalMiddleName: profile.legalMiddleName ?? "",
+        legalLastName: profile.legalLastName,
+        dateOfBirth: profile.dateOfBirth.substring(0, 10),
+        email: profile.email,
+        phone: profile.phone,
+        tsaPrecheckNumber: profile.tsaPrecheckNumber ?? "",
+        frequentFlyerProgram: profile.frequentFlyerProgram ?? "",
+        frequentFlyerNumber: profile.frequentFlyerNumber ?? "",
+        hotelRewardsProgram: profile.hotelRewardsProgram ?? "",
+        hotelRewardsNumber: profile.hotelRewardsNumber ?? "",
+        seatPreference: profile.seatPreference ?? "",
+        status: newStatus
+      });
+
+      setSuccessMessage(
+        `GC profile ${
+          newStatus === "active" ? "activated" : "deactivated"
+        }.`
+      );
+
+      await loadProfiles();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : `Unable to ${action} GC profile.`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -299,15 +350,41 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                     <td>{profile.tsaPrecheckNumber || "-"}</td>
                     <td>{profile.seatPreference || "-"}</td>
                     <td>
-                      <span className="gc-status">{profile.status}</span>
+                      <span
+                        className={`gc-status ${
+                          profile.status === "active"
+                            ? "status-active"
+                            : "status-inactive"
+                        }`}
+                      >
+                        {profile.status}
+                      </span>
                     </td>
                     <td>
-                      <button
-                        className="table-action-button"
-                        onClick={() => handleEdit(profile)}
-                      >
-                        Edit
-                      </button>
+                      <div className="table-actions">
+                        <button
+                          className="table-action-button"
+                          onClick={() => handleEdit(profile)}
+                        >
+                          Edit
+                        </button>
+
+                        {profile.status === "active" ? (
+                          <button
+                            className="table-action-button danger"
+                            onClick={() => handleStatusChange(profile, "inactive")}
+                          >
+                            Deactivate
+                          </button>
+                        ) : (
+                          <button
+                            className="table-action-button success"
+                            onClick={() => handleStatusChange(profile, "active")}
+                          >
+                            Activate
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
