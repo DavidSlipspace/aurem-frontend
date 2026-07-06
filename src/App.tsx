@@ -6,8 +6,9 @@ import { Navbar } from "./components/Navbar";
 import type { UserResponse } from "./types/user";
 import type { CaseResponse } from "./types/case";
 import "./App.css";
+import { TripsPage } from "./pages/trips";
 
-type Page = "cases" | "gcProfiles";
+type Page = "cases" | "gcProfiles" | "trips";
 
 export default function App() {
   const [idToken, setIdToken] = useState<string | null>(null);
@@ -47,6 +48,7 @@ export default function App() {
       />
 
       {activePage === "cases" && <HomePage cases={cases} />}
+      {activePage === "trips" && <TripsPage idToken={idToken} />}
 
       {activePage === "gcProfiles" && (
         <GcProfilesPage idToken={idToken} />
