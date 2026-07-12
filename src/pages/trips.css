@@ -1,0 +1,236 @@
+.trips-page {
+  min-height: calc(100vh - 64px);
+}
+
+.trips-content {
+  padding: 32px;
+}
+
+.trips-header {
+  margin-bottom: 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.trips-header h1 {
+  margin: 0 0 24px;
+}
+
+.trips-header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.trips-header button,
+.trip-form-actions button {
+  margin: 0;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trips-header button:hover,
+.trip-form-actions button:hover {
+  background: var(--color-primary-hover);
+}
+
+.trip-form-card {
+  margin-bottom: 24px;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.trip-form-card h2 {
+  margin: 0 0 24px;
+}
+
+.trip-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.trip-form-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.trip-form-grid input,
+.trip-form-grid select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+}
+
+.trip-form-grid input:focus,
+.trip-form-grid select:focus {
+  outline: 2px solid rgba(17, 24, 39, 0.15);
+  border-color: var(--color-primary);
+}
+
+.currency-input {
+  position: relative;
+}
+
+.currency-input span {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: var(--color-text-secondary);
+}
+
+.currency-input input {
+  padding-left: 28px;
+}
+
+.companion-toggle {
+  flex-direction: row !important;
+  align-items: center;
+  align-self: end;
+  min-height: 44px;
+}
+
+.companion-toggle input {
+  width: 18px;
+  min-height: auto;
+  height: 18px;
+  margin: 0;
+}
+
+.trip-form-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.trip-form-actions .secondary-button {
+  background: var(--color-table-row-hover);
+  color: var(--color-text-primary);
+}
+
+.trip-form-actions button:disabled,
+.trips-header button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.trips-table-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.trips-table-card table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1100px;
+}
+
+.trips-table-card thead {
+  background: var(--color-table-header);
+}
+
+.trips-table-card th,
+.trips-table-card td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.trips-table-card th {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.trips-table-card tbody tr:hover {
+  background: var(--color-table-row-hover);
+}
+
+.trip-status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #3538cd;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.trip-edit-button {
+  margin: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-table-row-hover);
+  color: var(--color-text-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trip-edit-button:hover {
+  background: var(--color-border);
+}
+
+.trips-error {
+  margin: 0 0 16px;
+  color: var(--color-error);
+}
+
+.trips-success {
+  margin: 0 0 16px;
+  color: var(--color-success);
+}
+
+.trips-loading {
+  margin: 0 0 16px;
+  color: var(--color-text-secondary);
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 800px) {
+  .trips-content {
+    padding: 20px;
+  }
+
+  .trips-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .trip-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trip-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .trip-form-actions button {
+    width: 100%;
+  }
+}

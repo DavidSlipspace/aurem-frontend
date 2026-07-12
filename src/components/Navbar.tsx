@@ -1,7 +1,7 @@
 import type { UserResponse } from "../types/user";
 import "./Navbar.css";
 
-type Page = "cases" | "gcProfiles";
+type Page = "cases" | "gcProfiles" | "trips";
 
 type NavbarProps = {
   user: UserResponse;
@@ -24,6 +24,12 @@ export function Navbar({ user, activePage, onPageChange, onLogout }: NavbarProps
           onClick={() => onPageChange("cases")}
         >
           Cases
+        </button>
+        <button
+          className={activePage === "trips" ? "nav-link active" : "nav-link"}
+          onClick={() => onPageChange("trips")}
+        >
+          Trips
         </button>
 
         {canManageGcProfiles && (
