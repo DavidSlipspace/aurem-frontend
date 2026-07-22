@@ -1,4 +1,5 @@
 import type {
+  SendTripToGcResponse,
   TripRequest,
   TripsResponse
 } from "../types/trip";
@@ -102,4 +103,33 @@ export async function updateTrip(
       getErrorMessage(data, "Unable to update trip.")
     );
   }
+}
+
+export async function sendTripToGc(
+  idToken: string,
+  tripId: string
+): Promise<SendTripToGcResponse> {
+  const response = await fetch(
+    `${baseUrl}/trips/${tripId}/booking-link`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  const data = await parseResponseBody(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Unable to send the trip selection email."
+      )
+    );
+  }
+
+  return data as SendTripToGcResponse;
 }

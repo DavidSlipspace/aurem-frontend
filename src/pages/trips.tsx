@@ -1,5 +1,6 @@
 import {
-  FormEvent,
+  type FormEvent,
+  useCallback,
   useEffect,
   useState
 } from "react";
@@ -7,14 +8,25 @@ import {
 import {
   createTrip,
   getTrips,
+  sendTripToGc,
   updateTrip
 } from "../api/tripApi";
 
 import { getCases } from "../api/caseApi";
 import { getGcProfiles } from "../api/gcProfileApi";
 
+import { ConfirmDialog } from "../components/common/ConfirmDialog";
+
+import {
+  TripForm,
+  type TripFormState
+} from "../components/trips/TripForm";
+
+import { TripsTable } from "../components/trips/TripsTable";
+
 import type { CaseResponse } from "../types/case";
 import type { GcProfile } from "../types/gcProfile";
+
 import type {
   Trip,
   TripRequest
@@ -26,62 +38,195 @@ type TripsPageProps = {
   idToken: string;
 };
 
-type TripFormState = {
-  caseId: string;
-  gcProfileId: string;
-  tripPurpose: string;
-  outboundDate: string;
-  returnDate: string;
-  outboundAirport: string;
-  returnAirport: string;
-  destinationCity: string;
-  destinationAddress: string;
-  hotelProximityPreference: string;
-  minimumHotelStarRating: string;
-  budgetDollars: string;
-  companionTraveler: boolean;
-  status: string;
-};
+function createEmptyForm(): TripFormState {
+  return {
+    caseId: "",
+    gcProfileId: "",
+    tripPurpose: "",
 
-const emptyForm: TripFormState = {
-  caseId: "",
-  gcProfileId: "",
-  tripPurpose: "",
-  outboundDate: "",
-  returnDate: "",
-  outboundAirport: "",
-  returnAirport: "",
-  destinationCity: "",
-  destinationAddress: "",
-  hotelProximityPreference: "",
-  minimumHotelStarRating: "",
-  budgetDollars: "",
-  companionTraveler: false,
-  status: "Created"
-};
+    outboundDate: "",
+    returnDate: "",
+    outboundAirport: "",
+    returnAirport: "",
 
-export function TripsPage({ idToken }: TripsPageProps) {
+    destinationCity: "",
+    destinationAddress: "",
+    hotelProximityPreference: "",
+    minimumHotelStarRating: "",
+
+    budgetDollars: "",
+    companionTraveler: false,
+    ipcmApprovalRequired: false,
+
+    status: "Created"
+  };
+}
+
+function createFormFromTrip(
+  trip: Trip
+): TripFormState {
+  return {
+    caseId: trip.caseId,
+    gcProfileId: trip.gcProfileId,
+    tripPurpose: trip.tripPurpose,
+
+    outboundDate:
+      trip.outboundDate?.substring(0, 10) ?? "",
+
+    returnDate:
+      trip.returnDate?.substring(0, 10) ?? "",
+
+    outboundAirport: trip.outboundAirport,
+    returnAirport: trip.returnAirport,
+
+    destinationCity: trip.destinationCity ?? "",
+    destinationAddress:
+      trip.destinationAddress ?? "",
+
+    hotelProximityPreference:
+      trip.hotelProximityPreference ?? "",
+
+    minimumHotelStarRating:
+      trip.minimumHotelStarRating?.toString() ?? "",
+
+    budgetDollars: (
+      trip.budgetFilter / 100
+    ).toFixed(2),
+
+    companionTraveler: trip.companionTraveler,
+
+    ipcmApprovalRequired:
+      trip.ipcmApprovalRequired ?? false,
+
+    status: trip.status
+  };
+}
+
+function buildRequestPayload(
+  formData: TripFormState
+): TripRequest {
+  const budgetDollars = Number(
+    formData.budgetDollars
+  );
+
+  if (
+    !Number.isFinite(budgetDollars) ||
+    budgetDollars <= 0
+  ) {
+    throw new Error(
+      "Budget must be greater than zero."
+    );
+  }
+
+  if (
+    !formData.destinationCity.trim() &&
+    !formData.destinationAddress.trim()
+  ) {
+    throw new Error(
+      "Enter either a destination city or destination address."
+    );
+  }
+
+  if (
+    formData.outboundDate &&
+    formData.returnDate &&
+    formData.returnDate < formData.outboundDate
+  ) {
+    throw new Error(
+      "Return date cannot be before the outbound date."
+    );
+  }
+
+  return {
+    caseId: formData.caseId,
+    gcProfileId: formData.gcProfileId,
+
+    tripPurpose: formData.tripPurpose.trim(),
+
+    outboundDate: formData.outboundDate,
+    returnDate: formData.returnDate,
+
+    outboundAirport:
+      formData.outboundAirport.trim().toUpperCase(),
+
+    returnAirport:
+      formData.returnAirport.trim().toUpperCase(),
+
+    destinationCity:
+      formData.destinationCity.trim() || undefined,
+
+    destinationAddress:
+      formData.destinationAddress.trim() ||
+      undefined,
+
+    hotelProximityPreference:
+      formData.hotelProximityPreference.trim() ||
+      undefined,
+
+    minimumHotelStarRating:
+      formData.minimumHotelStarRating === ""
+        ? undefined
+        : Number(
+            formData.minimumHotelStarRating
+          ),
+
+    budgetFilter: Math.round(
+      budgetDollars * 100
+    ),
+
+    companionTraveler:
+      formData.companionTraveler,
+
+    ipcmApprovalRequired:
+      formData.ipcmApprovalRequired,
+
+    status: formData.status
+  };
+}
+
+export function TripsPage({
+  idToken
+}: TripsPageProps) {
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [cases, setCases] = useState<CaseResponse[]>([]);
-  const [gcProfiles, setGcProfiles] = useState<GcProfile[]>([]);
+  const [cases, setCases] = useState<CaseResponse[]>(
+    []
+  );
+
+  const [gcProfiles, setGcProfiles] = useState<
+    GcProfile[]
+  >([]);
 
   const [formData, setFormData] =
-    useState<TripFormState>(emptyForm);
+    useState<TripFormState>(createEmptyForm());
 
   const [editingTripId, setEditingTripId] =
     useState<string | null>(null);
 
-  const [showForm, setShowForm] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [tripPendingEmail, setTripPendingEmail] =
+    useState<Trip | null>(null);
 
-  useEffect(() => {
-    loadPageData();
+  const [isSendingTripId, setIsSendingTripId] =
+    useState<string | null>(null);
+
+  const [showForm, setShowForm] = useState(false);
+  const [isPageLoading, setIsPageLoading] =
+    useState(false);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [errorMessage, setErrorMessage] =
+    useState("");
+
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  const loadTrips = useCallback(async () => {
+    const response = await getTrips(idToken);
+    setTrips(response.trips);
   }, [idToken]);
 
-  async function loadPageData() {
-    setIsLoading(true);
+  const loadPageData = useCallback(async () => {
+    setIsPageLoading(true);
     setErrorMessage("");
 
     try {
@@ -100,7 +245,8 @@ export function TripsPage({ idToken }: TripsPageProps) {
 
       setGcProfiles(
         gcProfilesResponse.gcProfiles.filter(
-          (profile) => profile.status === "active"
+          (profile) =>
+            profile.status.toLowerCase() === "active"
         )
       );
     } catch (error) {
@@ -110,123 +256,65 @@ export function TripsPage({ idToken }: TripsPageProps) {
           : "Unable to load trip data."
       );
     } finally {
-      setIsLoading(false);
+      setIsPageLoading(false);
     }
-  }
+  }, [idToken]);
 
-  function handleFieldChange(
-    field: keyof TripFormState,
-    value: string | boolean
-  ) {
+  useEffect(() => {
+    void loadPageData();
+  }, [loadPageData]);
+
+  function handleFieldChange<
+    Field extends keyof TripFormState
+  >(
+    field: Field,
+    value: TripFormState[Field]
+  ): void {
     setFormData((current) => ({
       ...current,
       [field]: value
     }));
   }
 
-  function handleNewTrip() {
-    setFormData(emptyForm);
+  function handleNewTrip(): void {
+    setFormData(createEmptyForm());
     setEditingTripId(null);
     setShowForm(true);
     setErrorMessage("");
     setSuccessMessage("");
   }
 
-  function handleEdit(trip: Trip) {
-    setFormData({
-      caseId: trip.caseId,
-      gcProfileId: trip.gcProfileId,
-      tripPurpose: trip.tripPurpose,
-      outboundDate: trip.outboundDate.substring(0, 10),
-      returnDate: trip.returnDate.substring(0, 10),
-      outboundAirport: trip.outboundAirport,
-      returnAirport: trip.returnAirport,
-      destinationCity: trip.destinationCity ?? "",
-      destinationAddress: trip.destinationAddress ?? "",
-      hotelProximityPreference:
-        trip.hotelProximityPreference ?? "",
-      minimumHotelStarRating:
-        trip.minimumHotelStarRating?.toString() ?? "",
-      budgetDollars: (trip.budgetFilter / 100).toFixed(2),
-      companionTraveler: trip.companionTraveler,
-      status: trip.status
-    });
-
+  function handleEdit(trip: Trip): void {
+    setFormData(createFormFromTrip(trip));
     setEditingTripId(trip.id);
     setShowForm(true);
     setErrorMessage("");
     setSuccessMessage("");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   }
 
-  function handleCancel() {
-    setFormData(emptyForm);
+  function handleCancelForm(): void {
+    setFormData(createEmptyForm());
     setEditingTripId(null);
     setShowForm(false);
-  }
-
-  function buildRequestPayload(): TripRequest {
-    const budgetDollars = Number(formData.budgetDollars);
-
-    if (!Number.isFinite(budgetDollars) || budgetDollars < 0) {
-      throw new Error("Budget must be a valid positive amount.");
-    }
-
-    if (
-      !formData.destinationCity.trim() &&
-      !formData.destinationAddress.trim()
-    ) {
-      throw new Error(
-        "Enter either a destination city or destination address."
-      );
-    }
-
-    if (
-      formData.returnDate &&
-      formData.outboundDate &&
-      formData.returnDate < formData.outboundDate
-    ) {
-      throw new Error(
-        "Return date cannot be before the outbound date."
-      );
-    }
-
-    return {
-      caseId: formData.caseId,
-      gcProfileId: formData.gcProfileId,
-      tripPurpose: formData.tripPurpose.trim(),
-      outboundDate: formData.outboundDate,
-      returnDate: formData.returnDate,
-      outboundAirport:
-        formData.outboundAirport.trim().toUpperCase(),
-      returnAirport:
-        formData.returnAirport.trim().toUpperCase(),
-      destinationCity:
-        formData.destinationCity.trim() || undefined,
-      destinationAddress:
-        formData.destinationAddress.trim() || undefined,
-      hotelProximityPreference:
-        formData.hotelProximityPreference.trim() || undefined,
-      minimumHotelStarRating:
-        formData.minimumHotelStarRating === ""
-          ? undefined
-          : Number(formData.minimumHotelStarRating),
-      budgetFilter: Math.round(budgetDollars * 100),
-      companionTraveler: formData.companionTraveler,
-      status: formData.status
-    };
+    setErrorMessage("");
   }
 
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
-  ) {
+  ): Promise<void> {
     event.preventDefault();
 
-    setIsLoading(true);
+    setIsSaving(true);
     setErrorMessage("");
     setSuccessMessage("");
 
     try {
-      const payload = buildRequestPayload();
+      const payload = buildRequestPayload(formData);
 
       if (editingTripId) {
         await updateTrip(
@@ -235,16 +323,20 @@ export function TripsPage({ idToken }: TripsPageProps) {
           payload
         );
 
-        setSuccessMessage("Trip updated successfully.");
+        setSuccessMessage(
+          "Trip updated successfully."
+        );
       } else {
         await createTrip(idToken, payload);
-        setSuccessMessage("Trip created successfully.");
+
+        setSuccessMessage(
+          "Trip created successfully."
+        );
       }
 
-      const response = await getTrips(idToken);
-      setTrips(response.trips);
+      await loadTrips();
 
-      setFormData(emptyForm);
+      setFormData(createEmptyForm());
       setEditingTripId(null);
       setShowForm(false);
     } catch (error) {
@@ -254,15 +346,59 @@ export function TripsPage({ idToken }: TripsPageProps) {
           : "Unable to save trip."
       );
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   }
 
-  function formatCurrencyCents(amount: number) {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD"
-    }).format(amount / 100);
+  function handleOpenSendDialog(
+    trip: Trip
+  ): void {
+    setTripPendingEmail(trip);
+    setErrorMessage("");
+    setSuccessMessage("");
+  }
+
+  function handleCloseSendDialog(): void {
+    if (isSendingTripId) {
+      return;
+    }
+
+    setTripPendingEmail(null);
+  }
+
+  async function handleConfirmSend(): Promise<void> {
+    if (!tripPendingEmail) {
+      return;
+    }
+
+    const trip = tripPendingEmail;
+
+    setIsSendingTripId(trip.id);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const response = await sendTripToGc(
+        idToken,
+        trip.id
+      );
+
+      setSuccessMessage(
+        `Trip selection link sent to ${response.sentTo}.`
+      );
+
+      setTripPendingEmail(null);
+
+      await loadTrips();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to send the trip selection email."
+      );
+    } finally {
+      setIsSendingTripId(null);
+    }
   }
 
   return (
@@ -271,12 +407,16 @@ export function TripsPage({ idToken }: TripsPageProps) {
         <div className="trips-header">
           <div>
             <h1>Trips</h1>
-            <p>Create and manage travel requests.</p>
+
+            <p>
+              Create and manage travel requests.
+            </p>
           </div>
 
           <button
             type="button"
             onClick={handleNewTrip}
+            disabled={isSaving}
           >
             + New Trip
           </button>
@@ -295,380 +435,55 @@ export function TripsPage({ idToken }: TripsPageProps) {
         )}
 
         {showForm && (
-          <form
-            className="trip-form-card"
+          <TripForm
+            formData={formData}
+            cases={cases}
+            gcProfiles={gcProfiles}
+            isEditing={editingTripId !== null}
+            isSaving={isSaving}
+            onFieldChange={handleFieldChange}
             onSubmit={handleSubmit}
-          >
-            <h2>
-              {editingTripId
-                ? "Edit Trip"
-                : "Create Trip"}
-            </h2>
-
-            <div className="trip-form-grid">
-              <label>
-                Case *
-                <select
-                  value={formData.caseId}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "caseId",
-                      event.target.value
-                    )
-                  }
-                  required
-                >
-                  <option value="">
-                    Select a case
-                  </option>
-
-                  {cases.map((caseItem) => (
-                    <option
-                      key={caseItem.id}
-                      value={caseItem.id}
-                    >
-                      {caseItem.caseReferenceId}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                GC Profile *
-                <select
-                  value={formData.gcProfileId}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "gcProfileId",
-                      event.target.value
-                    )
-                  }
-                  required
-                >
-                  <option value="">
-                    Select a GC
-                  </option>
-
-                  {gcProfiles.map((profile) => (
-                    <option
-                      key={profile.id}
-                      value={profile.id}
-                    >
-                      {profile.legalFirstName}{" "}
-                      {profile.legalLastName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                Trip Purpose *
-                <select
-                  value={formData.tripPurpose}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "tripPurpose",
-                      event.target.value
-                    )
-                  }
-                  required
-                >
-                  <option value="">
-                    Select a purpose
-                  </option>
-                  <option value="Monitoring">
-                    Monitoring
-                  </option>
-                  <option value="Transfer">
-                    Transfer
-                  </option>
-                  <option value="Delivery">
-                    Delivery
-                  </option>
-                  <option value="Consultation">
-                    Consultation
-                  </option>
-                  <option value="Legal">
-                    Legal
-                  </option>
-                  <option value="Other">
-                    Other
-                  </option>
-                </select>
-              </label>
-
-              <label>
-                Budget *
-                <div className="currency-input">
-                  <span>$</span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.budgetDollars}
-                    onChange={(event) =>
-                      handleFieldChange(
-                        "budgetDollars",
-                        event.target.value
-                      )
-                    }
-                    required
-                  />
-                </div>
-              </label>
-
-              <label>
-                Outbound Date *
-                <input
-                  type="date"
-                  value={formData.outboundDate}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "outboundDate",
-                      event.target.value
-                    )
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Return Date *
-                <input
-                  type="date"
-                  min={formData.outboundDate || undefined}
-                  value={formData.returnDate}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "returnDate",
-                      event.target.value
-                    )
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Outbound Airport *
-                <input
-                  maxLength={10}
-                  placeholder="DFW"
-                  value={formData.outboundAirport}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "outboundAirport",
-                      event.target.value
-                    )
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Return Airport *
-                <input
-                  maxLength={10}
-                  placeholder="DFW"
-                  value={formData.returnAirport}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "returnAirport",
-                      event.target.value
-                    )
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Destination City
-                <input
-                  placeholder="Denver"
-                  value={formData.destinationCity}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "destinationCity",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
-
-              <label>
-                Destination Address
-                <input
-                  placeholder="123 Clinic Way"
-                  value={formData.destinationAddress}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "destinationAddress",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
-
-              <label>
-                Hotel Proximity Preference
-                <input
-                  placeholder="Within 5 miles"
-                  value={
-                    formData.hotelProximityPreference
-                  }
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "hotelProximityPreference",
-                      event.target.value
-                    )
-                  }
-                />
-              </label>
-
-              <label>
-                Minimum Hotel Star Rating
-                <select
-                  value={
-                    formData.minimumHotelStarRating
-                  }
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "minimumHotelStarRating",
-                      event.target.value
-                    )
-                  }
-                >
-                  <option value="">
-                    No minimum
-                  </option>
-                  <option value="1">1 Star</option>
-                  <option value="2">2 Stars</option>
-                  <option value="3">3 Stars</option>
-                  <option value="4">4 Stars</option>
-                  <option value="5">5 Stars</option>
-                </select>
-              </label>
-
-              <label className="companion-toggle">
-                <input
-                  type="checkbox"
-                  checked={formData.companionTraveler}
-                  onChange={(event) =>
-                    handleFieldChange(
-                      "companionTraveler",
-                      event.target.checked
-                    )
-                  }
-                />
-
-                <span>Companion traveler included</span>
-              </label>
-            </div>
-
-            <div className="trip-form-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={handleCancel}
-                disabled={isLoading}
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading
-                  ? "Saving..."
-                  : editingTripId
-                    ? "Update Trip"
-                    : "Create Trip"}
-              </button>
-            </div>
-          </form>
+            onCancel={handleCancelForm}
+          />
         )}
 
-        {isLoading && !showForm && (
+        {isPageLoading ? (
           <p className="trips-loading">
             Loading trips...
           </p>
+        ) : (
+          <TripsTable
+            trips={trips}
+            isSendingTripId={isSendingTripId}
+            onEdit={handleEdit}
+            onSendToGc={handleOpenSendDialog}
+          />
         )}
-
-        <div className="trips-table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>Trip Reference</th>
-                <th>Case</th>
-                <th>GC</th>
-                <th>Purpose</th>
-                <th>Dates</th>
-                <th>Route</th>
-                <th>Destination</th>
-                <th>Budget</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {trips.length > 0 ? (
-                trips.map((trip) => (
-                  <tr key={trip.id}>
-                    <td>{trip.tripReferenceId}</td>
-                    <td>{trip.caseReferenceId}</td>
-                    <td>{trip.gcName}</td>
-                    <td>{trip.tripPurpose}</td>
-                    <td>
-                      {trip.outboundDate.substring(0, 10)}
-                      {" → "}
-                      {trip.returnDate.substring(0, 10)}
-                    </td>
-                    <td>
-                      {trip.outboundAirport}
-                      {" → "}
-                      {trip.returnAirport}
-                    </td>
-                    <td>
-                      {trip.destinationCity ||
-                        trip.destinationAddress ||
-                        "-"}
-                    </td>
-                    <td>
-                      {formatCurrencyCents(
-                        trip.budgetFilter
-                      )}
-                    </td>
-                    <td>
-                      <span className="trip-status">
-                        {trip.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        className="trip-edit-button"
-                        onClick={() => handleEdit(trip)}
-                      >
-                        Edit
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    className="empty-state"
-                    colSpan={10}
-                  >
-                    No trips found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
       </section>
+
+      <ConfirmDialog
+        isOpen={tripPendingEmail !== null}
+        title="Send trip to GC?"
+        message={
+          tripPendingEmail
+            ? [
+                `A secure trip-selection link will be sent to ${tripPendingEmail.gcName}.`,
+                "",
+                tripPendingEmail.gcEmail,
+                "",
+                "Any previously active link for this trip will be revoked."
+              ].join("\n")
+            : ""
+        }
+        confirmLabel="Send Email"
+        isConfirming={
+          isSendingTripId !== null
+        }
+        onConfirm={() => {
+          void handleConfirmSend();
+        }}
+        onCancel={handleCloseSendDialog}
+      />
     </main>
   );
 }
