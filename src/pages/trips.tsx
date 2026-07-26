@@ -32,6 +32,8 @@ import type {
   TripRequest
 } from "../types/trip";
 
+import { TripPurpose } from "../types/tripPurpose";
+
 import "./trips.css";
 
 type TripsPageProps = {
