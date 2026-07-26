@@ -20,6 +20,8 @@ import type {
   TripRequest
 } from "../types/trip";
 
+import { TripPurpose } from "../types/tripPurpose";
+
 import "./trips.css";
 
 type TripsPageProps = {
@@ -29,7 +31,7 @@ type TripsPageProps = {
 type TripFormState = {
   caseId: string;
   gcProfileId: string;
-  tripPurpose: string;
+  tripPurpose: TripPurpose | "";
   outboundDate: string;
   returnDate: string;
   outboundAirport: string;
@@ -136,7 +138,7 @@ export function TripsPage({ idToken }: TripsPageProps) {
     setFormData({
       caseId: trip.caseId,
       gcProfileId: trip.gcProfileId,
-      tripPurpose: trip.tripPurpose,
+      tripPurpose: trip.tripPurpose as TripPurpose,
       outboundDate: trip.outboundDate.substring(0, 10),
       returnDate: trip.returnDate.substring(0, 10),
       outboundAirport: trip.outboundAirport,
@@ -167,8 +169,8 @@ export function TripsPage({ idToken }: TripsPageProps) {
   function buildRequestPayload(): TripRequest {
     const budgetDollars = Number(formData.budgetDollars);
 
-    if (!Number.isFinite(budgetDollars) || budgetDollars < 0) {
-      throw new Error("Budget must be a valid positive amount.");
+    if (!Number.isFinite(budgetDollars) || budgetDollars <= 0) {
+      throw new Error("Budget must be greater than $0.00.");
     }
 
     if (
@@ -193,7 +195,7 @@ export function TripsPage({ idToken }: TripsPageProps) {
     return {
       caseId: formData.caseId,
       gcProfileId: formData.gcProfileId,
-      tripPurpose: formData.tripPurpose.trim(),
+      tripPurpose: formData.tripPurpose,
       outboundDate: formData.outboundDate,
       returnDate: formData.returnDate,
       outboundAirport:
@@ -368,7 +370,9 @@ export function TripsPage({ idToken }: TripsPageProps) {
                   onChange={(event) =>
                     handleFieldChange(
                       "tripPurpose",
-                      event.target.value
+                      event.target.value as
+                        | TripPurpose
+                        | ""
                     )
                   }
                   required
@@ -376,24 +380,17 @@ export function TripsPage({ idToken }: TripsPageProps) {
                   <option value="">
                     Select a purpose
                   </option>
-                  <option value="Monitoring">
-                    Monitoring
-                  </option>
-                  <option value="Transfer">
-                    Transfer
-                  </option>
-                  <option value="Delivery">
-                    Delivery
-                  </option>
-                  <option value="Consultation">
-                    Consultation
-                  </option>
-                  <option value="Legal">
-                    Legal
-                  </option>
-                  <option value="Other">
-                    Other
-                  </option>
+
+                  {Object.values(TripPurpose).map(
+                    (purpose) => (
+                      <option
+                        key={purpose}
+                        value={purpose}
+                      >
+                        {purpose}
+                      </option>
+                    )
+                  )}
                 </select>
               </label>
 
@@ -403,8 +400,9 @@ export function TripsPage({ idToken }: TripsPageProps) {
                   <span>$</span>
                   <input
                     type="number"
-                    min="0"
+                    min="0.01"
                     step="0.01"
+                    placeholder="0.00"
                     value={formData.budgetDollars}
                     onChange={(event) =>
                       handleFieldChange(
@@ -421,6 +419,7 @@ export function TripsPage({ idToken }: TripsPageProps) {
                 Outbound Date *
                 <input
                   type="date"
+                  min={new Date().toISOString().substring(0, 10)}
                   value={formData.outboundDate}
                   onChange={(event) =>
                     handleFieldChange(
@@ -451,13 +450,18 @@ export function TripsPage({ idToken }: TripsPageProps) {
               <label>
                 Outbound Airport *
                 <input
-                  maxLength={10}
+                  maxLength={3}
+                  minLength={3}
+                  pattern="[A-Za-z]{3}"
                   placeholder="DFW"
                   value={formData.outboundAirport}
                   onChange={(event) =>
                     handleFieldChange(
                       "outboundAirport",
                       event.target.value
+                        .replace(/[^a-zA-Z]/g, "")
+                        .toUpperCase()
+                        .slice(0, 3)
                     )
                   }
                   required
@@ -467,13 +471,18 @@ export function TripsPage({ idToken }: TripsPageProps) {
               <label>
                 Return Airport *
                 <input
-                  maxLength={10}
+                  maxLength={3}
+                  minLength={3}
+                  pattern="[A-Za-z]{3}"
                   placeholder="DFW"
                   value={formData.returnAirport}
                   onChange={(event) =>
                     handleFieldChange(
                       "returnAirport",
                       event.target.value
+                        .replace(/[^a-zA-Z]/g, "")
+                        .toUpperCase()
+                        .slice(0, 3)
                     )
                   }
                   required
