@@ -11,6 +11,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 24px;
 }
 
 .trips-header h1 {
@@ -37,6 +38,12 @@
 .trips-header button:hover,
 .trip-form-actions button:hover {
   background: var(--color-primary-hover);
+}
+
+.trips-header button:disabled,
+.trip-form-actions button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .trip-form-card {
@@ -68,6 +75,7 @@
 .trip-form-grid select {
   width: 100%;
   min-height: 44px;
+  box-sizing: border-box;
   padding: 10px 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -78,8 +86,8 @@
 
 .trip-form-grid input:focus,
 .trip-form-grid select:focus {
-  outline: 2px solid rgba(17, 24, 39, 0.15);
   border-color: var(--color-primary);
+  outline: 2px solid rgba(17, 24, 39, 0.12);
 }
 
 .currency-input {
@@ -98,17 +106,17 @@
   padding-left: 28px;
 }
 
-.companion-toggle {
+.trip-checkbox-field {
+  min-height: 44px;
+  align-self: end;
   flex-direction: row !important;
   align-items: center;
-  align-self: end;
-  min-height: 44px;
 }
 
-.companion-toggle input {
+.trip-checkbox-field input {
   width: 18px;
-  min-height: auto;
   height: 18px;
+  min-height: auto;
   margin: 0;
 }
 
@@ -124,23 +132,17 @@
   color: var(--color-text-primary);
 }
 
-.trip-form-actions button:disabled,
-.trips-header button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
 .trips-table-card {
-  background: var(--color-surface);
+  overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  overflow-x: auto;
+  background: var(--color-surface);
 }
 
 .trips-table-card table {
   width: 100%;
+  min-width: 1250px;
   border-collapse: collapse;
-  min-width: 1100px;
 }
 
 .trips-table-card thead {
@@ -150,46 +152,97 @@
 .trips-table-card th,
 .trips-table-card td {
   padding: 14px 16px;
-  text-align: left;
   border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: middle;
   white-space: nowrap;
 }
 
 .trips-table-card th {
-  font-size: 13px;
   color: var(--color-text-secondary);
-  text-transform: uppercase;
+  font-size: 13px;
   letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .trips-table-card tbody tr:hover {
   background: var(--color-table-row-hover);
 }
 
-.trip-status {
+.trip-gc-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.trip-gc-cell span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.trip-status,
+.approval-required,
+.approval-not-required {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 999px;
-  background: #eef4ff;
-  color: #3538cd;
-  font-weight: 700;
   font-size: 12px;
+  font-weight: 700;
   text-transform: capitalize;
 }
 
-.trip-edit-button {
+.trip-status {
+  background: #eef4ff;
+  color: #3538cd;
+}
+
+.approval-required {
+  background: #fff4e5;
+  color: #b54708;
+}
+
+.approval-not-required {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.trip-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trip-edit-button,
+.trip-send-button {
   margin: 0;
-  padding: 6px 10px;
+  padding: 7px 10px;
   border: none;
   border-radius: 6px;
-  background: var(--color-table-row-hover);
-  color: var(--color-text-primary);
   font-weight: 700;
   cursor: pointer;
 }
 
+.trip-edit-button {
+  background: var(--color-table-row-hover);
+  color: var(--color-text-primary);
+}
+
 .trip-edit-button:hover {
   background: var(--color-border);
+}
+
+.trip-send-button {
+  background: var(--color-primary);
+  color: white;
+}
+
+.trip-send-button:hover {
+  background: var(--color-primary-hover);
+}
+
+.trip-send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .trips-error {
@@ -208,8 +261,8 @@
 }
 
 .empty-state {
-  text-align: center;
   color: var(--color-text-secondary);
+  text-align: center !important;
 }
 
 @media (max-width: 800px) {
@@ -219,7 +272,6 @@
 
   .trips-header {
     flex-direction: column;
-    gap: 20px;
   }
 
   .trip-form-grid {
