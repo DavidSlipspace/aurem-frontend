@@ -7,6 +7,7 @@ export type Trip = {
 
   gcProfileId: string;
   gcName: string;
+  gcEmail: string;
 
   tripPurpose: string;
   status: string;
@@ -23,6 +24,9 @@ export type Trip = {
 
   budgetFilter: number;
   companionTraveler: boolean;
+  ipcmApprovalRequired: boolean;
+
+  bookingLinkExpiresAt?: string | null;
 };
 
 export type TripsResponse = {
@@ -33,15 +37,28 @@ export type TripRequest = {
   caseId: string;
   gcProfileId: string;
   tripPurpose: string;
+
   outboundDate: string;
   returnDate: string;
   outboundAirport: string;
   returnAirport: string;
+
   destinationCity?: string;
   destinationAddress?: string;
   hotelProximityPreference?: string;
   minimumHotelStarRating?: number;
+
   budgetFilter: number;
   companionTraveler: boolean;
+  ipcmApprovalRequired: boolean;
+
   status?: string;
+};
+
+export type SendTripToGcResponse = {
+  message: string;
+  tripId: string;
+  status: string;
+  sentTo: string;
+  expiresAt: string;
 };
