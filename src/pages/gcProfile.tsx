@@ -1,17 +1,36 @@
-import { FormEvent, useEffect, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useState
+} from "react";
+
 import {
   createGcProfile,
   getGcProfiles,
   updateGcProfile
 } from "../api/gcProfileApi";
-import type { GcProfile, GcProfileRequest } from "../types/gcProfile";
+
+import type {
+  GcProfile,
+  GcProfileRequest
+} from "../types/gcProfile";
+
+import { SeatPreference } from "../types/seatPreference";
+
 import "./gcProfile.css";
 
 type GcProfilesPageProps = {
   idToken: string;
 };
 
-const emptyForm: GcProfileRequest = {
+type GcProfileFormState = Omit<
+  GcProfileRequest,
+  "seatPreference"
+> & {
+  seatPreference: SeatPreference | "";
+};
+
+const emptyForm: GcProfileFormState = {
   legalFirstName: "",
   legalMiddleName: "",
   legalLastName: "",
@@ -26,36 +45,90 @@ const emptyForm: GcProfileRequest = {
   seatPreference: ""
 };
 
-export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
-  const [profiles, setProfiles] = useState<GcProfile[]>([]);
-  const [formData, setFormData] = useState<GcProfileRequest>(emptyForm);
-  const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
+export function GcProfilesPage({
+  idToken
+}: GcProfilesPageProps) {
+  const [profiles, setProfiles] =
+    useState<GcProfile[]>([]);
+
+  const [formData, setFormData] =
+    useState<GcProfileFormState>(emptyForm);
+
+  const [editingProfileId, setEditingProfileId] =
+    useState<string | null>(null);
+
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadProfiles();
-  }, []);
+  }, [idToken]);
 
   async function loadProfiles() {
     try {
       setErrorMessage("");
+
       const response = await getGcProfiles(idToken);
+
       setProfiles(response.gcProfiles);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Unable to load GC profiles."
+        error instanceof Error
+          ? error.message
+          : "Unable to load GC profiles."
       );
     }
   }
 
-  function handleChange(field: keyof GcProfileRequest, value: string) {
+  function handleChange(
+    field: keyof GcProfileFormState,
+    value: string
+  ) {
     setFormData((current) => ({
       ...current,
       [field]: value
     }));
+  }
+
+  function getPhoneDigits(value: string) {
+    return value.replace(/\D/g, "").slice(0, 10);
+  }
+
+  function formatPhoneNumber(value: string) {
+    const digits = getPhoneDigits(value);
+
+    if (digits.length === 0) {
+      return "";
+    }
+
+    if (digits.length <= 3) {
+      return `(${digits}`;
+    }
+
+    if (digits.length <= 6) {
+      return `(${digits.slice(0, 3)})${digits.slice(3)}`;
+    }
+
+    return `(${digits.slice(0, 3)})${digits.slice(
+      3,
+      6
+    )}-${digits.slice(6, 10)}`;
+  }
+
+  function handlePhoneChange(value: string) {
+    handleChange("phone", formatPhoneNumber(value));
+  }
+
+  function normalizeEmail(value: string) {
+    return value.trim().toLowerCase();
+  }
+
+  function isValidEmail(value: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
   function handleNewProfile() {
@@ -69,17 +142,25 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
   function handleEdit(profile: GcProfile) {
     setFormData({
       legalFirstName: profile.legalFirstName,
-      legalMiddleName: profile.legalMiddleName ?? "",
+      legalMiddleName:
+        profile.legalMiddleName ?? "",
       legalLastName: profile.legalLastName,
-      dateOfBirth: profile.dateOfBirth?.substring(0, 10),
+      dateOfBirth:
+        profile.dateOfBirth?.substring(0, 10) ?? "",
       email: profile.email,
-      phone: profile.phone,
-      tsaPrecheckNumber: profile.tsaPrecheckNumber ?? "",
-      frequentFlyerProgram: profile.frequentFlyerProgram ?? "",
-      frequentFlyerNumber: profile.frequentFlyerNumber ?? "",
-      hotelRewardsProgram: profile.hotelRewardsProgram ?? "",
-      hotelRewardsNumber: profile.hotelRewardsNumber ?? "",
-      seatPreference: profile.seatPreference ?? "",
+      phone: formatPhoneNumber(profile.phone),
+      tsaPrecheckNumber:
+        profile.tsaPrecheckNumber ?? "",
+      frequentFlyerProgram:
+        profile.frequentFlyerProgram ?? "",
+      frequentFlyerNumber:
+        profile.frequentFlyerNumber ?? "",
+      hotelRewardsProgram:
+        profile.hotelRewardsProgram ?? "",
+      hotelRewardsNumber:
+        profile.hotelRewardsNumber ?? "",
+      seatPreference:
+        (profile.seatPreference as SeatPreference) ?? "",
       status: profile.status
     });
 
@@ -95,42 +176,126 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
     setShowForm(false);
   }
 
+  function buildRequestPayload(
+    status?: string
+  ): GcProfileRequest {
+    const normalizedEmail = normalizeEmail(
+      formData.email
+    );
+
+    const phoneDigits = getPhoneDigits(formData.phone);
+
+    if (!isValidEmail(normalizedEmail)) {
+      throw new Error(
+        "Enter a valid email address."
+      );
+    }
+
+    if (phoneDigits.length !== 10) {
+      throw new Error(
+        "Phone number must contain exactly 10 digits."
+      );
+    }
+
+    return {
+      legalFirstName:
+        formData.legalFirstName.trim(),
+      legalMiddleName:
+        formData.legalMiddleName?.trim() ?? "",
+      legalLastName:
+        formData.legalLastName.trim(),
+      dateOfBirth: formData.dateOfBirth,
+      email: normalizedEmail,
+      phone: formatPhoneNumber(phoneDigits),
+      tsaPrecheckNumber:
+        formData.tsaPrecheckNumber
+          ?.trim()
+          .toUpperCase() ?? "",
+      frequentFlyerProgram:
+        formData.frequentFlyerProgram?.trim() ?? "",
+      frequentFlyerNumber:
+        formData.frequentFlyerNumber
+          ?.trim()
+          .toUpperCase() ?? "",
+      hotelRewardsProgram:
+        formData.hotelRewardsProgram?.trim() ?? "",
+      hotelRewardsNumber:
+        formData.hotelRewardsNumber
+          ?.trim()
+          .toUpperCase() ?? "",
+      seatPreference:
+        formData.seatPreference || "",
+      status: status ?? formData.status
+    };
+  }
+
   async function handleStatusChange(
     profile: GcProfile,
     newStatus: "active" | "inactive"
   ) {
-    const action = newStatus === "active" ? "activate" : "deactivate";
+    const action =
+      newStatus === "active"
+        ? "activate"
+        : "deactivate";
 
     const confirmed = window.confirm(
-      `Are you sure you want to ${action} ${profile.legalFirstName} ${profile.legalLastName}?`
+      `Are you sure you want to ${action} ` +
+        `${profile.legalFirstName} ` +
+        `${profile.legalLastName}?`
     );
 
-    if (!confirmed) return;
+    if (!confirmed) {
+      return;
+    }
 
     setIsLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
 
     try {
-      await updateGcProfile(idToken, profile.id, {
-        legalFirstName: profile.legalFirstName,
-        legalMiddleName: profile.legalMiddleName ?? "",
-        legalLastName: profile.legalLastName,
-        dateOfBirth: profile.dateOfBirth.substring(0, 10),
-        email: profile.email,
-        phone: profile.phone,
-        tsaPrecheckNumber: profile.tsaPrecheckNumber ?? "",
-        frequentFlyerProgram: profile.frequentFlyerProgram ?? "",
-        frequentFlyerNumber: profile.frequentFlyerNumber ?? "",
-        hotelRewardsProgram: profile.hotelRewardsProgram ?? "",
-        hotelRewardsNumber: profile.hotelRewardsNumber ?? "",
-        seatPreference: profile.seatPreference ?? "",
+      const payload: GcProfileRequest = {
+        legalFirstName:
+          profile.legalFirstName.trim(),
+        legalMiddleName:
+          profile.legalMiddleName?.trim() ?? "",
+        legalLastName:
+          profile.legalLastName.trim(),
+        dateOfBirth:
+          profile.dateOfBirth.substring(0, 10),
+        email: normalizeEmail(profile.email),
+        phone: formatPhoneNumber(profile.phone),
+        tsaPrecheckNumber:
+          profile.tsaPrecheckNumber
+            ?.trim()
+            .toUpperCase() ?? "",
+        frequentFlyerProgram:
+          profile.frequentFlyerProgram?.trim() ?? "",
+        frequentFlyerNumber:
+          profile.frequentFlyerNumber
+            ?.trim()
+            .toUpperCase() ?? "",
+        hotelRewardsProgram:
+          profile.hotelRewardsProgram?.trim() ?? "",
+        hotelRewardsNumber:
+          profile.hotelRewardsNumber
+            ?.trim()
+            .toUpperCase() ?? "",
+        seatPreference:
+          profile.seatPreference ?? "",
         status: newStatus
-      });
+      };
+
+      await updateGcProfile(
+        idToken,
+        profile.id,
+        payload
+      );
 
       setSuccessMessage(
         `GC profile ${
-          newStatus === "active" ? "activated" : "deactivated"
+          newStatus === "active"
+            ? "activated"
+            : "deactivated"
         }.`
       );
 
@@ -146,7 +311,9 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     setIsLoading(true);
@@ -154,19 +321,39 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
     setSuccessMessage("");
 
     try {
+      const payload = buildRequestPayload();
+
       if (editingProfileId) {
-        await updateGcProfile(idToken, editingProfileId, formData);
-        setSuccessMessage("GC profile updated.");
+        await updateGcProfile(
+          idToken,
+          editingProfileId,
+          payload
+        );
+
+        setSuccessMessage(
+          "GC profile updated."
+        );
       } else {
-        await createGcProfile(idToken, formData);
-        setSuccessMessage("GC profile created.");
+        await createGcProfile(
+          idToken,
+          payload
+        );
+
+        setSuccessMessage(
+          "GC profile created."
+        );
       }
 
       await loadProfiles();
-      handleCancel();
+
+      setFormData(emptyForm);
+      setEditingProfileId(null);
+      setShowForm(false);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Unable to save GC profile."
+        error instanceof Error
+          ? error.message
+          : "Unable to save GC profile."
       );
     } finally {
       setIsLoading(false);
@@ -179,25 +366,56 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
         <div className="gc-header">
           <div>
             <h1>GC Profiles</h1>
-            <p>Create and manage travel profiles.</p>
+            <p>
+              Create and manage travel profiles.
+            </p>
           </div>
 
-          <button onClick={handleNewProfile}>+ New GC Profile</button>
+          <button
+            type="button"
+            onClick={handleNewProfile}
+            disabled={isLoading}
+          >
+            + New GC Profile
+          </button>
         </div>
 
-        {successMessage && <p className="gc-success">{successMessage}</p>}
-        {errorMessage && <p className="gc-error">{errorMessage}</p>}
+        {successMessage && (
+          <p className="gc-success">
+            {successMessage}
+          </p>
+        )}
+
+        {errorMessage && (
+          <p className="gc-error">
+            {errorMessage}
+          </p>
+        )}
 
         {showForm && (
-          <form className="gc-form-card" onSubmit={handleSubmit}>
-            <h2>{editingProfileId ? "Edit GC Profile" : "New GC Profile"}</h2>
+          <form
+            className="gc-form-card"
+            onSubmit={handleSubmit}
+          >
+            <h2>
+              {editingProfileId
+                ? "Edit GC Profile"
+                : "New GC Profile"}
+            </h2>
 
             <div className="gc-form-grid">
               <label>
                 Legal First Name *
                 <input
                   value={formData.legalFirstName}
-                  onChange={(e) => handleChange("legalFirstName", e.target.value)}
+                  onChange={(event) =>
+                    handleChange(
+                      "legalFirstName",
+                      event.target.value
+                    )
+                  }
+                  autoComplete="given-name"
+                  maxLength={100}
                   required
                 />
               </label>
@@ -205,8 +423,17 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
               <label>
                 Legal Middle Name
                 <input
-                  value={formData.legalMiddleName ?? ""}
-                  onChange={(e) => handleChange("legalMiddleName", e.target.value)}
+                  value={
+                    formData.legalMiddleName ?? ""
+                  }
+                  onChange={(event) =>
+                    handleChange(
+                      "legalMiddleName",
+                      event.target.value
+                    )
+                  }
+                  autoComplete="additional-name"
+                  maxLength={100}
                 />
               </label>
 
@@ -214,7 +441,14 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                 Legal Last Name *
                 <input
                   value={formData.legalLastName}
-                  onChange={(e) => handleChange("legalLastName", e.target.value)}
+                  onChange={(event) =>
+                    handleChange(
+                      "legalLastName",
+                      event.target.value
+                    )
+                  }
+                  autoComplete="family-name"
+                  maxLength={100}
                   required
                 />
               </label>
@@ -224,7 +458,16 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                 <input
                   type="date"
                   value={formData.dateOfBirth}
-                  onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                  onChange={(event) =>
+                    handleChange(
+                      "dateOfBirth",
+                      event.target.value
+                    )
+                  }
+                  autoComplete="bday"
+                  max={new Date()
+                    .toISOString()
+                    .substring(0, 10)}
                   required
                 />
               </label>
@@ -234,7 +477,22 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
+                  onChange={(event) =>
+                    handleChange(
+                      "email",
+                      event.target.value
+                    )
+                  }
+                  onBlur={() =>
+                    handleChange(
+                      "email",
+                      normalizeEmail(formData.email)
+                    )
+                  }
+                  autoComplete="email"
+                  inputMode="email"
+                  maxLength={254}
+                  placeholder="name@example.com"
                   required
                 />
               </label>
@@ -242,8 +500,19 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
               <label>
                 Phone *
                 <input
+                  type="tel"
                   value={formData.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
+                  onChange={(event) =>
+                    handlePhoneChange(
+                      event.target.value
+                    )
+                  }
+                  autoComplete="tel-national"
+                  inputMode="numeric"
+                  maxLength={13}
+                  pattern="\(\d{3}\)\d{3}-\d{4}"
+                  placeholder="(111)111-1111"
+                  title="Enter a 10-digit phone number."
                   required
                 />
               </label>
@@ -251,67 +520,134 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
               <label>
                 TSA PreCheck Number
                 <input
-                  value={formData.tsaPrecheckNumber ?? ""}
-                  onChange={(e) =>
-                    handleChange("tsaPrecheckNumber", e.target.value)
+                  value={
+                    formData.tsaPrecheckNumber ?? ""
                   }
+                  onChange={(event) =>
+                    handleChange(
+                      "tsaPrecheckNumber",
+                      event.target.value
+                        .toUpperCase()
+                    )
+                  }
+                  maxLength={25}
                 />
               </label>
 
               <label>
                 Seat Preference
-                <input
-                  value={formData.seatPreference ?? ""}
-                  onChange={(e) => handleChange("seatPreference", e.target.value)}
-                />
+                <select
+                  value={
+                    formData.seatPreference ?? ""
+                  }
+                  required
+                  onChange={(event) =>
+                    handleChange(
+                      "seatPreference",
+                      event.target.value as
+                        | SeatPreference
+                        | ""
+                    )
+                  }
+                >
+                  <option value="">
+                    Select a seat preference
+                  </option>
+
+                  {Object.values(SeatPreference).map(
+                    (preference) => (
+                      <option
+                        key={preference}
+                        value={preference}
+                      >
+                        {preference}
+                      </option>
+                    )
+                  )}
+                </select>
               </label>
 
               <label>
                 Frequent Flyer Program
                 <input
-                  value={formData.frequentFlyerProgram ?? ""}
-                  onChange={(e) =>
-                    handleChange("frequentFlyerProgram", e.target.value)
+                  value={
+                    formData.frequentFlyerProgram ?? ""
                   }
+                  onChange={(event) =>
+                    handleChange(
+                      "frequentFlyerProgram",
+                      event.target.value
+                    )
+                  }
+                  maxLength={100}
                 />
               </label>
 
               <label>
                 Frequent Flyer Number
                 <input
-                  value={formData.frequentFlyerNumber ?? ""}
-                  onChange={(e) =>
-                    handleChange("frequentFlyerNumber", e.target.value)
+                  value={
+                    formData.frequentFlyerNumber ?? ""
                   }
+                  onChange={(event) =>
+                    handleChange(
+                      "frequentFlyerNumber",
+                      event.target.value
+                        .toUpperCase()
+                    )
+                  }
+                  maxLength={50}
                 />
               </label>
 
               <label>
                 Hotel Rewards Program
                 <input
-                  value={formData.hotelRewardsProgram ?? ""}
-                  onChange={(e) =>
-                    handleChange("hotelRewardsProgram", e.target.value)
+                  value={
+                    formData.hotelRewardsProgram ?? ""
                   }
+                  onChange={(event) =>
+                    handleChange(
+                      "hotelRewardsProgram",
+                      event.target.value
+                    )
+                  }
+                  maxLength={100}
                 />
               </label>
 
               <label>
                 Hotel Rewards Number
                 <input
-                  value={formData.hotelRewardsNumber ?? ""}
-                  onChange={(e) =>
-                    handleChange("hotelRewardsNumber", e.target.value)
+                  value={
+                    formData.hotelRewardsNumber ?? ""
                   }
+                  onChange={(event) =>
+                    handleChange(
+                      "hotelRewardsNumber",
+                      event.target.value
+                        .toUpperCase()
+                    )
+                  }
+                  maxLength={50}
                 />
               </label>
             </div>
 
             <div className="gc-form-actions">
-              <button type="button" className="secondary-button" onClick={handleCancel}>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={handleCancel}
+                disabled={isLoading}
+              >
                 Cancel
               </button>
-              <button type="submit" disabled={isLoading}>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+              >
                 {isLoading
                   ? "Saving..."
                   : editingProfileId
@@ -342,13 +678,31 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                 profiles.map((profile) => (
                   <tr key={profile.id}>
                     <td>
-                      {profile.legalFirstName} {profile.legalLastName}
+                      {profile.legalFirstName}{" "}
+                      {profile.legalLastName}
                     </td>
-                    <td>{profile.dateOfBirth?.substring(0, 10)}</td>
+
+                    <td>
+                      {profile.dateOfBirth?.substring(
+                        0,
+                        10
+                      )}
+                    </td>
+
                     <td>{profile.email}</td>
-                    <td>{profile.phone}</td>
-                    <td>{profile.tsaPrecheckNumber || "-"}</td>
-                    <td>{profile.seatPreference || "-"}</td>
+
+                    <td>
+                      {formatPhoneNumber(profile.phone)}
+                    </td>
+
+                    <td>
+                      {profile.tsaPrecheckNumber || "-"}
+                    </td>
+
+                    <td>
+                      {profile.seatPreference || "-"}
+                    </td>
+
                     <td>
                       <span
                         className={`gc-status ${
@@ -360,26 +714,49 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                         {profile.status}
                       </span>
                     </td>
+
                     <td>
                       <div className="table-actions">
                         <button
+                          type="button"
                           className="table-action-button"
-                          onClick={() => handleEdit(profile)}
+                          onClick={() =>
+                            handleEdit(profile)
+                          }
+                          disabled={isLoading}
                         >
                           Edit
                         </button>
 
                         {profile.status === "active" ? (
                           <button
-                            className="table-action-button danger"
-                            onClick={() => handleStatusChange(profile, "inactive")}
+                            type="button"
+                            className={
+                              "table-action-button danger"
+                            }
+                            onClick={() =>
+                              handleStatusChange(
+                                profile,
+                                "inactive"
+                              )
+                            }
+                            disabled={isLoading}
                           >
                             Deactivate
                           </button>
                         ) : (
                           <button
-                            className="table-action-button success"
-                            onClick={() => handleStatusChange(profile, "active")}
+                            type="button"
+                            className={
+                              "table-action-button success"
+                            }
+                            onClick={() =>
+                              handleStatusChange(
+                                profile,
+                                "active"
+                              )
+                            }
+                            disabled={isLoading}
                           >
                             Activate
                           </button>
@@ -390,7 +767,10 @@ export function GcProfilesPage({ idToken }: GcProfilesPageProps) {
                 ))
               ) : (
                 <tr>
-                  <td className="empty-state" colSpan={8}>
+                  <td
+                    className="empty-state"
+                    colSpan={8}
+                  >
                     No GC profiles found.
                   </td>
                 </tr>

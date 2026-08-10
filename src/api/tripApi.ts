@@ -1,9 +1,40 @@
 import type {
+  SendTripToGcResponse,
   TripRequest,
   TripsResponse
 } from "../types/trip";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+function getErrorMessage(
+  data: unknown,
+  fallbackMessage: string
+): string {
+  if (
+    typeof data === "object" &&
+    data !== null &&
+    "message" in data &&
+    typeof data.message === "string"
+  ) {
+    return data.message;
+  }
+
+  return fallbackMessage;
+}
+
+async function parseResponseBody(
+  response: Response
+): Promise<unknown> {
+  const contentType = response.headers.get("content-type");
+
+  if (contentType?.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text();
+
+  return text ? { message: text } : {};
+}
 
 export async function getTrips(
   idToken: string
@@ -15,13 +46,15 @@ export async function getTrips(
     }
   });
 
-  const data = await response.json();
+  const data = await parseResponseBody(response);
 
   if (!response.ok) {
-    throw new Error(data.message ?? "Unable to load trips.");
+    throw new Error(
+      getErrorMessage(data, "Unable to load trips.")
+    );
   }
 
-  return data;
+  return data as TripsResponse;
 }
 
 export async function createTrip(
@@ -37,10 +70,12 @@ export async function createTrip(
     body: JSON.stringify(payload)
   });
 
-  const data = await response.json();
+  const data = await parseResponseBody(response);
 
   if (!response.ok) {
-    throw new Error(data.message ?? "Unable to create trip.");
+    throw new Error(
+      getErrorMessage(data, "Unable to create trip.")
+    );
   }
 }
 
@@ -49,18 +84,52 @@ export async function updateTrip(
   tripId: string,
   payload: TripRequest
 ): Promise<void> {
-  const response = await fetch(`${baseUrl}/trips/${tripId}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
+  const response = await fetch(
+    `${baseUrl}/trips/${tripId}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }
+  );
 
-  const data = await response.json();
+  const data = await parseResponseBody(response);
 
   if (!response.ok) {
-    throw new Error(data.message ?? "Unable to update trip.");
+    throw new Error(
+      getErrorMessage(data, "Unable to update trip.")
+    );
   }
+}
+
+export async function sendTripToGc(
+  idToken: string,
+  tripId: string
+): Promise<SendTripToGcResponse> {
+  const response = await fetch(
+    `${baseUrl}/trips/${tripId}/booking-link`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  const data = await parseResponseBody(response);
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Unable to send the trip selection email."
+      )
+    );
+  }
+
+  return data as SendTripToGcResponse;
 }

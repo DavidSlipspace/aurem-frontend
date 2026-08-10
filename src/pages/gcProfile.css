@@ -34,6 +34,18 @@
   cursor: pointer;
 }
 
+.gc-header button:hover,
+.gc-form-actions button:hover {
+  background: var(--color-primary-hover);
+}
+
+.gc-header button:disabled,
+.gc-form-actions button:disabled,
+.table-action-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 .gc-form-card {
   margin-bottom: 24px;
   padding: 24px;
@@ -59,10 +71,23 @@
   font-weight: 600;
 }
 
-.gc-form-grid input {
-  padding: 12px;
+.gc-form-grid input,
+.gc-form-grid select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
   border: 1px solid var(--color-border);
   border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.gc-form-grid input:focus,
+.gc-form-grid select:focus {
+  outline: 2px solid rgba(17, 24, 39, 0.15);
+  border-color: var(--color-primary);
 }
 
 .gc-form-actions {
@@ -77,11 +102,15 @@
   color: var(--color-text-primary);
 }
 
+.gc-form-actions .secondary-button:hover {
+  background: var(--color-border);
+}
+
 .gc-table-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .gc-table-card table {
@@ -130,6 +159,11 @@
   color: #b42318;
 }
 
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .table-action-button {
   margin: 0;
   padding: 6px 10px;
@@ -141,17 +175,12 @@
   cursor: pointer;
 }
 
+.table-action-button:hover {
+  background: var(--color-border);
+}
+
 .table-action-button.success {
   color: #027a48;
-}
-
-.table-action-button.danger {
-  color: #b42318;
-}
-
-.table-actions {
-  display: flex;
-  gap: 8px;
 }
 
 .table-action-button.danger {
@@ -171,4 +200,47 @@
 .empty-state {
   text-align: center;
   color: var(--color-text-secondary);
+}
+
+@media (max-width: 800px) {
+  .gc-content {
+    padding: 20px;
+  }
+
+  .gc-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .gc-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gc-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .gc-form-actions button {
+    width: 100%;
+  }
+}
+
+.gc-form-grid select:required:invalid {
+  color: var(--color-text-secondary);
+}
+
+.gc-form-grid select option {
+  color: var(--color-text-primary);
+}
+
+.gc-form-grid select option[value=""] {
+  color: var(--color-text-secondary);
+}
+
+.gc-form-grid input[type="date"] {
+  color: var(--color-text-secondary);
+}
+
+.gc-form-grid input[type="date"]:valid {
+  color: var(--color-text-primary);
 }
