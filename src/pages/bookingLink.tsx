@@ -17,6 +17,13 @@ type BookingLinkResponse = {
   expiresAt: string;
 };
 
+type TravelApiError = {
+  code: string;
+  title: string;
+  message: string;
+  canRetry: boolean;
+};
+
 type HotelOption = {
   searchResultId: string;
   accommodationId: string;
@@ -161,6 +168,10 @@ type FlightSearchResponse = {
   flights: FlightOption[];
 };
 
+type PortalMode =
+  | "select"
+  | "review";
+
 const API_BASE_URL =
   import.meta.env
     .VITE_API_BASE_URL ??
@@ -211,6 +222,23 @@ function formatTime(
   return new Intl.DateTimeFormat(
     "en-US",
     {
+      hour: "numeric",
+      minute: "2-digit"
+    }
+  ).format(date);
+}
+
+function formatDateTime(
+  value: string
+): string {
+  const date =
+    new Date(value);
+
+  return new Intl.DateTimeFormat(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
       hour: "numeric",
       minute: "2-digit"
     }
@@ -303,6 +331,103 @@ function getStarText(
   );
 }
 
+function getDefaultApiError(
+  message: string
+): TravelApiError {
+  return {
+    code: "UNKNOWN_ERROR",
+    title: "Something went wrong",
+    message,
+    canRetry: true
+  };
+}
+
+async function readApiResponse(
+  response: Response
+): Promise<unknown> {
+  const text =
+    await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(
+      text
+    );
+  } catch {
+    return {
+      message:
+        "The server returned an unexpected response."
+    };
+  }
+}
+
+function parseApiError(
+  body: unknown,
+  fallbackMessage: string
+): TravelApiError {
+  if (
+    typeof body === "object" &&
+    body !== null
+  ) {
+    const record =
+      body as Record<
+        string,
+        unknown
+      >;
+
+    const message =
+      typeof record.message ===
+        "string"
+        ? record.message
+        : fallbackMessage;
+
+    return {
+      code:
+        typeof record.code ===
+          "string"
+          ? record.code
+          : "UNKNOWN_ERROR",
+
+      title:
+        typeof record.title ===
+          "string"
+          ? record.title
+          : "Something went wrong",
+
+      message,
+
+      canRetry:
+        typeof record.canRetry ===
+          "boolean"
+          ? record.canRetry
+          : true
+    };
+  }
+
+  return getDefaultApiError(
+    fallbackMessage
+  );
+}
+
+function scrollToElement(
+  id: string
+) {
+  window.setTimeout(
+    () => {
+      document
+        .getElementById(id)
+        ?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+    },
+    100
+  );
+}
+
 function FlightJourneyView({
   label,
   journey
@@ -389,7 +514,9 @@ function FlightJourneyView({
         {journey.segments.map(
           (segment) => (
             <div
-              key={segment.id}
+              key={
+                segment.id
+              }
               className="flight-segment"
             >
               <div>
@@ -436,6 +563,62 @@ function FlightJourneyView({
         )}
       </div>
     </div>
+  );
+}
+
+function TravelErrorAlert({
+  error,
+  retryLabel,
+  isRetrying,
+  onRetry
+}: {
+  error: TravelApiError;
+  retryLabel: string;
+  isRetrying: boolean;
+  onRetry: () => void;
+}) {
+  return (
+    <section
+      className="travel-error-alert"
+      role="alert"
+    >
+      <div className="travel-error-icon">
+        !
+      </div>
+
+      <div className="travel-error-content">
+        <h3>
+          {error.title}
+        </h3>
+
+        <p>
+          {error.message}
+        </p>
+
+        {!error.canRetry && (
+          <p className="travel-error-guidance">
+            This issue cannot be
+            corrected from the
+            traveler portal.
+          </p>
+        )}
+
+        {error.canRetry && (
+          <button
+            type="button"
+            className="travel-error-retry"
+            onClick={onRetry}
+            disabled={
+              isRetrying
+            }
+          >
+            {isRetrying
+              ? "Trying Again..."
+              : retryLabel}
+          </button>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -488,22 +671,48 @@ export function BookingLinkPage({
     >(null);
 
   const [
+    showFlightResults,
+    setShowFlightResults
+  ] =
+    useState(false);
+
+  const [
+    showHotelResults,
+    setShowHotelResults
+  ] =
+    useState(false);
+
+  const [
+    portalMode,
+    setPortalMode
+  ] =
+    useState<PortalMode>(
+      "select"
+    );
+
+  const [
     errorMessage,
     setErrorMessage
   ] =
     useState("");
 
   const [
-    flightErrorMessage,
-    setFlightErrorMessage
+    flightError,
+    setFlightError
   ] =
-    useState("");
+    useState<
+      TravelApiError |
+      null
+    >(null);
 
   const [
-    hotelErrorMessage,
-    setHotelErrorMessage
+    hotelError,
+    setHotelError
   ] =
-    useState("");
+    useState<
+      TravelApiError |
+      null
+    >(null);
 
   const [
     isLoading,
@@ -523,9 +732,12 @@ export function BookingLinkPage({
   ] =
     useState(false);
 
-  useEffect(() => {
-    loadBookingLink();
-  }, [token]);
+  useEffect(
+    () => {
+      loadBookingLink();
+    },
+    [token]
+  );
 
   async function loadBookingLink() {
     setIsLoading(true);
@@ -549,12 +761,19 @@ export function BookingLinkPage({
         );
 
       const responseBody =
-        await response.json();
+        await readApiResponse(
+          response
+        );
 
       if (!response.ok) {
-        throw new Error(
-          responseBody.message ??
+        const error =
+          parseApiError(
+            responseBody,
             "Unable to load this booking link."
+          );
+
+        throw new Error(
+          error.message
         );
       }
 
@@ -574,16 +793,24 @@ export function BookingLinkPage({
   }
 
   async function searchFlights() {
+    setPortalMode(
+      "select"
+    );
+
     setIsSearchingFlights(
       true
     );
 
-    setFlightErrorMessage(
-      ""
+    setFlightError(
+      null
     );
 
     setSelectedFlightId(
       null
+    );
+
+    setShowFlightResults(
+      false
     );
 
     try {
@@ -611,24 +838,67 @@ export function BookingLinkPage({
         );
 
       const responseBody =
-        await response.json();
+        await readApiResponse(
+          response
+        );
 
       if (!response.ok) {
-        throw new Error(
-          responseBody.message ??
-            "Unable to search for flights."
+        setFlightSearch(
+          null
         );
+
+        setFlightError(
+          parseApiError(
+            responseBody,
+            "Unable to search for flights."
+          )
+        );
+
+        return;
       }
 
-      setFlightSearch(
+      const searchResult =
         responseBody as
-          FlightSearchResponse
+          FlightSearchResponse;
+
+      setFlightSearch(
+        searchResult
+      );
+
+      setShowFlightResults(
+        true
+      );
+
+      if (
+        searchResult
+          .flights
+          .length === 0
+      ) {
+        setFlightError({
+          code:
+            "NO_FLIGHTS_FOUND",
+
+          title:
+            "No flights were found",
+
+          message:
+            "No available round-trip flight options matched the current route and dates.",
+
+          canRetry:
+            false
+        });
+      }
+
+      scrollToElement(
+        "flight-results"
       );
     } catch (error) {
-      setFlightErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to search for flights."
+      setFlightError(
+        getDefaultApiError(
+          error instanceof Error
+            ? error.message
+            : "Unable to search for flights."
+        )
       );
     } finally {
       setIsSearchingFlights(
@@ -638,16 +908,24 @@ export function BookingLinkPage({
   }
 
   async function searchHotels() {
+    setPortalMode(
+      "select"
+    );
+
     setIsSearchingHotels(
       true
     );
 
-    setHotelErrorMessage(
-      ""
+    setHotelError(
+      null
     );
 
     setSelectedHotelId(
       null
+    );
+
+    setShowHotelResults(
+      false
     );
 
     try {
@@ -675,30 +953,150 @@ export function BookingLinkPage({
         );
 
       const responseBody =
-        await response.json();
+        await readApiResponse(
+          response
+        );
 
       if (!response.ok) {
-        throw new Error(
-          responseBody.message ??
-            "Unable to search for hotels."
+        setHotelSearch(
+          null
         );
+
+        setHotelError(
+          parseApiError(
+            responseBody,
+            "Unable to search for hotels."
+          )
+        );
+
+        return;
       }
 
-      setHotelSearch(
+      const searchResult =
         responseBody as
-          HotelSearchResponse
+          HotelSearchResponse;
+
+      setHotelSearch(
+        searchResult
+      );
+
+      setShowHotelResults(
+        true
+      );
+
+      if (
+        searchResult
+          .hotels
+          .length === 0
+      ) {
+        setHotelError({
+          code:
+            "NO_HOTELS_FOUND",
+
+          title:
+            "No hotels were found",
+
+          message:
+            "No available hotels matched the current destination, dates, and trip preferences.",
+
+          canRetry:
+            false
+        });
+      }
+
+      scrollToElement(
+        "hotel-results"
       );
     } catch (error) {
-      setHotelErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to search for hotels."
+      setHotelError(
+        getDefaultApiError(
+          error instanceof Error
+            ? error.message
+            : "Unable to search for hotels."
+        )
       );
     } finally {
       setIsSearchingHotels(
         false
       );
     }
+  }
+
+  function selectFlight(
+    offerId: string
+  ) {
+    setSelectedFlightId(
+      offerId
+    );
+
+    setShowFlightResults(
+      false
+    );
+
+    setPortalMode(
+      "select"
+    );
+
+    scrollToElement(
+      "hotel-step"
+    );
+  }
+
+  function changeFlight() {
+    setPortalMode(
+      "select"
+    );
+
+    setShowFlightResults(
+      true
+    );
+
+    scrollToElement(
+      "flight-results"
+    );
+  }
+
+  function selectHotel(
+    searchResultId: string
+  ) {
+    setSelectedHotelId(
+      searchResultId
+    );
+
+    setShowHotelResults(
+      false
+    );
+
+    setPortalMode(
+      "select"
+    );
+
+    window.setTimeout(
+      () => {
+        window.scrollTo({
+          top:
+            document.body
+              .scrollHeight,
+          behavior:
+            "smooth"
+        });
+      },
+      100
+    );
+  }
+
+  function changeHotel() {
+    setPortalMode(
+      "select"
+    );
+
+    setShowHotelResults(
+      true
+    );
+
+    scrollToElement(
+      "hotel-results"
+    );
   }
 
   const selectedFlight =
@@ -720,31 +1118,51 @@ export function BookingLinkPage({
           selectedHotelId
       ) ?? null;
 
-  return (
-    <main className="booking-link-page">
-      <section className="booking-link-shell">
-        <header className="booking-link-header">
-          <div className="booking-link-brand">
-            Aurem Travel
-          </div>
+  const flightComplete =
+    selectedFlight !== null;
 
-          {bookingLink && (
-            <div className="booking-link-header-reference">
-              <span>
-                Trip reference
-              </span>
+  const hotelComplete =
+    selectedHotel !== null;
 
-              <strong>
-                {
-                  bookingLink
-                    .tripReferenceId
-                }
-              </strong>
+  const readyForReview =
+    flightComplete &&
+    hotelComplete;
+
+  function openReview() {
+    if (
+      !readyForReview
+    ) {
+      return;
+    }
+
+    setPortalMode(
+      "review"
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+  function exitReview() {
+    setPortalMode(
+      "select"
+    );
+  }
+
+  if (
+    isLoading
+  ) {
+    return (
+      <main className="booking-link-page">
+        <section className="booking-link-shell">
+          <header className="booking-link-header">
+            <div className="booking-link-brand">
+              Aurem Travel
             </div>
-          )}
-        </header>
+          </header>
 
-        {isLoading && (
           <section className="booking-link-card">
             <h1>
               Loading your trip...
@@ -756,82 +1174,533 @@ export function BookingLinkPage({
               booking link.
             </p>
           </section>
-        )}
+        </section>
+      </main>
+    );
+  }
 
-        {!isLoading &&
-          errorMessage && (
-            <section className="booking-link-card">
+  if (
+    errorMessage ||
+    !bookingLink
+  ) {
+    return (
+      <main className="booking-link-page">
+        <section className="booking-link-shell">
+          <header className="booking-link-header">
+            <div className="booking-link-brand">
+              Aurem Travel
+            </div>
+          </header>
+
+          <section className="booking-link-card">
+            <h1>
+              We could not open
+              this link
+            </h1>
+
+            <p className="booking-link-error">
+              {errorMessage}
+            </p>
+
+            <p className="booking-link-secondary-copy">
+              Contact your case
+              manager for a new
+              booking link.
+            </p>
+          </section>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="booking-link-page">
+      <section className="booking-link-shell">
+        <header className="booking-link-header">
+          <div className="booking-link-brand">
+            Aurem Travel
+          </div>
+
+          <div className="booking-link-header-reference">
+            <span>
+              Trip reference
+            </span>
+
+            <strong>
+              {
+                bookingLink
+                  .tripReferenceId
+              }
+            </strong>
+          </div>
+        </header>
+
+        <nav
+          className="travel-progress"
+          aria-label="Travel selection progress"
+        >
+          <div
+            className={
+              `travel-progress-step ${
+                flightComplete
+                  ? "travel-progress-step-complete"
+                  : "travel-progress-step-active"
+              }`
+            }
+          >
+            <span className="travel-progress-number">
+              {flightComplete
+                ? "✓"
+                : "1"}
+            </span>
+
+            <div>
+              <strong>
+                Flight
+              </strong>
+
+              <span>
+                {flightComplete
+                  ? "Selected"
+                  : "Choose a flight"}
+              </span>
+            </div>
+          </div>
+
+          <div className="travel-progress-line" />
+
+          <div
+            className={
+              `travel-progress-step ${
+                hotelComplete
+                  ? "travel-progress-step-complete"
+                  : flightComplete
+                    ? "travel-progress-step-active"
+                    : ""
+              }`
+            }
+          >
+            <span className="travel-progress-number">
+              {hotelComplete
+                ? "✓"
+                : "2"}
+            </span>
+
+            <div>
+              <strong>
+                Hotel
+              </strong>
+
+              <span>
+                {hotelComplete
+                  ? "Selected"
+                  : "Choose a hotel"}
+              </span>
+            </div>
+          </div>
+
+          <div className="travel-progress-line" />
+
+          <div
+            className={
+              `travel-progress-step ${
+                portalMode ===
+                "review"
+                  ? "travel-progress-step-active"
+                  : readyForReview
+                    ? "travel-progress-step-ready"
+                    : ""
+              }`
+            }
+          >
+            <span className="travel-progress-number">
+              3
+            </span>
+
+            <div>
+              <strong>
+                Review
+              </strong>
+
+              <span>
+                Confirm choices
+              </span>
+            </div>
+          </div>
+        </nav>
+
+        {portalMode ===
+        "review" ? (
+          <section className="review-page">
+            <div className="booking-link-card review-card">
+              <p className="booking-link-eyebrow">
+                Final review
+              </p>
+
               <h1>
-                We could not open
-                this link
+                Review your selections
               </h1>
 
-              <p className="booking-link-error">
-                {errorMessage}
-              </p>
-
               <p>
-                Contact your case
-                manager for a new
-                link.
+                Confirm that the flight
+                and hotel below are the
+                options you want before
+                continuing.
               </p>
-            </section>
-          )}
+            </div>
 
-        {!isLoading &&
-          bookingLink && (
-            <>
-              <section className="booking-link-card booking-link-intro">
-                <p className="booking-link-eyebrow">
-                  Secure travel
-                  portal
-                </p>
+            {selectedFlight &&
+              flightSearch && (
+                <article className="review-selection-card">
+                  <div className="review-selection-header">
+                    <div>
+                      <span className="review-check">
+                        ✓
+                      </span>
 
-                <h1>
-                  Hello,{" "}
-                  {
-                    bookingLink
-                      .gcName
-                  }
-                </h1>
+                      <div>
+                        <p className="booking-link-eyebrow">
+                          Flight
+                        </p>
 
-                <p>
-                  Review the flight
-                  and hotel options
-                  available for your
-                  trip and select the
-                  options that work
-                  best for you.
-                </p>
-              </section>
+                        <h2>
+                          {
+                            selectedFlight
+                              .ownerName
+                          }
+                        </h2>
+                      </div>
+                    </div>
 
-              <section className="travel-search-grid">
-                <article className="travel-search-card">
-                  <div className="travel-search-icon">
-                    ✈
+                    <button
+                      type="button"
+                      className="secondary-action-button"
+                      onClick={() => {
+                        exitReview();
+                        changeFlight();
+                      }}
+                    >
+                      Change flight
+                    </button>
                   </div>
 
+                  <div className="review-flight-grid">
+                    <div>
+                      <span>
+                        Outbound
+                      </span>
+
+                      <strong>
+                        {
+                          selectedFlight
+                            .outbound
+                            .originAirportCode
+                        }
+                        {" → "}
+                        {
+                          selectedFlight
+                            .outbound
+                            .destinationAirportCode
+                        }
+                      </strong>
+
+                      <p>
+                        {formatDateTime(
+                          selectedFlight
+                            .outbound
+                            .departingAt
+                        )}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span>
+                        Return
+                      </span>
+
+                      <strong>
+                        {
+                          selectedFlight
+                            .return
+                            .originAirportCode
+                        }
+                        {" → "}
+                        {
+                          selectedFlight
+                            .return
+                            .destinationAirportCode
+                        }
+                      </strong>
+
+                      <p>
+                        {formatDateTime(
+                          selectedFlight
+                            .return
+                            .departingAt
+                        )}
+                      </p>
+                    </div>
+
+                    <div>
+                      <span>
+                        Total
+                      </span>
+
+                      <strong>
+                        {formatCurrency(
+                          selectedFlight
+                            .totalAmountCents,
+                          selectedFlight
+                            .currency
+                        )}
+                      </strong>
+
+                      <p>
+                        Round trip
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              )}
+
+            {selectedHotel &&
+              hotelSearch && (
+                <article className="review-selection-card">
+                  <div className="review-selection-header">
+                    <div>
+                      <span className="review-check">
+                        ✓
+                      </span>
+
+                      <div>
+                        <p className="booking-link-eyebrow">
+                          Hotel
+                        </p>
+
+                        <h2>
+                          {
+                            selectedHotel
+                              .name
+                          }
+                        </h2>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="secondary-action-button"
+                      onClick={() => {
+                        exitReview();
+                        changeHotel();
+                      }}
+                    >
+                      Change hotel
+                    </button>
+                  </div>
+
+                  <div className="review-hotel-grid">
+                    <div>
+                      <span>
+                        Stay
+                      </span>
+
+                      <strong>
+                        {formatDate(
+                          hotelSearch
+                            .checkInDate
+                        )}
+                        {" – "}
+                        {formatDate(
+                          hotelSearch
+                            .checkOutDate
+                        )}
+                      </strong>
+
+                      <p>
+                        {
+                          selectedHotel
+                            .address
+                        }
+                      </p>
+                    </div>
+
+                    <div>
+                      <span>
+                        Total
+                      </span>
+
+                      <strong>
+                        {formatCurrency(
+                          selectedHotel
+                            .cheapestTotalAmountCents,
+                          selectedHotel
+                            .currency
+                        )}
+                      </strong>
+
+                      <p>
+                        Hotel stay
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              )}
+
+            {selectedFlight &&
+              selectedHotel && (
+                <section className="review-total-card">
                   <div>
-                    <p className="booking-link-eyebrow">
-                      Flights
-                    </p>
+                    <span>
+                      Selected travel total
+                    </span>
 
-                    <h2>
-                      Choose your
-                      round-trip
-                      flight
-                    </h2>
+                    <strong>
+                      {formatCurrency(
+                        selectedFlight
+                          .totalAmountCents +
+                          selectedHotel
+                            .cheapestTotalAmountCents,
+                        selectedFlight
+                          .currency
+                      )}
+                    </strong>
+                  </div>
 
+                  <p>
+                    Your selections have
+                    not been submitted
+                    yet. The next
+                    development step will
+                    save both choices
+                    together before this
+                    portal can be safely
+                    closed.
+                  </p>
+                </section>
+              )}
+
+            <div className="review-actions">
+              <button
+                type="button"
+                className="secondary-action-button"
+                onClick={
+                  exitReview
+                }
+              >
+                Back to selections
+              </button>
+
+              <button
+                type="button"
+                className="primary-action-button"
+                disabled
+                title="Selection submission will be enabled after backend persistence is added."
+              >
+                Submit selections
+              </button>
+            </div>
+          </section>
+        ) : (
+          <>
+            <section className="booking-link-card booking-link-intro">
+              <p className="booking-link-eyebrow">
+                Secure travel portal
+              </p>
+
+              <h1>
+                Hello,{" "}
+                {
+                  bookingLink
+                    .gcName
+                }
+              </h1>
+
+              <p>
+                Choose your preferred
+                flight and hotel. You
+                will review both
+                selections together
+                before submitting them.
+              </p>
+            </section>
+
+            <section className="travel-search-grid">
+              <article
+                id="flight-step"
+                className={
+                  `travel-search-card ${
+                    flightComplete
+                      ? "travel-search-card-complete"
+                      : ""
+                  }`
+                }
+              >
+                <div className="travel-search-icon">
+                  {flightComplete
+                    ? "✓"
+                    : "✈"}
+                </div>
+
+                <div>
+                  <p className="booking-link-eyebrow">
+                    Step 1
+                  </p>
+
+                  <h2>
+                    {flightComplete
+                      ? "Flight selected"
+                      : "Choose your round-trip flight"}
+                  </h2>
+
+                  {selectedFlight ? (
                     <p>
-                      Search economy
-                      flights using
-                      your trip's
-                      approved dates,
+                      {
+                        selectedFlight
+                          .ownerName
+                      }
+                      {" • "}
+                      {
+                        selectedFlight
+                          .outbound
+                          .originAirportCode
+                      }
+                      {" → "}
+                      {
+                        selectedFlight
+                          .outbound
+                          .destinationAirportCode
+                      }
+                      {" • "}
+                      {formatCurrency(
+                        selectedFlight
+                          .totalAmountCents,
+                        selectedFlight
+                          .currency
+                      )}
+                    </p>
+                  ) : (
+                    <p>
+                      Compare available
+                      economy flights
+                      using the approved
+                      trip dates,
                       airports, and
                       budget.
                     </p>
-                  </div>
+                  )}
+                </div>
 
+                {selectedFlight ? (
+                  <button
+                    type="button"
+                    className="secondary-action-button"
+                    onClick={
+                      changeFlight
+                    }
+                  >
+                    Change flight
+                  </button>
+                ) : (
                   <button
                     type="button"
                     className="travel-search-button"
@@ -845,37 +1714,76 @@ export function BookingLinkPage({
                     {isSearchingFlights
                       ? "Searching Flights..."
                       : flightSearch
-                        ? "Refresh Flights"
+                        ? "View Flight Options"
                         : "Search Available Flights"}
                   </button>
-                </article>
+                )}
+              </article>
 
-                <article className="travel-search-card">
-                  <div className="travel-search-icon">
-                    ▣
-                  </div>
+              <article
+                id="hotel-step"
+                className={
+                  `travel-search-card ${
+                    hotelComplete
+                      ? "travel-search-card-complete"
+                      : ""
+                  }`
+                }
+              >
+                <div className="travel-search-icon">
+                  {hotelComplete
+                    ? "✓"
+                    : "▣"}
+                </div>
 
-                  <div>
-                    <p className="booking-link-eyebrow">
-                      Hotels
-                    </p>
+                <div>
+                  <p className="booking-link-eyebrow">
+                    Step 2
+                  </p>
 
-                    <h2>
-                      Choose your
-                      hotel
-                    </h2>
+                  <h2>
+                    {hotelComplete
+                      ? "Hotel selected"
+                      : "Choose your hotel"}
+                  </h2>
 
+                  {selectedHotel ? (
                     <p>
-                      Search hotels
-                      based on your
-                      destination,
-                      dates, star
-                      rating, and
-                      proximity
-                      preferences.
+                      {
+                        selectedHotel
+                          .name
+                      }
+                      {" • "}
+                      {formatCurrency(
+                        selectedHotel
+                          .cheapestTotalAmountCents,
+                        selectedHotel
+                          .currency
+                      )}
                     </p>
-                  </div>
+                  ) : (
+                    <p>
+                      Compare hotels
+                      using the approved
+                      destination,
+                      dates, star rating,
+                      proximity, and
+                      budget.
+                    </p>
+                  )}
+                </div>
 
+                {selectedHotel ? (
+                  <button
+                    type="button"
+                    className="secondary-action-button"
+                    onClick={
+                      changeHotel
+                    }
+                  >
+                    Change hotel
+                  </button>
+                ) : (
                   <button
                     type="button"
                     className="travel-search-button"
@@ -889,50 +1797,35 @@ export function BookingLinkPage({
                     {isSearchingHotels
                       ? "Searching Hotels..."
                       : hotelSearch
-                        ? "Refresh Hotels"
+                        ? "View Hotel Options"
                         : "Search Available Hotels"}
                   </button>
-                </article>
-              </section>
+                )}
+              </article>
+            </section>
 
-              {flightErrorMessage && (
+            {flightError && (
+              <TravelErrorAlert
+                error={
+                  flightError
+                }
+                retryLabel="Try Flight Search Again"
+                isRetrying={
+                  isSearchingFlights
+                }
+                onRetry={
+                  searchFlights
+                }
+              />
+            )}
+
+            {flightSearch &&
+              showFlightResults &&
+              !flightError && (
                 <section
-                  className="travel-error-alert"
-                  role="alert"
+                  id="flight-results"
+                  className="flight-results-section"
                 >
-                  <div className="travel-error-icon">
-                    !
-                  </div>
-
-                  <div className="travel-error-content">
-                    <h3>
-                      We couldn't search for flights
-                    </h3>
-
-                    <p>
-                      {flightErrorMessage}
-                    </p>
-
-                    <button
-                      type="button"
-                      className="travel-error-retry"
-                      onClick={
-                        searchFlights
-                      }
-                      disabled={
-                        isSearchingFlights
-                      }
-                    >
-                      {isSearchingFlights
-                        ? "Trying Again..."
-                        : "Try Again"}
-                    </button>
-                  </div>
-                </section>
-              )}
-
-              {flightSearch && (
-                <section className="flight-results-section">
                   <div className="travel-results-heading">
                     <div>
                       <p className="booking-link-eyebrow">
@@ -969,21 +1862,24 @@ export function BookingLinkPage({
                         {" • "}
                         {
                           flightSearch
-                            .adultPassengers
+                            .flights
+                            .length
                         }
-                        {flightSearch
-                          .adultPassengers ===
-                        1
-                          ? " traveler"
-                          : " travelers"}
+                        {
+                          flightSearch
+                            .flights
+                            .length ===
+                          1
+                            ? " option"
+                            : " options"
+                        }
                       </p>
                     </div>
 
                     <div className="travel-budget-summary">
                       <span>
                         Round-trip
-                        flight
-                        allowance
+                        flight allowance
                       </span>
 
                       <strong>
@@ -997,158 +1893,129 @@ export function BookingLinkPage({
                     </div>
                   </div>
 
-                  {flightSearch
-                    .flights
-                    .length ===
-                  0 ? (
-                    <div className="booking-link-card travel-empty-state">
-                      <h3>
-                        No matching
-                        flights found
-                      </h3>
+                  <div className="flight-results-list">
+                    {flightSearch
+                      .flights
+                      .map(
+                        (
+                          flight
+                        ) => (
+                          <article
+                            key={
+                              flight.offerId
+                            }
+                            className="flight-card"
+                          >
+                            <div className="flight-card-header">
+                              <div className="flight-airline">
+                                {flight.ownerLogoUrl && (
+                                  <img
+                                    src={
+                                      flight.ownerLogoUrl
+                                    }
+                                    alt=""
+                                  />
+                                )}
 
-                      <p>
-                        No round-trip
-                        offers matched
-                        the current
-                        travel dates
-                        and route.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="flight-results-list">
-                      {flightSearch
-                        .flights
-                        .map(
-                          (
-                            flight
-                          ) => {
-                            const isSelected =
-                              selectedFlightId ===
-                              flight.offerId;
+                                <div>
+                                  <span>
+                                    Airline
+                                  </span>
 
-                            return (
-                              <article
-                                key={
-                                  flight.offerId
-                                }
-                                className={
-                                  `flight-card ${
-                                    isSelected
-                                      ? "flight-card-selected"
-                                      : ""
-                                  }`
-                                }
-                              >
-                                <div className="flight-card-header">
-                                  <div className="flight-airline">
-                                    {flight.ownerLogoUrl && (
-                                      <img
-                                        src={
-                                          flight.ownerLogoUrl
-                                        }
-                                        alt={
-                                          flight.ownerName
-                                        }
-                                      />
-                                    )}
-
-                                    <div>
-                                      <span>
-                                        Offer
-                                        from
-                                      </span>
-
-                                      <strong>
-                                        {
-                                          flight.ownerName
-                                        }
-                                      </strong>
-                                    </div>
-                                  </div>
-
-                                  <div className="flight-card-price">
-                                    <span
-                                      className={
-                                        `travel-budget-badge ${
-                                          flight.isWithinBudget
-                                            ? "travel-budget-within"
-                                            : "travel-budget-over"
-                                        }`
-                                      }
-                                    >
-                                      {flight.isWithinBudget
-                                        ? "Within budget"
-                                        : "Over budget"}
-                                    </span>
-
-                                    <strong>
-                                      {formatCurrency(
-                                        flight.totalAmountCents,
-                                        flight.currency
-                                      )}
-                                    </strong>
-
-                                    <span>
-                                      round trip
-                                    </span>
-                                  </div>
+                                  <strong>
+                                    {
+                                      flight.ownerName
+                                    }
+                                  </strong>
                                 </div>
+                              </div>
 
-                                <FlightJourneyView
-                                  label="Outbound"
-                                  journey={
-                                    flight.outbound
-                                  }
-                                />
-
-                                <FlightJourneyView
-                                  label="Return"
-                                  journey={
-                                    flight.return
-                                  }
-                                />
-
-                                <button
-                                  type="button"
+                              <div className="flight-card-price">
+                                <span
                                   className={
-                                    `flight-select-button ${
-                                      isSelected
-                                        ? "flight-select-button-selected"
-                                        : ""
+                                    `travel-budget-badge ${
+                                      flight.isWithinBudget
+                                        ? "travel-budget-within"
+                                        : "travel-budget-over"
                                     }`
                                   }
-                                  onClick={() =>
-                                    setSelectedFlightId(
-                                      flight.offerId
-                                    )
-                                  }
                                 >
-                                  {isSelected
-                                    ? "Selected"
-                                    : "Select Flight"}
-                                </button>
-                              </article>
-                            );
-                          }
-                        )}
-                    </div>
-                  )}
+                                  {flight.isWithinBudget
+                                    ? "Within budget"
+                                    : "Over budget"}
+                                </span>
 
-                  {selectedFlight && (
-                    <div className="travel-selection-summary">
+                                <strong>
+                                  {formatCurrency(
+                                    flight.totalAmountCents,
+                                    flight.currency
+                                  )}
+                                </strong>
+
+                                <span>
+                                  round trip
+                                </span>
+                              </div>
+                            </div>
+
+                            <FlightJourneyView
+                              label="Outbound"
+                              journey={
+                                flight.outbound
+                              }
+                            />
+
+                            <FlightJourneyView
+                              label="Return"
+                              journey={
+                                flight.return
+                              }
+                            />
+
+                            <button
+                              type="button"
+                              className="flight-select-button"
+                              onClick={() =>
+                                selectFlight(
+                                  flight.offerId
+                                )
+                              }
+                            >
+                              Select this flight
+                            </button>
+                          </article>
+                        )
+                      )}
+                  </div>
+                </section>
+              )}
+
+            {selectedFlight &&
+              !showFlightResults && (
+                <section className="confirmed-selection-card">
+                  <div className="confirmed-selection-check">
+                    ✓
+                  </div>
+
+                  <div className="confirmed-selection-main">
+                    <p className="booking-link-eyebrow">
+                      Flight selected
+                    </p>
+
+                    <h2>
+                      {
+                        selectedFlight
+                          .ownerName
+                      }
+                    </h2>
+
+                    <div className="confirmed-flight-details">
                       <div>
                         <span>
-                          Selected
-                          flight
+                          Outbound
                         </span>
 
                         <strong>
-                          {
-                            selectedFlight
-                              .ownerName
-                          }
-                          {" • "}
                           {
                             selectedFlight
                               .outbound
@@ -1163,69 +2030,93 @@ export function BookingLinkPage({
                         </strong>
 
                         <p>
+                          {formatDateTime(
+                            selectedFlight
+                              .outbound
+                              .departingAt
+                          )}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span>
+                          Return
+                        </span>
+
+                        <strong>
+                          {
+                            selectedFlight
+                              .return
+                              .originAirportCode
+                          }
+                          {" → "}
+                          {
+                            selectedFlight
+                              .return
+                              .destinationAirportCode
+                          }
+                        </strong>
+
+                        <p>
+                          {formatDateTime(
+                            selectedFlight
+                              .return
+                              .departingAt
+                          )}
+                        </p>
+                      </div>
+
+                      <div>
+                        <span>
+                          Total
+                        </span>
+
+                        <strong>
                           {formatCurrency(
                             selectedFlight
                               .totalAmountCents,
                             selectedFlight
                               .currency
                           )}
-                          {
-                            " round trip"
-                          }
-                        </p>
+                        </strong>
                       </div>
-
-                      <p>
-                        This selection
-                        is currently
-                        stored only in
-                        this browser.
-                        Saving it to the
-                        trip comes next.
-                      </p>
                     </div>
-                  )}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="secondary-action-button"
+                    onClick={
+                      changeFlight
+                    }
+                  >
+                    Change flight
+                  </button>
                 </section>
               )}
 
-              {hotelErrorMessage && (
+            {hotelError && (
+              <TravelErrorAlert
+                error={
+                  hotelError
+                }
+                retryLabel="Try Hotel Search Again"
+                isRetrying={
+                  isSearchingHotels
+                }
+                onRetry={
+                  searchHotels
+                }
+              />
+            )}
+
+            {hotelSearch &&
+              showHotelResults &&
+              !hotelError && (
                 <section
-                  className="travel-error-alert"
-                  role="alert"
+                  id="hotel-results"
+                  className="hotel-results-section"
                 >
-                  <div className="travel-error-icon">
-                    !
-                  </div>
-
-                  <div className="travel-error-content">
-                    <h3>
-                      We couldn't search for hotels
-                    </h3>
-
-                    <p>
-                      {hotelErrorMessage}
-                    </p>
-
-                    <button
-                      type="button"
-                      className="travel-error-retry"
-                      onClick={
-                        searchHotels
-                      }
-                      disabled={
-                        isSearchingHotels
-                      }
-                    >
-                      {isSearchingHotels
-                        ? "Trying Again..."
-                        : "Try Again"}
-                    </button>
-                  </div>
-                </section>
-              )}
-
-              {hotelSearch && (
-                <section className="hotel-results-section">
                   <div className="travel-results-heading">
                     <div>
                       <p className="booking-link-eyebrow">
@@ -1253,13 +2144,17 @@ export function BookingLinkPage({
                         {" • "}
                         {
                           hotelSearch
-                            .adultGuests
+                            .hotels
+                            .length
                         }
-                        {hotelSearch
-                          .adultGuests ===
-                        1
-                          ? " guest"
-                          : " guests"}
+                        {
+                          hotelSearch
+                            .hotels
+                            .length ===
+                          1
+                            ? " option"
+                            : " options"
+                        }
                       </p>
                     </div>
 
@@ -1279,232 +2174,205 @@ export function BookingLinkPage({
                     </div>
                   </div>
 
-                  {hotelSearch
-                    .hotels
-                    .length ===
-                  0 ? (
-                    <div className="booking-link-card travel-empty-state">
-                      <h3>
-                        No matching
-                        hotels found
-                      </h3>
-
-                      <p>
-                        No available
-                        hotels matched
-                        the current
-                        dates, radius,
-                        star rating, and
-                        search criteria.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="hotel-results-grid">
-                      {hotelSearch
-                        .hotels
-                        .map(
-                          (
-                            hotel
-                          ) => {
-                            const isSelected =
-                              selectedHotelId ===
+                  <div className="hotel-results-grid">
+                    {hotelSearch
+                      .hotels
+                      .map(
+                        (
+                          hotel
+                        ) => (
+                          <article
+                            key={
                               hotel
-                                .searchResultId;
+                                .searchResultId
+                            }
+                            className="hotel-card"
+                          >
+                            <div className="hotel-card-image">
+                              {hotel.photoUrl ? (
+                                <img
+                                  src={
+                                    hotel.photoUrl
+                                  }
+                                  alt={
+                                    hotel.name
+                                  }
+                                />
+                              ) : (
+                                <div className="hotel-image-placeholder">
+                                  Hotel
+                                </div>
+                              )}
 
-                            return (
-                              <article
-                                key={
-                                  hotel
-                                    .searchResultId
-                                }
+                              <span
                                 className={
-                                  `hotel-card ${
-                                    isSelected
-                                      ? "hotel-card-selected"
-                                      : ""
+                                  `hotel-budget-badge ${
+                                    hotel.isWithinBudget
+                                      ? "hotel-budget-within"
+                                      : "hotel-budget-over"
                                   }`
                                 }
                               >
-                                <div className="hotel-card-image">
-                                  {hotel.photoUrl ? (
-                                    <img
-                                      src={
-                                        hotel.photoUrl
-                                      }
-                                      alt={
-                                        hotel.name
-                                      }
-                                    />
-                                  ) : (
-                                    <div className="hotel-image-placeholder">
-                                      Hotel
-                                    </div>
-                                  )}
+                                {hotel.isWithinBudget
+                                  ? "Within budget"
+                                  : "Over budget"}
+                              </span>
+                            </div>
 
-                                  <span
-                                    className={
-                                      `hotel-budget-badge ${
-                                        hotel.isWithinBudget
-                                          ? "hotel-budget-within"
-                                          : "hotel-budget-over"
-                                      }`
-                                    }
-                                  >
-                                    {hotel.isWithinBudget
-                                      ? "Within budget"
-                                      : "Over budget"}
-                                  </span>
-                                </div>
-
-                                <div className="hotel-card-body">
-                                  <div className="hotel-card-title-row">
-                                    <div>
-                                      <p className="hotel-stars">
-                                        {getStarText(
-                                          hotel.starRating
-                                        )}
-                                      </p>
-
-                                      <h3>
-                                        {
-                                          hotel.name
-                                        }
-                                      </h3>
-                                    </div>
-
-                                    <div className="hotel-price">
-                                      <strong>
-                                        {formatCurrency(
-                                          hotel.cheapestTotalAmountCents,
-                                          hotel.currency
-                                        )}
-                                      </strong>
-
-                                      <span>
-                                        total
-                                        stay
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  <p className="hotel-address">
-                                    {
-                                      hotel.address
-                                    }
+                            <div className="hotel-card-body">
+                              <div className="hotel-card-title-row">
+                                <div>
+                                  <p className="hotel-stars">
+                                    {getStarText(
+                                      hotel.starRating
+                                    )}
                                   </p>
 
-                                  <div className="hotel-meta">
-                                    {hotel.distanceFromDestinationMiles !==
-                                      null && (
-                                      <span>
-                                        {
-                                          hotel.distanceFromDestinationMiles
-                                        }{" "}
-                                        miles
-                                        away
-                                      </span>
-                                    )}
-
-                                    {hotel.reviewScore !==
-                                      null && (
-                                      <span>
-                                        {
-                                          hotel.reviewScore
-                                        }
-                                        /10
-                                        {hotel.reviewCount !==
-                                          null &&
-                                          ` (${hotel.reviewCount} reviews)`}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {hotel.amenities
-                                    .length >
-                                    0 && (
-                                    <div className="hotel-amenities">
-                                      {hotel.amenities
-                                        .slice(
-                                          0,
-                                          4
-                                        )
-                                        .map(
-                                          (
-                                            amenity
-                                          ) => (
-                                            <span
-                                              key={
-                                                amenity
-                                              }
-                                            >
-                                              {
-                                                amenity
-                                              }
-                                            </span>
-                                          )
-                                        )}
-                                    </div>
-                                  )}
-
-                                  {hotel.loyaltyProgram && (
-                                    <p className="hotel-loyalty">
-                                      Supports{" "}
-                                      {formatLoyaltyProgram(
-                                        hotel.loyaltyProgram
-                                      )}
-                                    </p>
-                                  )}
-
-                                  <button
-                                    type="button"
-                                    className={
-                                      `hotel-select-button ${
-                                        isSelected
-                                          ? "hotel-select-button-selected"
-                                          : ""
-                                      }`
+                                  <h3>
+                                    {
+                                      hotel.name
                                     }
-                                    onClick={() =>
-                                      setSelectedHotelId(
-                                        hotel.searchResultId
-                                      )
-                                    }
-                                  >
-                                    {isSelected
-                                      ? "Selected"
-                                      : "Select Hotel"}
-                                  </button>
+                                  </h3>
                                 </div>
-                              </article>
-                            );
-                          }
-                        )}
-                    </div>
-                  )}
 
-                  {selectedHotel && (
-                    <div className="travel-selection-summary">
+                                <div className="hotel-price">
+                                  <strong>
+                                    {formatCurrency(
+                                      hotel.cheapestTotalAmountCents,
+                                      hotel.currency
+                                    )}
+                                  </strong>
+
+                                  <span>
+                                    total stay
+                                  </span>
+                                </div>
+                              </div>
+
+                              <p className="hotel-address">
+                                {
+                                  hotel.address
+                                }
+                              </p>
+
+                              <div className="hotel-meta">
+                                {hotel.distanceFromDestinationMiles !==
+                                  null && (
+                                  <span>
+                                    {
+                                      hotel.distanceFromDestinationMiles
+                                    }{" "}
+                                    miles away
+                                  </span>
+                                )}
+
+                                {hotel.reviewScore !==
+                                  null && (
+                                  <span>
+                                    {
+                                      hotel.reviewScore
+                                    }
+                                    /10
+                                    {hotel.reviewCount !==
+                                      null &&
+                                      ` (${hotel.reviewCount} reviews)`}
+                                  </span>
+                                )}
+                              </div>
+
+                              {hotel.amenities
+                                .length >
+                                0 && (
+                                <div className="hotel-amenities">
+                                  {hotel.amenities
+                                    .slice(
+                                      0,
+                                      4
+                                    )
+                                    .map(
+                                      (
+                                        amenity
+                                      ) => (
+                                        <span
+                                          key={
+                                            amenity
+                                          }
+                                        >
+                                          {
+                                            amenity
+                                          }
+                                        </span>
+                                      )
+                                    )}
+                                </div>
+                              )}
+
+                              {hotel.loyaltyProgram && (
+                                <p className="hotel-loyalty">
+                                  Supports{" "}
+                                  {formatLoyaltyProgram(
+                                    hotel.loyaltyProgram
+                                  )}
+                                </p>
+                              )}
+
+                              <button
+                                type="button"
+                                className="hotel-select-button"
+                                onClick={() =>
+                                  selectHotel(
+                                    hotel.searchResultId
+                                  )
+                                }
+                              >
+                                Select this hotel
+                              </button>
+                            </div>
+                          </article>
+                        )
+                      )}
+                  </div>
+                </section>
+              )}
+
+            {selectedHotel &&
+              !showHotelResults && (
+                <section className="confirmed-selection-card">
+                  <div className="confirmed-selection-check">
+                    ✓
+                  </div>
+
+                  <div className="confirmed-selection-main">
+                    <p className="booking-link-eyebrow">
+                      Hotel selected
+                    </p>
+
+                    <h2>
+                      {
+                        selectedHotel
+                          .name
+                      }
+                    </h2>
+
+                    <div className="confirmed-hotel-details">
                       <div>
                         <span>
-                          Selected
-                          hotel
+                          Stay
                         </span>
 
                         <strong>
-                          {
-                            selectedHotel
-                              .name
-                          }
+                          {formatDate(
+                            hotelSearch!
+                              .checkInDate
+                          )}
+                          {" – "}
+                          {formatDate(
+                            hotelSearch!
+                              .checkOutDate
+                          )}
                         </strong>
 
                         <p>
-                          {formatCurrency(
-                            selectedHotel
-                              .cheapestTotalAmountCents,
-                            selectedHotel
-                              .currency
-                          )}
-                          {" • "}
                           {
                             selectedHotel
                               .address
@@ -1512,20 +2380,65 @@ export function BookingLinkPage({
                         </p>
                       </div>
 
-                      <p>
-                        This selection
-                        is currently
-                        stored only in
-                        this browser.
-                        Saving it to the
-                        trip comes next.
-                      </p>
+                      <div>
+                        <span>
+                          Total
+                        </span>
+
+                        <strong>
+                          {formatCurrency(
+                            selectedHotel
+                              .cheapestTotalAmountCents,
+                            selectedHotel
+                              .currency
+                          )}
+                        </strong>
+                      </div>
                     </div>
-                  )}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="secondary-action-button"
+                    onClick={
+                      changeHotel
+                    }
+                  >
+                    Change hotel
+                  </button>
                 </section>
               )}
-            </>
-          )}
+
+            {readyForReview && (
+              <div className="review-cta-spacer" />
+            )}
+
+            {readyForReview && (
+              <aside className="review-sticky-bar">
+                <div>
+                  <strong>
+                    Flight and hotel selected
+                  </strong>
+
+                  <span>
+                    Review both choices
+                    before submitting.
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  className="primary-action-button"
+                  onClick={
+                    openReview
+                  }
+                >
+                  Review selections
+                </button>
+              </aside>
+            )}
+          </>
+        )}
       </section>
     </main>
   );
