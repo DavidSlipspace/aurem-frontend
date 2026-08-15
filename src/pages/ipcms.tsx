@@ -20,15 +20,24 @@ import type {
   IpcmDirectoryItem
 } from "../types/ipcm";
 
+import type {
+  UserResponse
+} from "../types/user";
+
 import "./ipcms.css";
 
 type IpcmsPageProps = {
   idToken: string;
+  user: UserResponse;
 };
 
 export function IpcmsPage({
-  idToken
+  idToken,
+  user
 }: IpcmsPageProps) {
+  const canManageInvitations =
+    user.role === "Admin";
+
   const [
     ipcms,
     setIpcms
@@ -115,7 +124,7 @@ export function IpcmsPage({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Unable to load IPCMs."
+          : "Unable to load IPCM profiles."
       );
     } finally {
       setIsLoading(
@@ -127,6 +136,12 @@ export function IpcmsPage({
   async function handleInvite(
     email: string
   ) {
+    if (
+      !canManageInvitations
+    ) {
+      return;
+    }
+
     setIsSendingInvite(
       true
     );
@@ -174,6 +189,12 @@ export function IpcmsPage({
     item:
       IpcmDirectoryItem
   ) {
+    if (
+      !canManageInvitations
+    ) {
+      return;
+    }
+
     setResendingInvitationId(
       item.id
     );
@@ -217,39 +238,27 @@ export function IpcmsPage({
     <main className="ipcms-page">
       <section className="ipcms-content">
         <header className="ipcms-header">
-          <div>
-            <p className="ipcms-eyebrow">
-              User administration
-            </p>
+          <h1>
+            IPCM Profiles
+          </h1>
 
-            <h1>
-              IPCMs
-            </h1>
+          {canManageInvitations && (
+            <button
+              type="button"
+              className="ipcm-primary-button"
+              onClick={() => {
+                setShowInviteForm(
+                  true
+                );
 
-            <p>
-              Invite IPCMs to
-              create Aurem
-              accounts and manage
-              outstanding
-              invitations.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="ipcm-primary-button"
-            onClick={() => {
-              setShowInviteForm(
-                true
-              );
-
-              setSuccessMessage(
-                ""
-              );
-            }}
-          >
-            Invite IPCM
-          </button>
+                setSuccessMessage(
+                  ""
+                );
+              }}
+            >
+              Invite IPCM
+            </button>
+          )}
         </header>
 
         {errorMessage && (
@@ -270,31 +279,32 @@ export function IpcmsPage({
           </div>
         )}
 
-        {showInviteForm && (
-          <InviteIpcmForm
-            isSubmitting={
-              isSendingInvite
-            }
-            onSubmit={
-              handleInvite
-            }
-            onCancel={() =>
-              setShowInviteForm(
-                false
-              )
-            }
-          />
-        )}
+        {canManageInvitations &&
+          showInviteForm && (
+            <InviteIpcmForm
+              isSubmitting={
+                isSendingInvite
+              }
+              onSubmit={
+                handleInvite
+              }
+              onCancel={() =>
+                setShowInviteForm(
+                  false
+                )
+              }
+            />
+          )}
 
         <div className="ipcms-section-header">
           <div>
             <h2>
-              IPCM Directory
+              IPCM Profiles
             </h2>
 
             <p>
-              Active accounts and
-              outstanding account
+              Active IPCM profiles
+              and outstanding account
               invitations for your
               agency.
             </p>
@@ -318,12 +328,16 @@ export function IpcmsPage({
 
         {isLoading ? (
           <div className="ipcms-loading">
-            Loading IPCMs...
+            Loading IPCM
+            profiles...
           </div>
         ) : (
           <IpcmTable
             ipcms={
               ipcms
+            }
+            canManageInvitations={
+              canManageInvitations
             }
             resendingInvitationId={
               resendingInvitationId

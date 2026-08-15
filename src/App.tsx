@@ -225,6 +225,9 @@ export default function App() {
           idToken={
             idToken
           }
+          user={
+            user
+          }
         />
       )}
 

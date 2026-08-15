@@ -10,6 +10,8 @@ type IpcmTableProps = {
   ipcms:
     IpcmDirectoryItem[];
 
+  canManageInvitations: boolean;
+
   resendingInvitationId:
     | string
     | null;
@@ -85,6 +87,7 @@ function getName(
 
 export function IpcmTable({
   ipcms,
+  canManageInvitations,
   resendingInvitationId,
   onResend
 }: IpcmTableProps) {
@@ -113,9 +116,11 @@ export function IpcmTable({
               Expires
             </th>
 
-            <th>
-              Actions
-            </th>
+            {canManageInvitations && (
+              <th>
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
 
@@ -176,34 +181,36 @@ export function IpcmTable({
                         : "—"}
                     </td>
 
-                    <td>
-                      {item.type ===
-                      "invitation" ? (
-                        <button
-                          type="button"
-                          className="ipcm-table-action"
-                          onClick={() =>
-                            onResend(
-                              item
-                            )
-                          }
-                          disabled={
-                            isResending
-                          }
-                        >
-                          {isResending
-                            ? "Sending..."
-                            : item.status ===
-                                "expired"
-                              ? "Send New Invite"
-                              : "Resend"}
-                        </button>
-                      ) : (
-                        <span className="ipcm-no-action">
-                          Account created
-                        </span>
-                      )}
-                    </td>
+                    {canManageInvitations && (
+                      <td>
+                        {item.type ===
+                        "invitation" ? (
+                          <button
+                            type="button"
+                            className="ipcm-table-action"
+                            onClick={() =>
+                              onResend(
+                                item
+                              )
+                            }
+                            disabled={
+                              isResending
+                            }
+                          >
+                            {isResending
+                              ? "Sending..."
+                              : item.status ===
+                                  "expired"
+                                ? "Send New Invite"
+                                : "Resend"}
+                          </button>
+                        ) : (
+                          <span className="ipcm-no-action">
+                            Account created
+                          </span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               }
@@ -213,11 +220,12 @@ export function IpcmTable({
               <td
                 className="ipcm-empty-state"
                 colSpan={
-                  6
+                  canManageInvitations
+                    ? 6
+                    : 5
                 }
               >
-                No IPCMs or
-                invitations
+                No IPCM profiles
                 found.
               </td>
             </tr>

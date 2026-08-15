@@ -39,9 +39,11 @@ export function Navbar({
     user.role ===
       "Case Manager";
 
-  const canManageIpcms =
+  const canViewIpcmProfiles =
     user.role ===
-    "Admin";
+      "Admin" ||
+    user.role ===
+      "IPCM";
 
   const canViewPayments =
     user.role ===
@@ -112,7 +114,7 @@ export function Navbar({
           </button>
         )}
 
-        {canManageIpcms && (
+        {canViewIpcmProfiles && (
           <button
             type="button"
             className={
@@ -127,7 +129,7 @@ export function Navbar({
               )
             }
           >
-            IPCMs
+            IPCM Profiles
           </button>
         )}
 
