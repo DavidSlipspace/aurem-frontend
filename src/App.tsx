@@ -24,7 +24,7 @@ import {
 
 import {
   PaymentsPage
-} from "./pages/payments/PaymentsPage";
+} from "./pages/payments";
 
 import {
   Navbar
