@@ -27,6 +27,10 @@ import {
 } from "./pages/payments";
 
 import {
+  IpcmsPage
+} from "./pages/ipcms";
+
+import {
   Navbar
 } from "./components/Navbar";
 
@@ -44,6 +48,7 @@ type Page =
   | "cases"
   | "gcProfiles"
   | "trips"
+  | "ipcms"
   | "payments";
 
 function getBookingToken():
@@ -208,6 +213,15 @@ export default function App() {
       {activePage ===
         "gcProfiles" && (
         <GcProfilesPage
+          idToken={
+            idToken
+          }
+        />
+      )}
+
+      {activePage ===
+        "ipcms" && (
+        <IpcmsPage
           idToken={
             idToken
           }

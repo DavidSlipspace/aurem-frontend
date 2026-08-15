@@ -8,6 +8,7 @@ type Page =
   | "cases"
   | "gcProfiles"
   | "trips"
+  | "ipcms"
   | "payments";
 
 type NavbarProps = {
@@ -37,6 +38,10 @@ export function Navbar({
       "Admin" ||
     user.role ===
       "Case Manager";
+
+  const canManageIpcms =
+    user.role ===
+    "Admin";
 
   const canViewPayments =
     user.role ===
@@ -104,6 +109,25 @@ export function Navbar({
             }
           >
             GC Profiles
+          </button>
+        )}
+
+        {canManageIpcms && (
+          <button
+            type="button"
+            className={
+              activePage ===
+              "ipcms"
+                ? "nav-link active"
+                : "nav-link"
+            }
+            onClick={() =>
+              onPageChange(
+                "ipcms"
+              )
+            }
+          >
+            IPCMs
           </button>
         )}
 
