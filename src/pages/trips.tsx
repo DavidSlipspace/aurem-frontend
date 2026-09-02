@@ -12,55 +12,99 @@ import {
   updateTrip
 } from "../api/tripApi";
 
-import { getCases } from "../api/caseApi";
-import { getTravelerProfiles } from "../api/travelerProfileApi";
+import {
+  getCases
+} from "../api/caseApi";
 
-import { ConfirmDialog } from "../components/common/ConfirmDialog";
+import {
+  getTravelerProfiles
+} from "../api/travelerProfileApi";
+
+import {
+  ConfirmDialog
+} from "../components/common/ConfirmDialog";
 
 import {
   TripForm,
   type TripFormState
 } from "../components/trips/TripForm";
 
-import { TripsTable } from "../components/trips/TripsTable";
+import {
+  TripsTable
+} from "../components/trips/TripsTable";
 
-import type { CaseResponse } from "../types/case";
-import type { TravelerProfile } from "../types/travelerProfile";
+import type {
+  CaseResponse
+} from "../types/case";
+
+import type {
+  TravelerProfile
+} from "../types/travelerProfile";
 
 import type {
   Trip,
   TripRequest
 } from "../types/trip";
 
-import { TripPurpose } from "../types/tripPurpose";
+import type {
+  UserResponse
+} from "../types/user";
 
 import "./trips.css";
 
 type TripsPageProps = {
   idToken: string;
+
+  user:
+    UserResponse;
 };
 
-function createEmptyForm(): TripFormState {
+function createEmptyForm():
+  TripFormState {
   return {
     caseId: "",
-    travelerProfileId: "",
-    tripPurpose: "",
 
-    outboundDate: "",
-    returnDate: "",
-    outboundAirport: "",
-    returnAirport: "",
+    travelerProfileId:
+      "",
 
-    destinationCity: "",
-    destinationAddress: "",
-    hotelProximityPreference: "",
-    minimumHotelStarRating: "",
+    tripPurpose:
+      "",
 
-    budgetDollars: "",
-    companionTraveler: false,
-    ipcmApprovalRequired: false,
+    outboundDate:
+      "",
 
-    status: "Created"
+    returnDate:
+      "",
+
+    outboundAirport:
+      "",
+
+    returnAirport:
+      "",
+
+    destinationCity:
+      "",
+
+    destinationAddress:
+      "",
+
+    hotelProximityPreference:
+      "",
+
+    minimumHotelStarRating:
+      "",
+
+    budgetDollars:
+      "",
+
+    companionTraveler:
+      false,
+
+    ipcmApprovalRequired:
+      false,
+
+    status:
+      "Created"
   };
 }
 
@@ -68,52 +112,86 @@ function createFormFromTrip(
   trip: Trip
 ): TripFormState {
   return {
-    caseId: trip.caseId,
-    travelerProfileId: trip.travelerProfileId,
-    tripPurpose: trip.tripPurpose,
+    caseId:
+      trip.caseId,
+
+    travelerProfileId:
+      trip.travelerProfileId,
+
+    tripPurpose:
+      trip.tripPurpose,
 
     outboundDate:
-      trip.outboundDate?.substring(0, 10) ?? "",
+      trip.outboundDate
+        ?.substring(
+          0,
+          10
+        ) ?? "",
 
     returnDate:
-      trip.returnDate?.substring(0, 10) ?? "",
+      trip.returnDate
+        ?.substring(
+          0,
+          10
+        ) ?? "",
 
-    outboundAirport: trip.outboundAirport,
-    returnAirport: trip.returnAirport,
+    outboundAirport:
+      trip.outboundAirport,
 
-    destinationCity: trip.destinationCity ?? "",
+    returnAirport:
+      trip.returnAirport,
+
+    destinationCity:
+      trip.destinationCity ??
+      "",
+
     destinationAddress:
-      trip.destinationAddress ?? "",
+      trip.destinationAddress ??
+      "",
 
     hotelProximityPreference:
-      trip.hotelProximityPreference ?? "",
+      trip.hotelProximityPreference ??
+      "",
 
     minimumHotelStarRating:
-      trip.minimumHotelStarRating?.toString() ?? "",
+      trip.minimumHotelStarRating
+        ?.toString() ??
+      "",
 
-    budgetDollars: (
-      trip.budgetFilter / 100
-    ).toFixed(2),
+    budgetDollars:
+      (
+        trip.budgetFilter /
+        100
+      ).toFixed(
+        2
+      ),
 
-    companionTraveler: trip.companionTraveler,
+    companionTraveler:
+      trip.companionTraveler,
 
     ipcmApprovalRequired:
-      trip.ipcmApprovalRequired ?? false,
+      trip.ipcmApprovalRequired,
 
-    status: trip.status
+    status:
+      trip.status
   };
 }
 
 function buildRequestPayload(
-  formData: TripFormState
+  formData:
+    TripFormState
 ): TripRequest {
-  const budgetDollars = Number(
-    formData.budgetDollars
-  );
+  const budgetDollars =
+    Number(
+      formData.budgetDollars
+    );
 
   if (
-    !Number.isFinite(budgetDollars) ||
-    budgetDollars <= 0
+    !Number.isFinite(
+      budgetDollars
+    ) ||
+    budgetDollars <=
+      0
   ) {
     throw new Error(
       "Budget must be greater than zero."
@@ -121,8 +199,12 @@ function buildRequestPayload(
   }
 
   if (
-    !formData.destinationCity.trim() &&
-    !formData.destinationAddress.trim()
+    !formData
+      .destinationCity
+      .trim() &&
+    !formData
+      .destinationAddress
+      .trim()
   ) {
     throw new Error(
       "Enter either a destination city or destination address."
@@ -132,49 +214,71 @@ function buildRequestPayload(
   if (
     formData.outboundDate &&
     formData.returnDate &&
-    formData.returnDate < formData.outboundDate
+    formData.returnDate <
+      formData.outboundDate
   ) {
     throw new Error(
       "Return date cannot be before the outbound date."
     );
   }
 
+  const minimumHotelStarRating =
+    formData.minimumHotelStarRating ===
+    ""
+      ? undefined
+      : Number(
+          formData.minimumHotelStarRating
+        );
+
   return {
-    caseId: formData.caseId,
-    travelerProfileId: formData.travelerProfileId,
+    caseId:
+      formData.caseId,
 
-    tripPurpose: formData.tripPurpose.trim(),
+    travelerProfileId:
+      formData.travelerProfileId,
 
-    outboundDate: formData.outboundDate,
-    returnDate: formData.returnDate,
+    tripPurpose:
+      formData.tripPurpose
+        .trim(),
+
+    outboundDate:
+      formData.outboundDate,
+
+    returnDate:
+      formData.returnDate,
 
     outboundAirport:
-      formData.outboundAirport.trim().toUpperCase(),
+      formData.outboundAirport
+        .trim()
+        .toUpperCase(),
 
     returnAirport:
-      formData.returnAirport.trim().toUpperCase(),
+      formData.returnAirport
+        .trim()
+        .toUpperCase(),
 
     destinationCity:
-      formData.destinationCity.trim() || undefined,
+      formData.destinationCity
+        .trim() ||
+      undefined,
 
     destinationAddress:
-      formData.destinationAddress.trim() ||
+      formData.destinationAddress
+        .trim() ||
       undefined,
 
     hotelProximityPreference:
-      formData.hotelProximityPreference.trim() ||
+      formData.hotelProximityPreference
+        .trim() ||
       undefined,
 
-    minimumHotelStarRating:
-      formData.minimumHotelStarRating === ""
-        ? undefined
-        : Number(
-            formData.minimumHotelStarRating
-          ),
+    minimumHotelStarRating,
 
-    budgetFilter: Math.round(
-      budgetDollars * 100
-    ),
+    budgetFilter:
+      Math.round(
+        budgetDollars *
+          100
+      ),
 
     companionTraveler:
       formData.companionTraveler,
@@ -182,146 +286,403 @@ function buildRequestPayload(
     ipcmApprovalRequired:
       formData.ipcmApprovalRequired,
 
-    status: formData.status
+    status:
+      formData.status
   };
 }
 
 export function TripsPage({
-  idToken
+  idToken,
+  user
 }: TripsPageProps) {
-  const [trips, setTrips] = useState<Trip[]>([]);
-  const [cases, setCases] = useState<CaseResponse[]>(
-    []
+  const canManageTrips =
+    user.role ===
+      "Admin" ||
+    user.role ===
+      "Case Manager";
+
+  const isIpcm =
+    user.role ===
+    "IPCM";
+
+  const [
+    trips,
+    setTrips
+  ] =
+    useState<
+      Trip[]
+    >([]);
+
+  const [
+    cases,
+    setCases
+  ] =
+    useState<
+      CaseResponse[]
+    >([]);
+
+  const [
+    travelerProfiles,
+    setTravelerProfiles
+  ] =
+    useState<
+      TravelerProfile[]
+    >([]);
+
+  const [
+    formData,
+    setFormData
+  ] =
+    useState<
+      TripFormState
+    >(
+      createEmptyForm()
+    );
+
+  const [
+    editingTripId,
+    setEditingTripId
+  ] =
+    useState<
+      string |
+      null
+    >(null);
+
+  const [
+    tripPendingEmail,
+    setTripPendingEmail
+  ] =
+    useState<
+      Trip |
+      null
+    >(null);
+
+  const [
+    isSendingTripId,
+    setIsSendingTripId
+  ] =
+    useState<
+      string |
+      null
+    >(null);
+
+  const [
+    showForm,
+    setShowForm
+  ] =
+    useState(
+      false
+    );
+
+  const [
+    isPageLoading,
+    setIsPageLoading
+  ] =
+    useState(
+      false
+    );
+
+  const [
+    isSaving,
+    setIsSaving
+  ] =
+    useState(
+      false
+    );
+
+  const [
+    errorMessage,
+    setErrorMessage
+  ] =
+    useState(
+      ""
+    );
+
+  const [
+    successMessage,
+    setSuccessMessage
+  ] =
+    useState(
+      ""
+    );
+
+  const loadTrips =
+    useCallback(
+      async () => {
+        const response =
+          await getTrips(
+            idToken
+          );
+
+        setTrips(
+          response.trips
+        );
+      },
+      [
+        idToken
+      ]
+    );
+
+  const loadPageData =
+    useCallback(
+      async () => {
+        setIsPageLoading(
+          true
+        );
+
+        setErrorMessage(
+          ""
+        );
+
+        try {
+          if (
+            canManageTrips
+          ) {
+            const [
+              tripsResponse,
+              casesResponse,
+              travelerProfilesResponse
+            ] =
+              await Promise.all([
+                getTrips(
+                  idToken
+                ),
+
+                getCases(
+                  idToken
+                ),
+
+                getTravelerProfiles(
+                  idToken
+                )
+              ]);
+
+            setTrips(
+              tripsResponse.trips
+            );
+
+            setCases(
+              casesResponse.cases
+            );
+
+            setTravelerProfiles(
+              travelerProfilesResponse
+                .travelerProfiles
+                .filter(
+                  (
+                    profile
+                  ) =>
+                    profile.status
+                      .toLowerCase() ===
+                    "active"
+                )
+            );
+
+            return;
+          }
+
+          const tripsResponse =
+            await getTrips(
+              idToken
+            );
+
+          setTrips(
+            tripsResponse.trips
+          );
+
+          setCases(
+            []
+          );
+
+          setTravelerProfiles(
+            []
+          );
+        } catch (
+          error
+        ) {
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "Unable to load trip data."
+          );
+        } finally {
+          setIsPageLoading(
+            false
+          );
+        }
+      },
+      [
+        canManageTrips,
+        idToken
+      ]
+    );
+
+  useEffect(
+    () => {
+      void loadPageData();
+    },
+    [
+      loadPageData
+    ]
   );
 
-  const [travelerProfiles, setTravelerProfiles] = useState<
-    TravelerProfile[]
-  >([]);
-
-  const [formData, setFormData] =
-    useState<TripFormState>(createEmptyForm());
-
-  const [editingTripId, setEditingTripId] =
-    useState<string | null>(null);
-
-  const [tripPendingEmail, setTripPendingEmail] =
-    useState<Trip | null>(null);
-
-  const [isSendingTripId, setIsSendingTripId] =
-    useState<string | null>(null);
-
-  const [showForm, setShowForm] = useState(false);
-  const [isPageLoading, setIsPageLoading] =
-    useState(false);
-
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [errorMessage, setErrorMessage] =
-    useState("");
-
-  const [successMessage, setSuccessMessage] =
-    useState("");
-
-  const loadTrips = useCallback(async () => {
-    const response = await getTrips(idToken);
-    setTrips(response.trips);
-  }, [idToken]);
-
-  const loadPageData = useCallback(async () => {
-    setIsPageLoading(true);
-    setErrorMessage("");
-
-    try {
-      const [
-        tripsResponse,
-        casesResponse,
-        travelerProfilesResponse
-      ] = await Promise.all([
-        getTrips(idToken),
-        getCases(idToken),
-        getTravelerProfiles(idToken)
-      ]);
-
-      setTrips(tripsResponse.trips);
-      setCases(casesResponse.cases);
-
-      setTravelerProfiles(
-        travelerProfilesResponse.travelerProfiles.filter(
-          (profile) =>
-            profile.status.toLowerCase() === "active"
-        )
-      );
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to load trip data."
-      );
-    } finally {
-      setIsPageLoading(false);
-    }
-  }, [idToken]);
-
-  useEffect(() => {
-    void loadPageData();
-  }, [loadPageData]);
-
   function handleFieldChange<
-    Field extends keyof TripFormState
+    Field extends
+      keyof TripFormState
   >(
-    field: Field,
-    value: TripFormState[Field]
+    field:
+      Field,
+
+    value:
+      TripFormState[Field]
   ): void {
-    setFormData((current) => ({
-      ...current,
-      [field]: value
-    }));
+    if (
+      !canManageTrips
+    ) {
+      return;
+    }
+
+    setFormData(
+      (
+        current
+      ) => ({
+        ...current,
+
+        [field]:
+          value
+      })
+    );
   }
 
-  function handleNewTrip(): void {
-    setFormData(createEmptyForm());
-    setEditingTripId(null);
-    setShowForm(true);
-    setErrorMessage("");
-    setSuccessMessage("");
+  function handleNewTrip():
+    void {
+    if (
+      !canManageTrips
+    ) {
+      return;
+    }
+
+    setFormData(
+      createEmptyForm()
+    );
+
+    setEditingTripId(
+      null
+    );
+
+    setShowForm(
+      true
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    setSuccessMessage(
+      ""
+    );
   }
 
-  function handleEdit(trip: Trip): void {
-    setFormData(createFormFromTrip(trip));
-    setEditingTripId(trip.id);
-    setShowForm(true);
-    setErrorMessage("");
-    setSuccessMessage("");
+  function handleEdit(
+    trip:
+      Trip
+  ): void {
+    if (
+      !canManageTrips
+    ) {
+      return;
+    }
+
+    setFormData(
+      createFormFromTrip(
+        trip
+      )
+    );
+
+    setEditingTripId(
+      trip.id
+    );
+
+    setShowForm(
+      true
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    setSuccessMessage(
+      ""
+    );
 
     window.scrollTo({
-      top: 0,
-      behavior: "smooth"
+      top:
+        0,
+
+      behavior:
+        "smooth"
     });
   }
 
-  function handleCancelForm(): void {
-    setFormData(createEmptyForm());
-    setEditingTripId(null);
-    setShowForm(false);
-    setErrorMessage("");
+  function handleCancelForm():
+    void {
+    setFormData(
+      createEmptyForm()
+    );
+
+    setEditingTripId(
+      null
+    );
+
+    setShowForm(
+      false
+    );
+
+    setErrorMessage(
+      ""
+    );
   }
 
   async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
+    event:
+      FormEvent<
+        HTMLFormElement
+      >
   ): Promise<void> {
     event.preventDefault();
 
-    setIsSaving(true);
-    setErrorMessage("");
-    setSuccessMessage("");
+    if (
+      !canManageTrips
+    ) {
+      return;
+    }
+
+    setIsSaving(
+      true
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    setSuccessMessage(
+      ""
+    );
 
     try {
-      const payload = buildRequestPayload(formData);
+      const payload =
+        buildRequestPayload(
+          formData
+        );
 
-      if (editingTripId) {
+      if (
+        editingTripId
+      ) {
         await updateTrip(
           idToken,
+
           editingTripId,
+
           payload
         );
 
@@ -329,7 +690,11 @@ export function TripsPage({
           "Trip updated successfully."
         );
       } else {
-        await createTrip(idToken, payload);
+        await createTrip(
+          idToken,
+
+          payload
+        );
 
         setSuccessMessage(
           "Trip created successfully."
@@ -338,68 +703,121 @@ export function TripsPage({
 
       await loadTrips();
 
-      setFormData(createEmptyForm());
-      setEditingTripId(null);
-      setShowForm(false);
-    } catch (error) {
+      setFormData(
+        createEmptyForm()
+      );
+
+      setEditingTripId(
+        null
+      );
+
+      setShowForm(
+        false
+      );
+    } catch (
+      error
+    ) {
       setErrorMessage(
         error instanceof Error
           ? error.message
           : "Unable to save trip."
       );
     } finally {
-      setIsSaving(false);
+      setIsSaving(
+        false
+      );
     }
   }
 
   function handleOpenSendDialog(
-    trip: Trip
+    trip:
+      Trip
   ): void {
-    setTripPendingEmail(trip);
-    setErrorMessage("");
-    setSuccessMessage("");
-  }
-
-  function handleCloseSendDialog(): void {
-    if (isSendingTripId) {
+    if (
+      !canManageTrips
+    ) {
       return;
     }
 
-    setTripPendingEmail(null);
+    setTripPendingEmail(
+      trip
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    setSuccessMessage(
+      ""
+    );
   }
 
-  async function handleConfirmSend(): Promise<void> {
-    if (!tripPendingEmail) {
+  function handleCloseSendDialog():
+    void {
+    if (
+      isSendingTripId
+    ) {
       return;
     }
 
-    const trip = tripPendingEmail;
+    setTripPendingEmail(
+      null
+    );
+  }
 
-    setIsSendingTripId(trip.id);
-    setErrorMessage("");
-    setSuccessMessage("");
+  async function handleConfirmSend():
+    Promise<void> {
+    if (
+      !tripPendingEmail ||
+      !canManageTrips
+    ) {
+      return;
+    }
+
+    const trip =
+      tripPendingEmail;
+
+    setIsSendingTripId(
+      trip.id
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    setSuccessMessage(
+      ""
+    );
 
     try {
-      const response = await sendTripToTraveler(
-        idToken,
-        trip.id
-      );
+      const response =
+        await sendTripToTraveler(
+          idToken,
+
+          trip.id
+        );
 
       setSuccessMessage(
         `Trip selection link sent to ${response.sentTo}.`
       );
 
-      setTripPendingEmail(null);
+      setTripPendingEmail(
+        null
+      );
 
       await loadTrips();
-    } catch (error) {
+    } catch (
+      error
+    ) {
       setErrorMessage(
         error instanceof Error
           ? error.message
           : "Unable to send the trip selection email."
       );
     } finally {
-      setIsSendingTripId(null);
+      setIsSendingTripId(
+        null
+      );
     }
   }
 
@@ -408,84 +826,145 @@ export function TripsPage({
       <section className="trips-content">
         <div className="trips-header">
           <div>
-            <h1>Trips</h1>
+            <h1>
+              {isIpcm
+                ? "My Trips"
+                : "Trips"}
+            </h1>
 
             <p>
-              Create and manage travel requests.
+              {isIpcm
+                ? "View travel requests assigned to you."
+                : "Create and manage travel requests."}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleNewTrip}
-            disabled={isSaving}
-          >
-            + New Trip
-          </button>
+          {canManageTrips && (
+            <button
+              type="button"
+              onClick={
+                handleNewTrip
+              }
+              disabled={
+                isSaving
+              }
+            >
+              + New Trip
+            </button>
+          )}
         </div>
 
         {successMessage && (
           <p className="trips-success">
-            {successMessage}
+            {
+              successMessage
+            }
           </p>
         )}
 
         {errorMessage && (
           <p className="trips-error">
-            {errorMessage}
+            {
+              errorMessage
+            }
           </p>
         )}
 
-        {showForm && (
-          <TripForm
-            formData={formData}
-            cases={cases}
-            travelerProfiles={travelerProfiles}
-            isEditing={editingTripId !== null}
-            isSaving={isSaving}
-            onFieldChange={handleFieldChange}
-            onSubmit={handleSubmit}
-            onCancel={handleCancelForm}
-          />
-        )}
+        {canManageTrips &&
+          showForm && (
+            <TripForm
+              formData={
+                formData
+              }
+              cases={
+                cases
+              }
+              travelerProfiles={
+                travelerProfiles
+              }
+              isEditing={
+                editingTripId !==
+                null
+              }
+              isSaving={
+                isSaving
+              }
+              onFieldChange={
+                handleFieldChange
+              }
+              onSubmit={
+                handleSubmit
+              }
+              onCancel={
+                handleCancelForm
+              }
+            />
+          )}
 
         {isPageLoading ? (
           <p className="trips-loading">
-            Loading trips...
+            {isIpcm
+              ? "Loading your trips..."
+              : "Loading trips..."}
           </p>
         ) : (
           <TripsTable
-            trips={trips}
-            isSendingTripId={isSendingTripId}
-            onEdit={handleEdit}
-            onSendToTraveler={handleOpenSendDialog}
+            trips={
+              trips
+            }
+            canManage={
+              canManageTrips
+            }
+            isSendingTripId={
+              isSendingTripId
+            }
+            onEdit={
+              handleEdit
+            }
+            onSendToTraveler={
+              handleOpenSendDialog
+            }
           />
         )}
       </section>
 
-      <ConfirmDialog
-        isOpen={tripPendingEmail !== null}
-        title="Send trip to Traveler?"
-        message={
-          tripPendingEmail
-            ? [
-                `A secure trip-selection link will be sent to ${tripPendingEmail.travelerName}.`,
-                "",
-                tripPendingEmail.travelerEmail,
-                "",
-                "Any previously active link for this trip will be revoked."
-              ].join("\n")
-            : ""
-        }
-        confirmLabel="Send Email"
-        isConfirming={
-          isSendingTripId !== null
-        }
-        onConfirm={() => {
-          void handleConfirmSend();
-        }}
-        onCancel={handleCloseSendDialog}
-      />
+      {canManageTrips && (
+        <ConfirmDialog
+          isOpen={
+            tripPendingEmail !==
+            null
+          }
+          title="Send trip to Traveler?"
+          message={
+            tripPendingEmail
+              ? [
+                  `A secure trip-selection link will be sent to ${tripPendingEmail.travelerName}.`,
+
+                  "",
+
+                  tripPendingEmail.travelerEmail,
+
+                  "",
+
+                  "Any previously active link for this trip will be revoked."
+                ].join(
+                  "\n"
+                )
+              : ""
+          }
+          confirmLabel="Send Email"
+          isConfirming={
+            isSendingTripId !==
+            null
+          }
+          onConfirm={() => {
+            void handleConfirmSend();
+          }}
+          onCancel={
+            handleCloseSendDialog
+          }
+        />
+      )}
     </main>
   );
 }

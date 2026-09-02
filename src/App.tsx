@@ -31,6 +31,14 @@ import {
 } from "./pages/ipcms";
 
 import {
+  ProfilePage
+} from "./pages/profile";
+
+import {
+  IpcmOnboardingPage
+} from "./pages/ipcmOnboarding";
+
+import {
   Navbar
 } from "./components/Navbar";
 
@@ -49,6 +57,7 @@ type Page =
   | "travelerProfiles"
   | "trips"
   | "ipcms"
+  | "profile"
   | "payments";
 
 function getBookingToken():
@@ -59,7 +68,32 @@ function getBookingToken():
       /^\/booking\/([^/]+)\/?$/
     );
 
-  if (!match?.[1]) {
+  if (
+    !match?.[1]
+  ) {
+    return null;
+  }
+
+  try {
+    return decodeURIComponent(
+      match[1]
+    );
+  } catch {
+    return null;
+  }
+}
+
+function getIpcmInvitationToken():
+  | string
+  | null {
+  const match =
+    window.location.pathname.match(
+      /^\/ipcm\/invite\/([^/]+)\/?$/
+    );
+
+  if (
+    !match?.[1]
+  ) {
     return null;
   }
 
@@ -75,6 +109,9 @@ function getBookingToken():
 export default function App() {
   const bookingToken =
     getBookingToken();
+
+  const ipcmInvitationToken =
+    getIpcmInvitationToken();
 
   const [
     idToken,
@@ -112,8 +149,12 @@ export default function App() {
 
   function handleLoginSuccess(
     token: string,
-    userData: UserResponse,
-    caseData: CaseResponse[]
+
+    userData:
+      UserResponse,
+
+    caseData:
+      CaseResponse[]
   ) {
     setIdToken(
       token
@@ -129,6 +170,15 @@ export default function App() {
 
     setActivePage(
       "cases"
+    );
+  }
+
+  function handleUserUpdated(
+    updatedUser:
+      UserResponse
+  ) {
+    setUser(
+      updatedUser
     );
   }
 
@@ -157,6 +207,18 @@ export default function App() {
       <BookingLinkPage
         token={
           bookingToken
+        }
+      />
+    );
+  }
+
+  if (
+    ipcmInvitationToken
+  ) {
+    return (
+      <IpcmOnboardingPage
+        token={
+          ipcmInvitationToken
         }
       />
     );
@@ -198,6 +260,9 @@ export default function App() {
           cases={
             cases
           }
+          user={
+            user
+          }
         />
       )}
 
@@ -206,6 +271,9 @@ export default function App() {
         <TripsPage
           idToken={
             idToken
+          }
+          user={
+            user
           }
         />
       )}
@@ -227,6 +295,21 @@ export default function App() {
           }
           user={
             user
+          }
+        />
+      )}
+
+      {activePage ===
+        "profile" && (
+        <ProfilePage
+          idToken={
+            idToken
+          }
+          user={
+            user
+          }
+          onUserUpdated={
+            handleUserUpdated
           }
         />
       )}

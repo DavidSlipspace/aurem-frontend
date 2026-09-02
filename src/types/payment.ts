@@ -11,7 +11,8 @@ export type PaymentMethodStatus =
 export type IpcmPaymentMethod = {
   id: string;
 
-  type: PaymentMethodType;
+  type:
+    PaymentMethodType;
 
   provider: string;
 
@@ -35,9 +36,11 @@ export type IpcmPaymentMethod = {
     | string
     | null;
 
-  status: PaymentMethodStatus;
+  status:
+    PaymentMethodStatus;
 
-  isDefault: boolean;
+  isDefault:
+    boolean;
 };
 
 export type IpcmPaymentProfile = {
@@ -60,8 +63,28 @@ export type IpcmPaymentProfile = {
 
 export type PaymentMethodsResponse = {
   mode:
-    | "admin"
-    | "self";
+    "self";
 
-  ipcms: IpcmPaymentProfile[];
+  ipcms:
+    IpcmPaymentProfile[];
+};
+
+export type PaymentMethodIntakeRequest = {
+  type:
+    PaymentMethodType;
+
+  displayName?:
+    string;
+
+  cardBrand?:
+    string;
+
+  lastFour?:
+    string;
+
+  bankName?:
+    string;
+
+  bankAccountType?:
+    string;
 };

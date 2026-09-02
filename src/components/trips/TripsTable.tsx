@@ -3,7 +3,11 @@ import type {
 } from "../../types/trip";
 
 type TripsTableProps = {
-  trips: Trip[];
+  trips:
+    Trip[];
+
+  canManage:
+    boolean;
 
   isSendingTripId:
     | string
@@ -11,18 +15,22 @@ type TripsTableProps = {
 
   onEdit:
     (
-      trip: Trip
+      trip:
+        Trip
     ) => void;
 
   onSendToTraveler:
     (
-      trip: Trip
+      trip:
+        Trip
     ) => void;
 };
 
 function formatCurrencyCents(
   amount: number,
-  currency = "USD"
+
+  currency =
+    "USD"
 ): string {
   return new Intl.NumberFormat(
     "en-US",
@@ -33,12 +41,14 @@ function formatCurrencyCents(
       currency
     }
   ).format(
-    amount / 100
+    amount /
+      100
   );
 }
 
 function canSendTrip(
-  trip: Trip
+  trip:
+    Trip
 ): boolean {
   return Boolean(
     trip.travelerProfileId &&
@@ -48,7 +58,8 @@ function canSendTrip(
     trip.returnDate &&
     trip.outboundAirport &&
     trip.returnAirport &&
-    trip.budgetFilter > 0 &&
+    trip.budgetFilter >
+      0 &&
     (
       trip.destinationCity ||
       trip.destinationAddress
@@ -57,7 +68,8 @@ function canSendTrip(
 }
 
 function hasBeenSent(
-  trip: Trip
+  trip:
+    Trip
 ): boolean {
   return [
     "Link Sent",
@@ -76,12 +88,16 @@ function formatDateTime(
     | string
     | null
 ): string | null {
-  if (!value) {
+  if (
+    !value
+  ) {
     return null;
   }
 
   const date =
-    new Date(value);
+    new Date(
+      value
+    );
 
   if (
     Number.isNaN(
@@ -94,20 +110,35 @@ function formatDateTime(
   return new Intl.DateTimeFormat(
     "en-US",
     {
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit"
+      month:
+        "short",
+
+      day:
+        "numeric",
+
+      hour:
+        "numeric",
+
+      minute:
+        "2-digit"
     }
-  ).format(date);
+  ).format(
+    date
+  );
 }
 
 export function TripsTable({
   trips,
+  canManage,
   isSendingTripId,
   onEdit,
   onSendToTraveler
 }: TripsTableProps) {
+  const columnCount =
+    canManage
+      ? 14
+      : 12;
+
   return (
     <div className="trips-table-card">
       <table>
@@ -124,6 +155,12 @@ export function TripsTable({
             <th>
               Traveler
             </th>
+
+            {canManage && (
+              <th>
+                IPCM
+              </th>
+            )}
 
             <th>
               Purpose
@@ -161,16 +198,21 @@ export function TripsTable({
               Status
             </th>
 
-            <th>
-              Actions
-            </th>
+            {canManage && (
+              <th>
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
 
         <tbody>
-          {trips.length > 0 ? (
+          {trips.length >
+          0 ? (
             trips.map(
-              (trip) => {
+              (
+                trip
+              ) => {
                 const isReady =
                   canSendTrip(
                     trip
@@ -186,26 +228,26 @@ export function TripsTable({
                   trip.id;
 
                 const flight =
-                  trip
-                    .selectedFlight;
+                  trip.selectedFlight;
 
                 const hotel =
-                  trip
-                    .selectedHotel;
+                  trip.selectedHotel;
 
                 return (
-                  <tr key={trip.id}>
+                  <tr
+                    key={
+                      trip.id
+                    }
+                  >
                     <td>
                       {
-                        trip
-                          .tripReferenceId
+                        trip.tripReferenceId
                       }
                     </td>
 
                     <td>
                       {
-                        trip
-                          .caseReferenceId
+                        trip.caseReferenceId
                       }
                     </td>
 
@@ -224,38 +266,45 @@ export function TripsTable({
                       </div>
                     </td>
 
+                    {canManage && (
+                      <td>
+                        {
+                          trip.ipcmName
+                        }
+                      </td>
+                    )}
+
                     <td>
                       {
-                        trip
-                          .tripPurpose
+                        trip.tripPurpose
                       }
                     </td>
 
                     <td>
-                      {trip.outboundDate?.substring(
-                        0,
-                        10
-                      )}
+                      {trip.outboundDate
+                        ?.substring(
+                          0,
+                          10
+                        )}
 
                       {" → "}
 
-                      {trip.returnDate?.substring(
-                        0,
-                        10
-                      )}
+                      {trip.returnDate
+                        ?.substring(
+                          0,
+                          10
+                        )}
                     </td>
 
                     <td>
                       {
-                        trip
-                          .outboundAirport
+                        trip.outboundAirport
                       }
 
                       {" → "}
 
                       {
-                        trip
-                          .returnAirport
+                        trip.returnAirport
                       }
                     </td>
 
@@ -267,8 +316,7 @@ export function TripsTable({
 
                     <td>
                       {formatCurrencyCents(
-                        trip
-                          .budgetFilter
+                        trip.budgetFilter
                       )}
                     </td>
 
@@ -287,7 +335,9 @@ export function TripsTable({
                           <span>
                             {flight.originAirport ||
                               "—"}
+
                             {" → "}
+
                             {flight.destinationAirport ||
                               "—"}
                           </span>
@@ -295,8 +345,7 @@ export function TripsTable({
                           {flight.outboundDepartureAt && (
                             <span>
                               {formatDateTime(
-                                flight
-                                  .outboundDepartureAt
+                                flight.outboundDepartureAt
                               )}
                             </span>
                           )}
@@ -304,6 +353,7 @@ export function TripsTable({
                           <span className="trip-selection-price">
                             {formatCurrencyCents(
                               flight.price,
+
                               flight.currency
                             )}
                           </span>
@@ -347,6 +397,7 @@ export function TripsTable({
                           <span className="trip-selection-price">
                             {formatCurrencyCents(
                               hotel.price,
+
                               hotel.currency
                             )}
                           </span>
@@ -380,48 +431,50 @@ export function TripsTable({
                       </span>
                     </td>
 
-                    <td>
-                      <div className="trip-row-actions">
-                        <button
-                          type="button"
-                          className="trip-edit-button"
-                          onClick={() =>
-                            onEdit(
-                              trip
-                            )
-                          }
-                        >
-                          Edit
-                        </button>
+                    {canManage && (
+                      <td>
+                        <div className="trip-row-actions">
+                          <button
+                            type="button"
+                            className="trip-edit-button"
+                            onClick={() =>
+                              onEdit(
+                                trip
+                              )
+                            }
+                          >
+                            Edit
+                          </button>
 
-                        <button
-                          type="button"
-                          className="trip-send-button"
-                          onClick={() =>
-                            onSendToTraveler(
-                              trip
-                            )
-                          }
-                          disabled={
-                            !isReady ||
-                            isSending
-                          }
-                          title={
-                            isReady
-                              ? wasSent
-                                ? "Send a new secure trip link"
-                                : "Send a secure trip link"
-                              : "Complete the trip and ensure the Traveler has an email address"
-                          }
-                        >
-                          {isSending
-                            ? "Sending..."
-                            : wasSent
-                              ? "Resend Link"
-                              : "Send to Traveler"}
-                        </button>
-                      </div>
-                    </td>
+                          <button
+                            type="button"
+                            className="trip-send-button"
+                            onClick={() =>
+                              onSendToTraveler(
+                                trip
+                              )
+                            }
+                            disabled={
+                              !isReady ||
+                              isSending
+                            }
+                            title={
+                              isReady
+                                ? wasSent
+                                  ? "Send a new secure trip link"
+                                  : "Send a secure trip link"
+                                : "Complete the trip and ensure the Traveler has an email address"
+                            }
+                          >
+                            {isSending
+                              ? "Sending..."
+                              : wasSent
+                                ? "Resend Link"
+                                : "Send to Traveler"}
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               }
@@ -430,7 +483,9 @@ export function TripsTable({
             <tr>
               <td
                 className="empty-state"
-                colSpan={13}
+                colSpan={
+                  columnCount
+                }
               >
                 No trips found.
               </td>

@@ -9,6 +9,7 @@ type Page =
   | "travelerProfiles"
   | "trips"
   | "ipcms"
+  | "profile"
   | "payments";
 
 type NavbarProps = {
@@ -33,23 +34,21 @@ export function Navbar({
   onPageChange,
   onLogout
 }: NavbarProps) {
-  const canManageTravelerProfiles =
+  const isAdmin =
     user.role ===
-      "Admin" ||
-    user.role ===
-      "Case Manager";
+    "Admin";
 
-  const canViewIpcmProfiles =
+  const isCaseManager =
     user.role ===
-      "Admin" ||
-    user.role ===
-      "IPCM";
+    "Case Manager";
 
-  const canViewPayments =
+  const isIpcm =
     user.role ===
-      "Admin" ||
-    user.role ===
-      "IPCM";
+    "IPCM";
+
+  const canManageTravel =
+    isAdmin ||
+    isCaseManager;
 
   return (
     <nav
@@ -75,7 +74,9 @@ export function Navbar({
             )
           }
         >
-          Cases
+          {isIpcm
+            ? "My Cases"
+            : "Cases"}
         </button>
 
         <button
@@ -92,10 +93,12 @@ export function Navbar({
             )
           }
         >
-          Trips
+          {isIpcm
+            ? "My Trips"
+            : "Trips"}
         </button>
 
-        {canManageTravelerProfiles && (
+        {canManageTravel && (
           <button
             type="button"
             className={
@@ -114,7 +117,7 @@ export function Navbar({
           </button>
         )}
 
-        {canViewIpcmProfiles && (
+        {isAdmin && (
           <button
             type="button"
             className={
@@ -133,23 +136,42 @@ export function Navbar({
           </button>
         )}
 
-        {canViewPayments && (
-          <button
-            type="button"
-            className={
-              activePage ===
-              "payments"
-                ? "nav-link active"
-                : "nav-link"
-            }
-            onClick={() =>
-              onPageChange(
+        {isIpcm && (
+          <>
+            <button
+              type="button"
+              className={
+                activePage ===
+                "profile"
+                  ? "nav-link active"
+                  : "nav-link"
+              }
+              onClick={() =>
+                onPageChange(
+                  "profile"
+                )
+              }
+            >
+              My Profile
+            </button>
+
+            <button
+              type="button"
+              className={
+                activePage ===
                 "payments"
-              )
-            }
-          >
-            Payments
-          </button>
+                  ? "nav-link active"
+                  : "nav-link"
+              }
+              onClick={() =>
+                onPageChange(
+                  "payments"
+                )
+              }
+            >
+              Payments
+            </button>
+          </>
         )}
       </div>
 

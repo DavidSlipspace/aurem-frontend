@@ -77,29 +77,45 @@ export type SelectedTripHotel = {
 export type Trip = {
   id: string;
 
-  tripReferenceId: string;
+  tripReferenceId:
+    string;
 
   caseId: string;
 
-  caseReferenceId: string;
+  caseReferenceId:
+    string;
 
-  travelerProfileId: string;
+  travelerProfileId:
+    string;
 
-  travelerName: string;
+  travelerName:
+    string;
 
-  travelerEmail: string;
+  travelerEmail:
+    string;
 
-  tripPurpose: string;
+  ipcmUserId:
+    string;
+
+  ipcmName:
+    string;
+
+  tripPurpose:
+    string;
 
   status: string;
 
-  outboundDate: string;
+  outboundDate:
+    string;
 
-  returnDate: string;
+  returnDate:
+    string;
 
-  outboundAirport: string;
+  outboundAirport:
+    string;
 
-  returnAirport: string;
+  returnAirport:
+    string;
 
   destinationCity?:
     | string
@@ -117,11 +133,14 @@ export type Trip = {
     | number
     | null;
 
-  budgetFilter: number;
+  budgetFilter:
+    number;
 
-  companionTraveler: boolean;
+  companionTraveler:
+    boolean;
 
-  ipcmApprovalRequired: boolean;
+  ipcmApprovalRequired:
+    boolean;
 
   bookingLinkExpiresAt?:
     | string
@@ -137,39 +156,54 @@ export type Trip = {
 };
 
 export type TripsResponse = {
-  trips: Trip[];
+  trips:
+    Trip[];
 };
 
 export type TripRequest = {
   caseId: string;
 
-  travelerProfileId: string;
+  travelerProfileId:
+    string;
 
-  tripPurpose: string;
+  tripPurpose:
+    string;
 
-  outboundDate: string;
+  outboundDate:
+    string;
 
-  returnDate: string;
+  returnDate:
+    string;
 
-  outboundAirport: string;
+  outboundAirport:
+    string;
 
-  returnAirport: string;
+  returnAirport:
+    string;
 
-  destinationCity?: string;
+  destinationCity?:
+    string;
 
-  destinationAddress?: string;
+  destinationAddress?:
+    string;
 
-  hotelProximityPreference?: string;
+  hotelProximityPreference?:
+    string;
 
-  minimumHotelStarRating?: number;
+  minimumHotelStarRating?:
+    number;
 
-  budgetFilter: number;
+  budgetFilter:
+    number;
 
-  companionTraveler: boolean;
+  companionTraveler:
+    boolean;
 
-  ipcmApprovalRequired: boolean;
+  ipcmApprovalRequired:
+    boolean;
 
-  status?: string;
+  status?:
+    string;
 };
 
 export type SendTripToTravelerResponse = {
