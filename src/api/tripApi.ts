@@ -1,5 +1,5 @@
 import type {
-  SendTripToGcResponse,
+  SendTripToTravelerResponse,
   TripRequest,
   TripsResponse
 } from "../types/trip";
@@ -105,10 +105,10 @@ export async function updateTrip(
   }
 }
 
-export async function sendTripToGc(
+export async function sendTripToTraveler(
   idToken: string,
   tripId: string
-): Promise<SendTripToGcResponse> {
+): Promise<SendTripToTravelerResponse> {
   const response = await fetch(
     `${baseUrl}/trips/${tripId}/booking-link`,
     {
@@ -131,5 +131,5 @@ export async function sendTripToGc(
     );
   }
 
-  return data as SendTripToGcResponse;
+  return data as SendTripToTravelerResponse;
 }

@@ -1,11 +1,11 @@
 import type { FormEvent } from "react";
 
 import type { CaseResponse } from "../../types/case";
-import type { GcProfile } from "../../types/gcProfile";
+import type { TravelerProfile } from "../../types/travelerProfile";
 
 export type TripFormState = {
   caseId: string;
-  gcProfileId: string;
+  travelerProfileId: string;
   tripPurpose: string;
 
   outboundDate: string;
@@ -28,7 +28,7 @@ export type TripFormState = {
 type TripFormProps = {
   formData: TripFormState;
   cases: CaseResponse[];
-  gcProfiles: GcProfile[];
+  travelerProfiles: TravelerProfile[];
   isEditing: boolean;
   isSaving: boolean;
 
@@ -49,7 +49,7 @@ type TripFormProps = {
 export function TripForm({
   formData,
   cases,
-  gcProfiles,
+  travelerProfiles,
   isEditing,
   isSaving,
   onFieldChange,
@@ -92,20 +92,20 @@ export function TripForm({
         </label>
 
         <label>
-          GC Profile *
+          Traveler Profile *
           <select
-            value={formData.gcProfileId}
+            value={formData.travelerProfileId}
             onChange={(event) =>
               onFieldChange(
-                "gcProfileId",
+                "travelerProfileId",
                 event.target.value
               )
             }
             required
           >
-            <option value="">Select a GC</option>
+            <option value="">Select a Traveler</option>
 
-            {gcProfiles.map((profile) => (
+            {travelerProfiles.map((profile) => (
               <option
                 key={profile.id}
                 value={profile.id}

@@ -6,7 +6,7 @@ import "./Navbar.css";
 
 type Page =
   | "cases"
-  | "gcProfiles"
+  | "travelerProfiles"
   | "trips"
   | "ipcms"
   | "payments";
@@ -33,7 +33,7 @@ export function Navbar({
   onPageChange,
   onLogout
 }: NavbarProps) {
-  const canManageGcProfiles =
+  const canManageTravelerProfiles =
     user.role ===
       "Admin" ||
     user.role ===
@@ -95,22 +95,22 @@ export function Navbar({
           Trips
         </button>
 
-        {canManageGcProfiles && (
+        {canManageTravelerProfiles && (
           <button
             type="button"
             className={
               activePage ===
-              "gcProfiles"
+              "travelerProfiles"
                 ? "nav-link active"
                 : "nav-link"
             }
             onClick={() =>
               onPageChange(
-                "gcProfiles"
+                "travelerProfiles"
               )
             }
           >
-            GC Profiles
+            Traveler Profiles
           </button>
         )}
 

@@ -83,11 +83,11 @@ export type Trip = {
 
   caseReferenceId: string;
 
-  gcProfileId: string;
+  travelerProfileId: string;
 
-  gcName: string;
+  travelerName: string;
 
-  gcEmail: string;
+  travelerEmail: string;
 
   tripPurpose: string;
 
@@ -143,7 +143,7 @@ export type TripsResponse = {
 export type TripRequest = {
   caseId: string;
 
-  gcProfileId: string;
+  travelerProfileId: string;
 
   tripPurpose: string;
 
@@ -172,7 +172,7 @@ export type TripRequest = {
   status?: string;
 };
 
-export type SendTripToGcResponse = {
+export type SendTripToTravelerResponse = {
   message: string;
 
   tripId: string;

@@ -8,12 +8,12 @@ import {
 import {
   createTrip,
   getTrips,
-  sendTripToGc,
+  sendTripToTraveler,
   updateTrip
 } from "../api/tripApi";
 
 import { getCases } from "../api/caseApi";
-import { getGcProfiles } from "../api/gcProfileApi";
+import { getTravelerProfiles } from "../api/travelerProfileApi";
 
 import { ConfirmDialog } from "../components/common/ConfirmDialog";
 
@@ -25,7 +25,7 @@ import {
 import { TripsTable } from "../components/trips/TripsTable";
 
 import type { CaseResponse } from "../types/case";
-import type { GcProfile } from "../types/gcProfile";
+import type { TravelerProfile } from "../types/travelerProfile";
 
 import type {
   Trip,
@@ -43,7 +43,7 @@ type TripsPageProps = {
 function createEmptyForm(): TripFormState {
   return {
     caseId: "",
-    gcProfileId: "",
+    travelerProfileId: "",
     tripPurpose: "",
 
     outboundDate: "",
@@ -69,7 +69,7 @@ function createFormFromTrip(
 ): TripFormState {
   return {
     caseId: trip.caseId,
-    gcProfileId: trip.gcProfileId,
+    travelerProfileId: trip.travelerProfileId,
     tripPurpose: trip.tripPurpose,
 
     outboundDate:
@@ -141,7 +141,7 @@ function buildRequestPayload(
 
   return {
     caseId: formData.caseId,
-    gcProfileId: formData.gcProfileId,
+    travelerProfileId: formData.travelerProfileId,
 
     tripPurpose: formData.tripPurpose.trim(),
 
@@ -194,8 +194,8 @@ export function TripsPage({
     []
   );
 
-  const [gcProfiles, setGcProfiles] = useState<
-    GcProfile[]
+  const [travelerProfiles, setTravelerProfiles] = useState<
+    TravelerProfile[]
   >([]);
 
   const [formData, setFormData] =
@@ -235,18 +235,18 @@ export function TripsPage({
       const [
         tripsResponse,
         casesResponse,
-        gcProfilesResponse
+        travelerProfilesResponse
       ] = await Promise.all([
         getTrips(idToken),
         getCases(idToken),
-        getGcProfiles(idToken)
+        getTravelerProfiles(idToken)
       ]);
 
       setTrips(tripsResponse.trips);
       setCases(casesResponse.cases);
 
-      setGcProfiles(
-        gcProfilesResponse.gcProfiles.filter(
+      setTravelerProfiles(
+        travelerProfilesResponse.travelerProfiles.filter(
           (profile) =>
             profile.status.toLowerCase() === "active"
         )
@@ -380,7 +380,7 @@ export function TripsPage({
     setSuccessMessage("");
 
     try {
-      const response = await sendTripToGc(
+      const response = await sendTripToTraveler(
         idToken,
         trip.id
       );
@@ -440,7 +440,7 @@ export function TripsPage({
           <TripForm
             formData={formData}
             cases={cases}
-            gcProfiles={gcProfiles}
+            travelerProfiles={travelerProfiles}
             isEditing={editingTripId !== null}
             isSaving={isSaving}
             onFieldChange={handleFieldChange}
@@ -458,20 +458,20 @@ export function TripsPage({
             trips={trips}
             isSendingTripId={isSendingTripId}
             onEdit={handleEdit}
-            onSendToGc={handleOpenSendDialog}
+            onSendToTraveler={handleOpenSendDialog}
           />
         )}
       </section>
 
       <ConfirmDialog
         isOpen={tripPendingEmail !== null}
-        title="Send trip to GC?"
+        title="Send trip to Traveler?"
         message={
           tripPendingEmail
             ? [
-                `A secure trip-selection link will be sent to ${tripPendingEmail.gcName}.`,
+                `A secure trip-selection link will be sent to ${tripPendingEmail.travelerName}.`,
                 "",
-                tripPendingEmail.gcEmail,
+                tripPendingEmail.travelerEmail,
                 "",
                 "Any previously active link for this trip will be revoked."
               ].join("\n")

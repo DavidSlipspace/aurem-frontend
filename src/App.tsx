@@ -11,8 +11,8 @@ import {
 } from "./pages/home";
 
 import {
-  GcProfilesPage
-} from "./pages/gcProfile";
+  TravelerProfilesPage
+} from "./pages/travelerProfile";
 
 import {
   TripsPage
@@ -46,7 +46,7 @@ import "./App.css";
 
 type Page =
   | "cases"
-  | "gcProfiles"
+  | "travelerProfiles"
   | "trips"
   | "ipcms"
   | "payments";
@@ -211,8 +211,8 @@ export default function App() {
       )}
 
       {activePage ===
-        "gcProfiles" && (
-        <GcProfilesPage
+        "travelerProfiles" && (
+        <TravelerProfilesPage
           idToken={
             idToken
           }

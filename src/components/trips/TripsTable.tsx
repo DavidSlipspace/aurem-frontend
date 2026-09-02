@@ -14,7 +14,7 @@ type TripsTableProps = {
       trip: Trip
     ) => void;
 
-  onSendToGc:
+  onSendToTraveler:
     (
       trip: Trip
     ) => void;
@@ -41,8 +41,8 @@ function canSendTrip(
   trip: Trip
 ): boolean {
   return Boolean(
-    trip.gcProfileId &&
-    trip.gcEmail &&
+    trip.travelerProfileId &&
+    trip.travelerEmail &&
     trip.tripPurpose &&
     trip.outboundDate &&
     trip.returnDate &&
@@ -61,7 +61,7 @@ function hasBeenSent(
 ): boolean {
   return [
     "Link Sent",
-    "Awaiting GC Selection",
+    "Awaiting Traveler Selection",
     "Awaiting IPCM Approval",
     "Changes Requested",
     "Booking In Progress",
@@ -106,7 +106,7 @@ export function TripsTable({
   trips,
   isSendingTripId,
   onEdit,
-  onSendToGc
+  onSendToTraveler
 }: TripsTableProps) {
   return (
     <div className="trips-table-card">
@@ -122,7 +122,7 @@ export function TripsTable({
             </th>
 
             <th>
-              GC
+              Traveler
             </th>
 
             <th>
@@ -210,15 +210,15 @@ export function TripsTable({
                     </td>
 
                     <td>
-                      <div className="trip-gc-cell">
+                      <div className="trip-traveler-cell">
                         <strong>
                           {
-                            trip.gcName
+                            trip.travelerName
                           }
                         </strong>
 
                         <span>
-                          {trip.gcEmail ||
+                          {trip.travelerEmail ||
                             "No email"}
                         </span>
                       </div>
@@ -398,7 +398,7 @@ export function TripsTable({
                           type="button"
                           className="trip-send-button"
                           onClick={() =>
-                            onSendToGc(
+                            onSendToTraveler(
                               trip
                             )
                           }
@@ -411,14 +411,14 @@ export function TripsTable({
                               ? wasSent
                                 ? "Send a new secure trip link"
                                 : "Send a secure trip link"
-                              : "Complete the trip and ensure the GC has an email address"
+                              : "Complete the trip and ensure the Traveler has an email address"
                           }
                         >
                           {isSending
                             ? "Sending..."
                             : wasSent
                               ? "Resend Link"
-                              : "Send to GC"}
+                              : "Send to Traveler"}
                         </button>
                       </div>
                     </td>

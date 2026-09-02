@@ -169,13 +169,13 @@
   background: var(--color-table-row-hover);
 }
 
-.trip-gc-cell {
+.trip-traveler-cell {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.trip-gc-cell span {
+.trip-traveler-cell span {
   color: var(--color-text-secondary);
   font-size: 12px;
 }

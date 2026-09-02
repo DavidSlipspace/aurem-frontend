@@ -5,32 +5,32 @@ import {
 } from "react";
 
 import {
-  createGcProfile,
-  getGcProfiles,
-  updateGcProfile
-} from "../api/gcProfileApi";
+  createTravelerProfile,
+  getTravelerProfiles,
+  updateTravelerProfile
+} from "../api/travelerProfileApi";
 
 import type {
-  GcProfile,
-  GcProfileRequest
-} from "../types/gcProfile";
+  TravelerProfile,
+  TravelerProfileRequest
+} from "../types/travelerProfile";
 
 import { SeatPreference } from "../types/seatPreference";
 
-import "./gcProfile.css";
+import "./travelerProfile.css";
 
-type GcProfilesPageProps = {
+type TravelerProfilesPageProps = {
   idToken: string;
 };
 
-type GcProfileFormState = Omit<
-  GcProfileRequest,
+type TravelerProfileFormState = Omit<
+  TravelerProfileRequest,
   "seatPreference"
 > & {
   seatPreference: SeatPreference | "";
 };
 
-const emptyForm: GcProfileFormState = {
+const emptyForm: TravelerProfileFormState = {
   legalFirstName: "",
   legalMiddleName: "",
   legalLastName: "",
@@ -45,14 +45,14 @@ const emptyForm: GcProfileFormState = {
   seatPreference: ""
 };
 
-export function GcProfilesPage({
+export function TravelerProfilesPage({
   idToken
-}: GcProfilesPageProps) {
+}: TravelerProfilesPageProps) {
   const [profiles, setProfiles] =
-    useState<GcProfile[]>([]);
+    useState<TravelerProfile[]>([]);
 
   const [formData, setFormData] =
-    useState<GcProfileFormState>(emptyForm);
+    useState<TravelerProfileFormState>(emptyForm);
 
   const [editingProfileId, setEditingProfileId] =
     useState<string | null>(null);
@@ -72,20 +72,20 @@ export function GcProfilesPage({
     try {
       setErrorMessage("");
 
-      const response = await getGcProfiles(idToken);
+      const response = await getTravelerProfiles(idToken);
 
-      setProfiles(response.gcProfiles);
+      setProfiles(response.travelerProfiles);
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Unable to load GC profiles."
+          : "Unable to load Traveler profiles."
       );
     }
   }
 
   function handleChange(
-    field: keyof GcProfileFormState,
+    field: keyof TravelerProfileFormState,
     value: string
   ) {
     setFormData((current) => ({
@@ -139,7 +139,7 @@ export function GcProfilesPage({
     setSuccessMessage("");
   }
 
-  function handleEdit(profile: GcProfile) {
+  function handleEdit(profile: TravelerProfile) {
     setFormData({
       legalFirstName: profile.legalFirstName,
       legalMiddleName:
@@ -178,7 +178,7 @@ export function GcProfilesPage({
 
   function buildRequestPayload(
     status?: string
-  ): GcProfileRequest {
+  ): TravelerProfileRequest {
     const normalizedEmail = normalizeEmail(
       formData.email
     );
@@ -230,7 +230,7 @@ export function GcProfilesPage({
   }
 
   async function handleStatusChange(
-    profile: GcProfile,
+    profile: TravelerProfile,
     newStatus: "active" | "inactive"
   ) {
     const action =
@@ -253,7 +253,7 @@ export function GcProfilesPage({
     setSuccessMessage("");
 
     try {
-      const payload: GcProfileRequest = {
+      const payload: TravelerProfileRequest = {
         legalFirstName:
           profile.legalFirstName.trim(),
         legalMiddleName:
@@ -285,14 +285,14 @@ export function GcProfilesPage({
         status: newStatus
       };
 
-      await updateGcProfile(
+      await updateTravelerProfile(
         idToken,
         profile.id,
         payload
       );
 
       setSuccessMessage(
-        `GC profile ${
+        `Traveler profile ${
           newStatus === "active"
             ? "activated"
             : "deactivated"
@@ -304,7 +304,7 @@ export function GcProfilesPage({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : `Unable to ${action} GC profile.`
+          : `Unable to ${action} Traveler profile.`
       );
     } finally {
       setIsLoading(false);
@@ -324,23 +324,23 @@ export function GcProfilesPage({
       const payload = buildRequestPayload();
 
       if (editingProfileId) {
-        await updateGcProfile(
+        await updateTravelerProfile(
           idToken,
           editingProfileId,
           payload
         );
 
         setSuccessMessage(
-          "GC profile updated."
+          "Traveler profile updated."
         );
       } else {
-        await createGcProfile(
+        await createTravelerProfile(
           idToken,
           payload
         );
 
         setSuccessMessage(
-          "GC profile created."
+          "Traveler profile created."
         );
       }
 
@@ -353,7 +353,7 @@ export function GcProfilesPage({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Unable to save GC profile."
+          : "Unable to save Traveler profile."
       );
     } finally {
       setIsLoading(false);
@@ -361,11 +361,11 @@ export function GcProfilesPage({
   }
 
   return (
-    <main className="gc-page">
-      <section className="gc-content">
-        <div className="gc-header">
+    <main className="traveler-page">
+      <section className="traveler-content">
+        <div className="traveler-header">
           <div>
-            <h1>GC Profiles</h1>
+            <h1>Traveler Profiles</h1>
             <p>
               Create and manage travel profiles.
             </p>
@@ -376,34 +376,34 @@ export function GcProfilesPage({
             onClick={handleNewProfile}
             disabled={isLoading}
           >
-            + New GC Profile
+            + New Traveler Profile
           </button>
         </div>
 
         {successMessage && (
-          <p className="gc-success">
+          <p className="traveler-success">
             {successMessage}
           </p>
         )}
 
         {errorMessage && (
-          <p className="gc-error">
+          <p className="traveler-error">
             {errorMessage}
           </p>
         )}
 
         {showForm && (
           <form
-            className="gc-form-card"
+            className="traveler-form-card"
             onSubmit={handleSubmit}
           >
             <h2>
               {editingProfileId
-                ? "Edit GC Profile"
-                : "New GC Profile"}
+                ? "Edit Traveler Profile"
+                : "New Traveler Profile"}
             </h2>
 
-            <div className="gc-form-grid">
+            <div className="traveler-form-grid">
               <label>
                 Legal First Name *
                 <input
@@ -634,7 +634,7 @@ export function GcProfilesPage({
               </label>
             </div>
 
-            <div className="gc-form-actions">
+            <div className="traveler-form-actions">
               <button
                 type="button"
                 className="secondary-button"
@@ -658,7 +658,7 @@ export function GcProfilesPage({
           </form>
         )}
 
-        <div className="gc-table-card">
+        <div className="traveler-table-card">
           <table>
             <thead>
               <tr>
@@ -705,7 +705,7 @@ export function GcProfilesPage({
 
                     <td>
                       <span
-                        className={`gc-status ${
+                        className={`traveler-status ${
                           profile.status === "active"
                             ? "status-active"
                             : "status-inactive"
@@ -771,7 +771,7 @@ export function GcProfilesPage({
                     className="empty-state"
                     colSpan={8}
                   >
-                    No GC profiles found.
+                    No Traveler profiles found.
                   </td>
                 </tr>
               )}
