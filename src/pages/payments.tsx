@@ -12,6 +12,10 @@ import {
 } from "../components/payments/AdminPaymentMethodsPanel";
 
 import {
+  CardSetupModal
+} from "../components/payments/CardSetupModal";
+
+import {
   IpcmPaymentMethodsPanel
 } from "../components/payments/IpcmPaymentMethodsPanel";
 
@@ -28,16 +32,9 @@ import type {
 import "./payments.css";
 
 type PaymentsPageProps = {
-  idToken: string;
+  idToken:
+    string;
 };
-
-function getMethodName(
-  type: PaymentMethodType
-): string {
-  return type === "card"
-    ? "card"
-    : "bank account";
-}
 
 export function PaymentsPage({
   idToken
@@ -55,7 +52,9 @@ export function PaymentsPage({
     isLoading,
     setIsLoading
   ] =
-    useState(true);
+    useState(
+      true
+    );
 
   const [
     errorMessage,
@@ -69,9 +68,18 @@ export function PaymentsPage({
   ] =
     useState("");
 
+  const [
+    cardSetupProfile,
+    setCardSetupProfile
+  ] =
+    useState<
+      IpcmPaymentProfile |
+      null
+    >(null);
+
   useEffect(
     () => {
-      loadPaymentMethods();
+      void loadPaymentMethods();
     },
     [
       idToken
@@ -96,7 +104,9 @@ export function PaymentsPage({
       setData(
         response
       );
-    } catch (error) {
+    } catch (
+      error
+    ) {
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -116,20 +126,40 @@ export function PaymentsPage({
     type:
       PaymentMethodType
   ) {
-    const fullName =
-      `${profile.firstName} ${profile.lastName}`.trim();
+    setNoticeMessage(
+      ""
+    );
+
+    if (
+      type ===
+      "card"
+    ) {
+      setCardSetupProfile(
+        profile
+      );
+
+      return;
+    }
 
     setNoticeMessage(
-      `Secure ${getMethodName(
-        type
-      )} setup for ${fullName} is the next payment milestone. No financial credentials are collected by this screen yet.`
+      "Secure bank account connection is the next payment milestone. The payment architecture is prepared for a separate tokenized bank-account provider without changing the IPCM payment profile model."
     );
 
     window.scrollTo({
-      top: 0,
+      top:
+        0,
+
       behavior:
         "smooth"
     });
+  }
+
+  async function handleCardSaved() {
+    setNoticeMessage(
+      "Your travel card was saved successfully."
+    );
+
+    await loadPaymentMethods();
   }
 
   return (
@@ -150,13 +180,13 @@ export function PaymentsPage({
               Configure the
               payment sources
               associated with
-              IPCMs in your
-              organization.
-              Each IPCM may
-              have one travel
-              card and one
-              bank account
-              connection.
+              your IPCM profile.
+              Card credentials
+              are securely
+              tokenized by the
+              payment provider
+              and are never
+              stored in Aurem.
             </p>
           </div>
         </header>
@@ -166,7 +196,9 @@ export function PaymentsPage({
             className="payments-info-message"
             role="status"
           >
-            {noticeMessage}
+            {
+              noticeMessage
+            }
           </div>
         )}
 
@@ -181,13 +213,15 @@ export function PaymentsPage({
             </strong>
 
             <span>
-              {errorMessage}
+              {
+                errorMessage
+              }
             </span>
 
             <button
               type="button"
-              onClick={
-                loadPaymentMethods
+              onClick={() =>
+                void loadPaymentMethods()
               }
             >
               Try again
@@ -215,9 +249,7 @@ export function PaymentsPage({
                     </h2>
 
                     <p>
-                      As an Admin,
-                      you can manage
-                      payment
+                      Review payment
                       configuration
                       for IPCMs in
                       your company.
@@ -235,7 +267,7 @@ export function PaymentsPage({
                 </>
               ) : (
                 <>
-                  <div className="payments-section-heading">
+                  <div className="payments-section-heading payments-section-heading-centered">
                     <h2>
                       Your payment
                       profile
@@ -287,6 +319,22 @@ export function PaymentsPage({
             </>
           )}
       </section>
+
+      {cardSetupProfile && (
+        <CardSetupModal
+          idToken={
+            idToken
+          }
+          onClose={() =>
+            setCardSetupProfile(
+              null
+            )
+          }
+          onSaved={
+            handleCardSaved
+          }
+        />
+      )}
     </main>
   );
 }

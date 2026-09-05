@@ -1,5 +1,8 @@
 import type {
-  PaymentMethodsResponse
+  PaymentComponentKeyResponse,
+  PaymentMethodsResponse,
+  SaveCardPaymentMethodRequest,
+  SavePaymentMethodResponse
 } from "../types/payment";
 
 const baseUrl =
@@ -45,7 +48,8 @@ async function parseResponseBody(
 
   return text
     ? {
-        message: text
+        message:
+          text
       }
     : {};
 }
@@ -72,7 +76,9 @@ export async function getPaymentMethods(
       response
     );
 
-  if (!response.ok) {
+  if (
+    !response.ok
+  ) {
     throw new Error(
       getErrorMessage(
         data,
@@ -84,5 +90,101 @@ export async function getPaymentMethods(
   return (
     data as
       PaymentMethodsResponse
+  );
+}
+
+export async function createPaymentComponentKey(
+  idToken: string
+): Promise<PaymentComponentKeyResponse> {
+  const response =
+    await fetch(
+      `${baseUrl}/payment-methods/component-key`,
+      {
+        method:
+          "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${idToken}`,
+
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            {}
+          )
+      }
+    );
+
+  const data =
+    await parseResponseBody(
+      response
+    );
+
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Unable to start secure card setup."
+      )
+    );
+  }
+
+  return (
+    data as
+      PaymentComponentKeyResponse
+  );
+}
+
+export async function saveCardPaymentMethod(
+  idToken: string,
+  payload:
+    SaveCardPaymentMethodRequest
+): Promise<SavePaymentMethodResponse> {
+  const response =
+    await fetch(
+      `${baseUrl}/payment-methods`,
+      {
+        method:
+          "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${idToken}`,
+
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+  const data =
+    await parseResponseBody(
+      response
+    );
+
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Unable to save the card."
+      )
+    );
+  }
+
+  return (
+    data as
+      SavePaymentMethodResponse
   );
 }
