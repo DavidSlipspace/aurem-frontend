@@ -21,6 +21,10 @@ import {
 } from "../api/travelerProfileApi";
 
 import {
+  getIpcms
+} from "../api/ipcmApi";
+
+import {
   ConfirmDialog
 } from "../components/common/ConfirmDialog";
 
@@ -36,6 +40,10 @@ import {
 import type {
   CaseResponse
 } from "../types/case";
+
+import type {
+  IpcmDirectoryItem
+} from "../types/ipcm";
 
 import type {
   TravelerProfile
@@ -62,9 +70,13 @@ type TripsPageProps = {
 function createEmptyForm():
   TripFormState {
   return {
-    caseId: "",
+    caseId:
+      "",
 
     travelerProfileId:
+      "",
+
+    ipcmUserId:
       "",
 
     tripPurpose:
@@ -117,6 +129,9 @@ function createFormFromTrip(
 
     travelerProfileId:
       trip.travelerProfileId,
+
+    ipcmUserId:
+      trip.ipcmUserId ?? "",
 
     tripPurpose:
       trip.tripPurpose,
@@ -187,6 +202,30 @@ function buildRequestPayload(
     );
 
   if (
+    !formData.caseId
+  ) {
+    throw new Error(
+      "Select a case."
+    );
+  }
+
+  if (
+    !formData.travelerProfileId
+  ) {
+    throw new Error(
+      "Select a traveler."
+    );
+  }
+
+  if (
+    !formData.ipcmUserId
+  ) {
+    throw new Error(
+      "Select an IPCM."
+    );
+  }
+
+  if (
     !Number.isFinite(
       budgetDollars
     ) ||
@@ -236,6 +275,9 @@ function buildRequestPayload(
 
     travelerProfileId:
       formData.travelerProfileId,
+
+    ipcmUserId:
+      formData.ipcmUserId,
 
     tripPurpose:
       formData.tripPurpose
@@ -327,6 +369,14 @@ export function TripsPage({
   ] =
     useState<
       TravelerProfile[]
+    >([]);
+
+  const [
+    ipcms,
+    setIpcms
+  ] =
+    useState<
+      IpcmDirectoryItem[]
     >([]);
 
   const [
@@ -441,7 +491,8 @@ export function TripsPage({
             const [
               tripsResponse,
               casesResponse,
-              travelerProfilesResponse
+              travelerProfilesResponse,
+              ipcmsResponse
             ] =
               await Promise.all([
                 getTrips(
@@ -453,6 +504,10 @@ export function TripsPage({
                 ),
 
                 getTravelerProfiles(
+                  idToken
+                ),
+
+                getIpcms(
                   idToken
                 )
               ]);
@@ -478,6 +533,18 @@ export function TripsPage({
                 )
             );
 
+            setIpcms(
+              ipcmsResponse.ipcms.filter(
+                (
+                  ipcm
+                ) =>
+                  ipcm.type ===
+                    "user" &&
+                  ipcm.status ===
+                    "active"
+              )
+            );
+
             return;
           }
 
@@ -495,6 +562,10 @@ export function TripsPage({
           );
 
           setTravelerProfiles(
+            []
+          );
+
+          setIpcms(
             []
           );
         } catch (
@@ -881,6 +952,9 @@ export function TripsPage({
               }
               travelerProfiles={
                 travelerProfiles
+              }
+              ipcms={
+                ipcms
               }
               isEditing={
                 editingTripId !==

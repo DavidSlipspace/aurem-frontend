@@ -80,7 +80,8 @@ export type Trip = {
   tripReferenceId:
     string;
 
-  caseId: string;
+  caseId:
+    string;
 
   caseReferenceId:
     string;
@@ -103,7 +104,8 @@ export type Trip = {
   tripPurpose:
     string;
 
-  status: string;
+  status:
+    string;
 
   outboundDate:
     string;
@@ -161,9 +163,13 @@ export type TripsResponse = {
 };
 
 export type TripRequest = {
-  caseId: string;
+  caseId:
+    string;
 
   travelerProfileId:
+    string;
+
+  ipcmUserId:
     string;
 
   tripPurpose:
@@ -207,13 +213,18 @@ export type TripRequest = {
 };
 
 export type SendTripToTravelerResponse = {
-  message: string;
+  message:
+    string;
 
-  tripId: string;
+  tripId:
+    string;
 
-  status: string;
+  status:
+    string;
 
-  sentTo: string;
+  sentTo:
+    string;
 
-  expiresAt: string;
+  expiresAt:
+    string;
 };

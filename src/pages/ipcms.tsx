@@ -425,19 +425,7 @@ export function IpcmsPage({
             />
           )}
 
-        <div className="ipcms-section-header">
-          <div>
-            <h2>
-              Agency IPCMs
-            </h2>
-
-            <p>
-              Profile status and
-              payment readiness
-              are shown separately.
-            </p>
-          </div>
-
+        <div className="ipcms-table-toolbar">
           <button
             type="button"
             className="ipcm-secondary-button"
