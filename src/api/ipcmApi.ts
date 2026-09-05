@@ -1,6 +1,8 @@
 import type {
+  IpcmDirectoryItem,
   IpcmDirectoryResponse,
-  InviteIpcmResponse
+  InviteIpcmResponse,
+  RemoveIpcmResponse
 } from "../types/ipcm";
 
 const baseUrl =
@@ -78,7 +80,7 @@ export async function getIpcms(
     throw new Error(
       getErrorMessage(
         data,
-        "Unable to load IPCMs."
+        "Unable to load IPCM profiles."
       )
     );
   }
@@ -132,5 +134,51 @@ export async function inviteIpcm(
   return (
     data as
       InviteIpcmResponse
+  );
+}
+
+export async function removeIpcm(
+  idToken: string,
+  item: IpcmDirectoryItem
+): Promise<RemoveIpcmResponse> {
+  const query =
+    new URLSearchParams({
+      resourceType:
+        item.type
+    });
+
+  const response =
+    await fetch(
+      `${baseUrl}/ipcms/${encodeURIComponent(
+        item.id
+      )}?${query.toString()}`,
+      {
+        method:
+          "DELETE",
+
+        headers: {
+          Authorization:
+            `Bearer ${idToken}`
+        }
+      }
+    );
+
+  const data =
+    await parseResponseBody(
+      response
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Unable to remove the IPCM."
+      )
+    );
+  }
+
+  return (
+    data as
+      RemoveIpcmResponse
   );
 }

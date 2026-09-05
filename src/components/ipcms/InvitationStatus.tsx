@@ -11,17 +11,15 @@ function getLabel(
   status:
     IpcmDirectoryStatus
 ): string {
-  switch (
-    status
-  ) {
+  switch (status) {
     case "active":
-      return "Active";
+      return "Profile Created";
 
     case "invited":
-      return "Invited";
+      return "Invitation Sent";
 
     case "expired":
-      return "Expired";
+      return "Invitation Expired";
   }
 }
 

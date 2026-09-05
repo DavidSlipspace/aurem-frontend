@@ -4,53 +4,40 @@
 }
 
 .ipcms-content {
-  width: min(1180px, calc(100% - 64px));
-  margin: 0 auto;
-  padding: 40px 0 64px;
+  padding: 32px;
 }
 
 .ipcms-header {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
 }
 
-.ipcms-eyebrow {
-  margin: 0 0 8px;
-  color: var(--color-text-secondary);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
 .ipcms-header h1 {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
   color: var(--color-text-primary);
-  font-size: clamp(30px, 4vw, 40px);
-  letter-spacing: -0.03em;
 }
 
-.ipcms-header > div > p:last-child {
-  max-width: 680px;
+.ipcms-header p {
   margin: 0;
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .ipcm-primary-button,
 .ipcm-secondary-button,
-.ipcm-table-action {
+.ipcm-table-action,
+.ipcm-danger-button {
   font: inherit;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .ipcm-primary-button {
   margin: 0;
-  padding: 10px 15px;
+  padding: 10px 14px;
   border: none;
   border-radius: 8px;
   background: var(--color-primary);
@@ -76,7 +63,8 @@
 
 .ipcm-primary-button:disabled,
 .ipcm-secondary-button:disabled,
-.ipcm-table-action:disabled {
+.ipcm-table-action:disabled,
+.ipcm-danger-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -179,7 +167,7 @@
 
 .ipcm-table-card table {
   width: 100%;
-  min-width: 900px;
+  min-width: 1050px;
   border-collapse: collapse;
 }
 
@@ -208,7 +196,8 @@
   background: var(--color-table-row-hover);
 }
 
-.ipcm-status {
+.ipcm-status,
+.ipcm-payment-status {
   display: inline-flex;
   padding: 5px 9px;
   border-radius: 999px;
@@ -231,6 +220,27 @@
   color: #b54708;
 }
 
+.ipcm-payment-status-configured {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.ipcm-payment-status-in_progress {
+  background: #fff4e5;
+  color: #b54708;
+}
+
+.ipcm-payment-status-not_started {
+  background: #f2f4f7;
+  color: #667085;
+}
+
+.ipcm-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .ipcm-table-action {
   padding: 7px 10px;
   border: 1px solid var(--color-border);
@@ -243,9 +253,13 @@
   background: var(--color-table-row-hover);
 }
 
-.ipcm-no-action {
-  color: var(--color-text-secondary);
-  font-size: 12px;
+.ipcm-table-action-danger {
+  border-color: #fecdca;
+  color: #b42318;
+}
+
+.ipcm-table-action-danger:hover {
+  background: #fef3f2;
 }
 
 .ipcm-empty-state {
@@ -280,10 +294,68 @@
   color: var(--color-text-secondary);
 }
 
+.ipcm-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  padding: 20px;
+  display: grid;
+  place-items: center;
+  background: rgba(16, 24, 40, 0.46);
+}
+
+.ipcm-dialog {
+  width: min(460px, 100%);
+  box-sizing: border-box;
+  padding: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.2);
+}
+
+.ipcm-dialog h2 {
+  margin: 0 0 12px;
+  color: var(--color-text-primary);
+}
+
+.ipcm-dialog p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.ipcm-dialog-note {
+  margin-top: 14px !important;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 13px;
+}
+
+.ipcm-dialog-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.ipcm-danger-button {
+  margin: 0;
+  padding: 9px 13px;
+  border: none;
+  border-radius: 8px;
+  background: #d92d20;
+  color: #ffffff;
+}
+
+.ipcm-danger-button:hover {
+  background: #b42318;
+}
+
 @media (max-width: 800px) {
   .ipcms-content {
-    width: calc(100% - 40px);
-    padding: 28px 0 48px;
+    padding: 20px;
   }
 
   .ipcms-header,

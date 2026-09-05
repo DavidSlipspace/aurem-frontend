@@ -3,6 +3,11 @@ export type IpcmDirectoryStatus =
   | "invited"
   | "expired";
 
+export type IpcmPaymentSetupStatus =
+  | "not_started"
+  | "in_progress"
+  | "configured";
+
 export type IpcmDirectoryItem = {
   id: string;
 
@@ -22,6 +27,9 @@ export type IpcmDirectoryItem = {
 
   status:
     IpcmDirectoryStatus;
+
+  paymentStatus:
+    IpcmPaymentSetupStatus;
 
   invitationSentAt:
     | string
@@ -48,4 +56,8 @@ export type InviteIpcmResponse = {
   expiresAt: string;
 
   sentTo: string;
+};
+
+export type RemoveIpcmResponse = {
+  message: string;
 };

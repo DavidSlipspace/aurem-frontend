@@ -1,11 +1,13 @@
 import {
+  useCallback,
   useEffect,
   useState
 } from "react";
 
 import {
   getIpcms,
-  inviteIpcm
+  inviteIpcm,
+  removeIpcm
 } from "../api/ipcmApi";
 
 import {
@@ -15,6 +17,10 @@ import {
 import {
   IpcmTable
 } from "../components/ipcms/IpcmTable";
+
+import {
+  RemoveIpcmDialog
+} from "../components/ipcms/RemoveIpcmDialog";
 
 import type {
   IpcmDirectoryItem
@@ -36,7 +42,8 @@ export function IpcmsPage({
   user
 }: IpcmsPageProps) {
   const canManageInvitations =
-    user.role === "Admin";
+    user.role ===
+    "Admin";
 
   const [
     ipcms,
@@ -91,47 +98,71 @@ export function IpcmsPage({
       null
     >(null);
 
-  useEffect(
-    () => {
-      loadIpcms();
-    },
-    [
-      idToken
-    ]
-  );
+  const [
+    itemPendingRemoval,
+    setItemPendingRemoval
+  ] =
+    useState<
+      IpcmDirectoryItem |
+      null
+    >(null);
 
-  async function loadIpcms() {
-    setIsLoading(
-      true
-    );
+  const [
+    removingIpcmId,
+    setRemovingIpcmId
+  ] =
+    useState<
+      string |
+      null
+    >(null);
 
-    setErrorMessage(
-      ""
-    );
-
-    try {
-      const response =
-        await getIpcms(
-          idToken
+  const loadIpcms =
+    useCallback(
+      async () => {
+        setIsLoading(
+          true
         );
 
-      setIpcms(
-        response.ipcms
-      );
-    } catch (
-      error
-    ) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to load IPCM profiles."
-      );
-    } finally {
-      setIsLoading(
-        false
-      );
-    }
-  }
+        setErrorMessage(
+          ""
+        );
+
+        try {
+          const response =
+            await getIpcms(
+              idToken
+            );
+
+          setIpcms(
+            response.ipcms
+          );
+        } catch (
+          error
+        ) {
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "Unable to load IPCM profiles."
+          );
+        } finally {
+          setIsLoading(
+            false
+          );
+        }
+      },
+      [
+        idToken
+      ]
+    );
+
+  useEffect(
+    () => {
+      void loadIpcms();
+    },
+    [
+      loadIpcms
+    ]
+  );
 
   async function handleInvite(
     email: string
@@ -234,13 +265,111 @@ export function IpcmsPage({
     }
   }
 
+  function handleRequestRemove(
+    item:
+      IpcmDirectoryItem
+  ) {
+    if (
+      !canManageInvitations
+    ) {
+      return;
+    }
+
+    setSuccessMessage(
+      ""
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    setItemPendingRemoval(
+      item
+    );
+  }
+
+  async function handleConfirmRemove() {
+    if (
+      !canManageInvitations ||
+      !itemPendingRemoval
+    ) {
+      return;
+    }
+
+    const item =
+      itemPendingRemoval;
+
+    setRemovingIpcmId(
+      item.id
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    setSuccessMessage(
+      ""
+    );
+
+    try {
+      const response =
+        await removeIpcm(
+          idToken,
+          item
+        );
+
+      setSuccessMessage(
+        response.message
+      );
+
+      setItemPendingRemoval(
+        null
+      );
+
+      await loadIpcms();
+    } catch (
+      error
+    ) {
+      setItemPendingRemoval(
+        null
+      );
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to remove the IPCM."
+      );
+
+      window.scrollTo({
+        top:
+          0,
+
+        behavior:
+          "smooth"
+      });
+    } finally {
+      setRemovingIpcmId(
+        null
+      );
+    }
+  }
+
   return (
     <main className="ipcms-page">
       <section className="ipcms-content">
         <header className="ipcms-header">
-          <h1>
-            IPCM Profiles
-          </h1>
+          <div>
+            <h1>
+              IPCM Profiles
+            </h1>
+
+            <p>
+              Manage IPCM access,
+              onboarding, and
+              payment readiness
+              for your agency.
+            </p>
+          </div>
 
           {canManageInvitations && (
             <button
@@ -256,7 +385,7 @@ export function IpcmsPage({
                 );
               }}
             >
-              Invite IPCM
+              + Invite IPCM
             </button>
           )}
         </header>
@@ -299,23 +428,22 @@ export function IpcmsPage({
         <div className="ipcms-section-header">
           <div>
             <h2>
-              IPCM Profiles
+              Agency IPCMs
             </h2>
 
             <p>
-              Active IPCM profiles
-              and outstanding account
-              invitations for your
-              agency.
+              Profile status and
+              payment readiness
+              are shown separately.
             </p>
           </div>
 
           <button
             type="button"
             className="ipcm-secondary-button"
-            onClick={
-              loadIpcms
-            }
+            onClick={() => {
+              void loadIpcms();
+            }}
             disabled={
               isLoading
             }
@@ -342,12 +470,41 @@ export function IpcmsPage({
             resendingInvitationId={
               resendingInvitationId
             }
+            removingIpcmId={
+              removingIpcmId
+            }
             onResend={
               handleResend
+            }
+            onRemove={
+              handleRequestRemove
             }
           />
         )}
       </section>
+
+      <RemoveIpcmDialog
+        item={
+          itemPendingRemoval
+        }
+        isRemoving={
+          removingIpcmId !==
+          null
+        }
+        onConfirm={() => {
+          void handleConfirmRemove();
+        }}
+        onCancel={() => {
+          if (
+            removingIpcmId ===
+            null
+          ) {
+            setItemPendingRemoval(
+              null
+            );
+          }
+        }}
+      />
     </main>
   );
 }

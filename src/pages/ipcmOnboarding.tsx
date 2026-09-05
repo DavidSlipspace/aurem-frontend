@@ -115,9 +115,7 @@ export function IpcmOnboardingPage({
 
   async function handleSubmit(
     event:
-      FormEvent<
-        HTMLFormElement
-      >
+      FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
@@ -189,7 +187,14 @@ export function IpcmOnboardingPage({
     return (
       <main className="ipcm-onboarding-page">
         <section className="ipcm-onboarding-card">
-          Loading invitation...
+          <div className="ipcm-onboarding-brand">
+            Aurem
+          </div>
+
+          <div className="ipcm-onboarding-state">
+            Loading your
+            invitation...
+          </div>
         </section>
       </main>
     );
@@ -201,17 +206,31 @@ export function IpcmOnboardingPage({
     return (
       <main className="ipcm-onboarding-page">
         <section className="ipcm-onboarding-card">
-          <h1>
-            Account created
-          </h1>
+          <div className="ipcm-onboarding-brand">
+            Aurem
+          </div>
 
-          <p>
-            Your IPCM account is
-            ready. Sign in to
-            access your cases,
-            trips, profile, and
-            payment setup.
-          </p>
+          <div className="ipcm-onboarding-intro">
+            <p className="ipcm-onboarding-eyebrow">
+              Account ready
+            </p>
+
+            <h1>
+              Welcome to Aurem
+            </h1>
+
+            <p>
+              Your IPCM account
+              has been created.
+              You can now sign in
+              to view assigned
+              cases and trips,
+              maintain your
+              profile, and
+              configure payment
+              information.
+            </p>
+          </div>
 
           <button
             type="button"
@@ -234,14 +253,33 @@ export function IpcmOnboardingPage({
     return (
       <main className="ipcm-onboarding-page">
         <section className="ipcm-onboarding-card">
-          <h1>
-            Invitation unavailable
-          </h1>
+          <div className="ipcm-onboarding-brand">
+            Aurem
+          </div>
 
-          <p className="ipcm-onboarding-error">
+          <div className="ipcm-onboarding-intro">
+            <p className="ipcm-onboarding-eyebrow">
+              IPCM invitation
+            </p>
+
+            <h1>
+              Invitation unavailable
+            </h1>
+
+            <p>
+              We could not verify
+              this account
+              invitation.
+            </p>
+          </div>
+
+          <div
+            className="ipcm-onboarding-error"
+            role="alert"
+          >
             {errorMessage ||
               "This invitation is invalid, expired, or has already been used."}
-          </p>
+          </div>
         </section>
       </main>
     );
@@ -254,79 +292,89 @@ export function IpcmOnboardingPage({
           Aurem
         </div>
 
-        <h1>
-          Create your IPCM account
-        </h1>
+        <div className="ipcm-onboarding-intro">
+          <p className="ipcm-onboarding-eyebrow">
+            IPCM invitation
+          </p>
 
-        <p className="ipcm-onboarding-copy">
-          This invitation creates
-          your secure Aurem portal
-          account. After signing
-          in, you can manage your
-          profile and payment
-          setup and view the cases
-          and trips assigned to
-          you.
-        </p>
+          <h1>
+            Create your Aurem account
+          </h1>
+
+          <p>
+            Set up your secure
+            IPCM portal account.
+            Once signed in, you
+            will be able to view
+            assigned cases and
+            trips, maintain your
+            profile, and manage
+            your payment setup.
+          </p>
+        </div>
+
+        <div className="ipcm-onboarding-email">
+          <span>
+            Invitation sent to
+          </span>
+
+          <strong>
+            {
+              invitation.email
+            }
+          </strong>
+        </div>
 
         <form
           onSubmit={
             handleSubmit
           }
         >
-          <label>
-            Email
+          <div className="ipcm-onboarding-name-grid">
+            <label>
+              First name
 
-            <input
-              type="email"
-              value={
-                invitation.email
-              }
-              readOnly
-            />
-          </label>
+              <input
+                value={
+                  firstName
+                }
+                onChange={(
+                  event
+                ) =>
+                  setFirstName(
+                    event.target.value
+                  )
+                }
+                maxLength={
+                  100
+                }
+                autoComplete="given-name"
+                required
+              />
+            </label>
 
-          <label>
-            First name
+            <label>
+              Last name
 
-            <input
-              value={
-                firstName
-              }
-              onChange={(
-                event
-              ) =>
-                setFirstName(
-                  event.target.value
-                )
-              }
-              maxLength={
-                100
-              }
-              required
-            />
-          </label>
-
-          <label>
-            Last name
-
-            <input
-              value={
-                lastName
-              }
-              onChange={(
-                event
-              ) =>
-                setLastName(
-                  event.target.value
-                )
-              }
-              maxLength={
-                100
-              }
-              required
-            />
-          </label>
+              <input
+                value={
+                  lastName
+                }
+                onChange={(
+                  event
+                ) =>
+                  setLastName(
+                    event.target.value
+                  )
+                }
+                maxLength={
+                  100
+                }
+                autoComplete="family-name"
+                required
+              />
+            </label>
+          </div>
 
           <label>
             Password
@@ -374,15 +422,23 @@ export function IpcmOnboardingPage({
             />
           </label>
 
+          <p className="ipcm-password-help">
+            Use at least 8
+            characters. Your
+            password is managed
+            securely through
+            Amazon Cognito.
+          </p>
+
           {errorMessage && (
-            <p
+            <div
               className="ipcm-onboarding-error"
               role="alert"
             >
               {
                 errorMessage
               }
-            </p>
+            </div>
           )}
 
           <button

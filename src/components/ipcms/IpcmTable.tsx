@@ -6,6 +6,10 @@ import {
   InvitationStatus
 } from "./InvitationStatus";
 
+import {
+  PaymentSetupStatus
+} from "./PaymentSetupStatus";
+
 type IpcmTableProps = {
   ipcms:
     IpcmDirectoryItem[];
@@ -16,7 +20,17 @@ type IpcmTableProps = {
     | string
     | null;
 
+  removingIpcmId:
+    | string
+    | null;
+
   onResend:
+    (
+      item:
+        IpcmDirectoryItem
+    ) => void;
+
+  onRemove:
     (
       item:
         IpcmDirectoryItem
@@ -55,13 +69,7 @@ function formatDateTime(
         "numeric",
 
       year:
-        "numeric",
-
-      hour:
-        "numeric",
-
-      minute:
-        "2-digit"
+        "numeric"
     }
   ).format(
     date
@@ -79,17 +87,23 @@ function getName(
     return "Pending profile";
   }
 
+  const name =
+    `${item.firstName ?? ""} ${item.lastName ?? ""}`
+      .trim();
+
   return (
-    `${item.firstName ?? ""} ` +
-    `${item.lastName ?? ""}`
-  ).trim();
+    name ||
+    "IPCM"
+  );
 }
 
 export function IpcmTable({
   ipcms,
   canManageInvitations,
   resendingInvitationId,
-  onResend
+  removingIpcmId,
+  onResend,
+  onRemove
 }: IpcmTableProps) {
   return (
     <div className="ipcm-table-card">
@@ -105,7 +119,11 @@ export function IpcmTable({
             </th>
 
             <th>
-              Status
+              Profile
+            </th>
+
+            <th>
+              Payment Setup
             </th>
 
             <th>
@@ -133,6 +151,10 @@ export function IpcmTable({
               ) => {
                 const isResending =
                   resendingInvitationId ===
+                  item.id;
+
+                const isRemoving =
+                  removingIpcmId ===
                   item.id;
 
                 return (
@@ -164,6 +186,14 @@ export function IpcmTable({
                     </td>
 
                     <td>
+                      <PaymentSetupStatus
+                        status={
+                          item.paymentStatus
+                        }
+                      />
+                    </td>
+
+                    <td>
                       {item.type ===
                       "invitation"
                         ? formatDateTime(
@@ -183,32 +213,49 @@ export function IpcmTable({
 
                     {canManageInvitations && (
                       <td>
-                        {item.type ===
-                        "invitation" ? (
+                        <div className="ipcm-table-actions">
+                          {item.type ===
+                            "invitation" && (
+                            <button
+                              type="button"
+                              className="ipcm-table-action"
+                              onClick={() =>
+                                onResend(
+                                  item
+                                )
+                              }
+                              disabled={
+                                isResending ||
+                                isRemoving
+                              }
+                            >
+                              {isResending
+                                ? "Sending..."
+                                : item.status ===
+                                    "expired"
+                                  ? "Send New Invite"
+                                  : "Resend"}
+                            </button>
+                          )}
+
                           <button
                             type="button"
-                            className="ipcm-table-action"
+                            className="ipcm-table-action ipcm-table-action-danger"
                             onClick={() =>
-                              onResend(
+                              onRemove(
                                 item
                               )
                             }
                             disabled={
+                              isRemoving ||
                               isResending
                             }
                           >
-                            {isResending
-                              ? "Sending..."
-                              : item.status ===
-                                  "expired"
-                                ? "Send New Invite"
-                                : "Resend"}
+                            {isRemoving
+                              ? "Removing..."
+                              : "Remove"}
                           </button>
-                        ) : (
-                          <span className="ipcm-no-action">
-                            Account created
-                          </span>
-                        )}
+                        </div>
                       </td>
                     )}
                   </tr>
@@ -221,8 +268,8 @@ export function IpcmTable({
                 className="ipcm-empty-state"
                 colSpan={
                   canManageInvitations
-                    ? 6
-                    : 5
+                    ? 7
+                    : 6
                 }
               >
                 No IPCM profiles

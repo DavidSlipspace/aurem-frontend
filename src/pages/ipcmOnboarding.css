@@ -1,41 +1,102 @@
 .ipcm-onboarding-page {
   min-height: 100vh;
-  padding: 32px 20px;
   box-sizing: border-box;
+  padding: 48px 20px;
   display: grid;
   place-items: center;
-  background: var(--color-background, #f8fafc);
+  background:
+    linear-gradient(
+      135deg,
+      #f8fafc 0%,
+      #eef2f7 100%
+    );
 }
 
 .ipcm-onboarding-card {
-  width: min(520px, 100%);
-  padding: 32px;
+  width: min(600px, 100%);
   box-sizing: border-box;
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
-  background: var(--color-surface);
+  padding: 38px;
+  border: 1px solid var(--color-border, #e4e7ec);
+  border-radius: 20px;
+  background: var(--color-surface, #ffffff);
+  box-shadow:
+    0 20px 45px
+    rgba(16, 24, 40, 0.08);
 }
 
 .ipcm-onboarding-brand {
-  margin-bottom: 24px;
-  font-size: 20px;
+  display: inline-flex;
+  margin-bottom: 30px;
+  padding: 9px 13px;
+  border-radius: 8px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 15px;
   font-weight: 800;
 }
 
-.ipcm-onboarding-card h1 {
-  margin: 0 0 12px;
+.ipcm-onboarding-intro {
+  margin-bottom: 28px;
 }
 
-.ipcm-onboarding-copy,
-.ipcm-onboarding-card > p {
-  margin: 0 0 24px;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
+.ipcm-onboarding-eyebrow {
+  margin: 0 0 8px;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ipcm-onboarding-intro h1 {
+  margin: 0 0 12px;
+  color: #101828;
+  font-size: clamp(28px, 5vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.ipcm-onboarding-intro > p:last-child {
+  max-width: 520px;
+  margin: 0;
+  color: #475467;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.ipcm-onboarding-email {
+  margin-bottom: 26px;
+  padding: 14px 16px;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.ipcm-onboarding-email span {
+  display: block;
+  margin-bottom: 4px;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ipcm-onboarding-email strong {
+  color: #101828;
+  font-size: 14px;
 }
 
 .ipcm-onboarding-card form {
   display: flex;
   flex-direction: column;
+  gap: 17px;
+}
+
+.ipcm-onboarding-name-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -43,34 +104,49 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  color: #344054;
   font-weight: 700;
+  font-size: 14px;
 }
 
 .ipcm-onboarding-card input {
+  width: 100%;
   min-height: 44px;
+  box-sizing: border-box;
   padding: 10px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid #d0d5dd;
   border-radius: 8px;
-  background: var(--color-surface);
-  color: var(--color-text-primary);
+  background: #ffffff;
+  color: #101828;
   font: inherit;
 }
 
-.ipcm-onboarding-card input[readonly] {
-  background: var(--color-table-row-hover);
-  color: var(--color-text-secondary);
+.ipcm-onboarding-card input:focus {
+  border-color: #111827;
+  outline: 2px solid rgba(17, 24, 39, 0.12);
+}
+
+.ipcm-password-help {
+  margin: -7px 0 0;
+  color: #667085;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .ipcm-onboarding-primary {
-  margin: 8px 0 0;
-  padding: 11px 15px;
+  margin: 7px 0 0;
+  padding: 12px 16px;
   border: none;
   border-radius: 8px;
-  background: var(--color-primary);
+  background: #111827;
   color: #ffffff;
   font: inherit;
   font-weight: 800;
   cursor: pointer;
+}
+
+.ipcm-onboarding-primary:hover {
+  background: #293548;
 }
 
 .ipcm-onboarding-primary:disabled {
@@ -79,6 +155,31 @@
 }
 
 .ipcm-onboarding-error {
-  margin: 0;
-  color: var(--color-error);
+  padding: 12px 14px;
+  border: 1px solid #fecdca;
+  border-radius: 8px;
+  background: #fef3f2;
+  color: #b42318;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ipcm-onboarding-state {
+  color: #667085;
+  font-size: 15px;
+}
+
+@media (max-width: 600px) {
+  .ipcm-onboarding-page {
+    padding: 20px 14px;
+  }
+
+  .ipcm-onboarding-card {
+    padding: 28px 22px;
+    border-radius: 16px;
+  }
+
+  .ipcm-onboarding-name-grid {
+    grid-template-columns: 1fr;
+  }
 }

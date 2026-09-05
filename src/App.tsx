@@ -39,6 +39,10 @@ import {
 } from "./pages/ipcmOnboarding";
 
 import {
+  ResetPasswordPage
+} from "./pages/resetPassword";
+
+import {
   Navbar
 } from "./components/Navbar";
 
@@ -60,12 +64,14 @@ type Page =
   | "profile"
   | "payments";
 
-function getBookingToken():
+function getPathToken(
+  pattern: RegExp
+):
   | string
   | null {
   const match =
     window.location.pathname.match(
-      /^\/booking\/([^/]+)\/?$/
+      pattern
     );
 
   if (
@@ -83,27 +89,72 @@ function getBookingToken():
   }
 }
 
+function getBookingToken():
+  | string
+  | null {
+  return getPathToken(
+    /^\/booking\/([^/]+)\/?$/
+  );
+}
+
 function getIpcmInvitationToken():
   | string
   | null {
-  const match =
-    window.location.pathname.match(
-      /^\/ipcm\/invite\/([^/]+)\/?$/
-    );
+  return getPathToken(
+    /^\/ipcm\/invite\/([^/]+)\/?$/
+  );
+}
 
+function getPasswordResetDetails(): {
+  isResetPage: boolean;
+  email: string;
+  code: string;
+} {
   if (
-    !match?.[1]
+    !/^\/reset-password\/?$/.test(
+      window.location.pathname
+    )
   ) {
-    return null;
+    return {
+      isResetPage:
+        false,
+
+      email:
+        "",
+
+      code:
+        ""
+    };
   }
 
-  try {
-    return decodeURIComponent(
-      match[1]
+  const searchParams =
+    new URLSearchParams(
+      window.location.search
     );
-  } catch {
-    return null;
-  }
+
+  const hashParams =
+    new URLSearchParams(
+      window.location.hash
+        .replace(
+          /^#/,
+          ""
+        )
+    );
+
+  return {
+    isResetPage:
+      true,
+
+    email:
+      searchParams.get(
+        "email"
+      ) ?? "",
+
+    code:
+      hashParams.get(
+        "code"
+      ) ?? ""
+  };
 }
 
 export default function App() {
@@ -112,6 +163,9 @@ export default function App() {
 
   const ipcmInvitationToken =
     getIpcmInvitationToken();
+
+  const passwordReset =
+    getPasswordResetDetails();
 
   const [
     idToken,
@@ -149,10 +203,8 @@ export default function App() {
 
   function handleLoginSuccess(
     token: string,
-
     userData:
       UserResponse,
-
     caseData:
       CaseResponse[]
   ) {
@@ -219,6 +271,22 @@ export default function App() {
       <IpcmOnboardingPage
         token={
           ipcmInvitationToken
+        }
+      />
+    );
+  }
+
+  if (
+    passwordReset
+      .isResetPage
+  ) {
+    return (
+      <ResetPasswordPage
+        initialEmail={
+          passwordReset.email
+        }
+        initialCode={
+          passwordReset.code
         }
       />
     );
