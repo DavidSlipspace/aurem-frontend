@@ -1,103 +1,497 @@
 .home-page {
-  min-height: 100vh;
-}
-
-.home-navbar {
-  height: 64px;
-  padding: 0 32px;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.home-brand {
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.home-user {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-weight: 600;
-}
-
-.home-user button {
-  margin: 0;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  background: var(--color-primary);
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
+  min-height: calc(100vh - 64px);
+  background:
+    var(
+      --color-background,
+      #f8fafc
+    );
 }
 
 .home-content {
-  padding: 32px;
+  width:
+    min(
+      1180px,
+      calc(100% - 64px)
+    );
+  margin: 0 auto;
+  padding: 40px 0 64px;
 }
 
 .home-header {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
 }
 
 .home-header h1 {
   margin: 0 0 18px;
+  color:
+    var(
+      --color-text-primary
+    );
+  font-size:
+    clamp(
+      30px,
+      4vw,
+      40px
+    );
+  letter-spacing: -0.03em;
 }
 
 .home-header p {
   margin: 0;
-  color: var(--color-text-secondary);
+  color:
+    var(
+      --color-text-secondary
+    );
+  line-height: 1.6;
+}
+
+.case-primary-button,
+.case-secondary-button,
+.case-table-button {
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.case-primary-button {
+  margin: 0;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background:
+    var(
+      --color-primary
+    );
+  color: #ffffff;
+}
+
+.case-primary-button:hover {
+  background:
+    var(
+      --color-primary-hover
+    );
+}
+
+.case-secondary-button {
+  margin: 0;
+  padding: 10px 15px;
+  border: 1px solid
+    var(
+      --color-border
+    );
+  border-radius: 8px;
+  background:
+    var(
+      --color-surface
+    );
+  color:
+    var(
+      --color-text-primary
+    );
+}
+
+.case-secondary-button:hover {
+  background:
+    var(
+      --color-table-row-hover
+    );
+}
+
+.case-primary-button:disabled,
+.case-secondary-button:disabled,
+.case-table-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.case-form-card,
+.case-budget-card {
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid
+    var(
+      --color-border
+    );
+  border-radius: 16px;
+  background:
+    var(
+      --color-surface
+    );
+  box-shadow:
+    0 8px 24px
+      rgba(
+        16,
+        24,
+        40,
+        0.04
+      );
+}
+
+.case-form-heading,
+.case-budget-heading {
+  margin-bottom: 22px;
+}
+
+.case-form-heading h2,
+.case-budget-heading h2 {
+  margin: 0 0 7px;
+  color:
+    var(
+      --color-text-primary
+    );
+  font-size: 22px;
+}
+
+.case-form-heading p,
+.case-budget-heading p {
+  max-width: 720px;
+  margin: 0;
+  color:
+    var(
+      --color-text-secondary
+    );
+  line-height: 1.55;
+}
+
+.case-form-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 18px;
+}
+
+.case-form-grid label,
+.case-budget-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color:
+    var(
+      --color-text-primary
+    );
+  font-weight: 700;
+}
+
+.case-form-grid input,
+.case-form-grid select,
+.case-budget-field input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid
+    var(
+      --color-border
+    );
+  border-radius: 8px;
+  background:
+    var(
+      --color-surface
+    );
+  color:
+    var(
+      --color-text-primary
+    );
+  font: inherit;
+}
+
+.case-form-grid input:focus,
+.case-form-grid select:focus,
+.case-budget-field input:focus {
+  border-color:
+    var(
+      --color-primary
+    );
+  outline: 2px solid
+    rgba(
+      17,
+      24,
+      39,
+      0.12
+    );
+}
+
+.case-form-grid small {
+  color:
+    var(
+      --color-text-secondary
+    );
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+.case-currency-input {
+  position: relative;
+}
+
+.case-currency-input span {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform:
+    translateY(-50%);
+  color:
+    var(
+      --color-text-secondary
+    );
+  pointer-events: none;
+}
+
+.case-currency-input input {
+  padding-left: 28px;
+}
+
+.case-form-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.case-budget-summary {
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 12px;
+}
+
+.case-budget-summary > div {
+  padding: 16px;
+  border: 1px solid
+    var(
+      --color-border
+    );
+  border-radius: 10px;
+  background:
+    var(
+      --color-background,
+      #f8fafc
+    );
+}
+
+.case-budget-summary span {
+  display: block;
+  margin-bottom: 5px;
+  color:
+    var(
+      --color-text-secondary
+    );
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.case-budget-summary strong {
+  color:
+    var(
+      --color-text-primary
+    );
+  font-size: 18px;
+}
+
+.case-budget-field {
+  max-width: 360px;
+}
+
+.case-budget-help {
+  max-width: 680px;
+  margin: 14px 0 0;
+  color:
+    var(
+      --color-text-secondary
+    );
+  font-size: 13px;
+  line-height: 1.55;
 }
 
 .case-table-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  overflow-x: auto;
+  border: 1px solid
+    var(
+      --color-border
+    );
   border-radius: 12px;
-  overflow: hidden;
+  background:
+    var(
+      --color-surface
+    );
 }
 
 .case-table-card table {
   width: 100%;
+  min-width: 1050px;
   border-collapse: collapse;
 }
 
 .case-table-card thead {
-  background: var(--color-table-header);
+  background:
+    var(
+      --color-table-header
+    );
 }
 
 .case-table-card th,
 .case-table-card td {
   padding: 14px 16px;
+  border-bottom: 1px solid
+    var(
+      --color-border
+    );
   text-align: left;
-  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+  white-space: nowrap;
 }
 
 .case-table-card th {
-  font-size: 13px;
-  color: var(--color-text-secondary);
+  color:
+    var(
+      --color-text-secondary
+    );
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .case-table-card tbody tr:hover {
-  background: var(--color-table-row-hover);
+  background:
+    var(
+      --color-table-row-hover
+    );
 }
 
 .case-status {
-  display: inline-block;
-  padding: 4px 10px;
+  display: inline-flex;
+  padding: 5px 9px;
   border-radius: 999px;
-  background: #ecfdf3;
-  color: var(--color-success);
-  font-weight: 700;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: capitalize;
 }
 
+.case-status-active {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.case-status-neutral {
+  background: #f2f4f7;
+  color: #667085;
+}
+
+.case-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.case-table-button {
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid
+    var(
+      --color-border
+    );
+  border-radius: 7px;
+  background:
+    var(
+      --color-surface
+    );
+  color:
+    var(
+      --color-text-primary
+    );
+}
+
+.case-table-button:hover {
+  background:
+    var(
+      --color-table-row-hover
+    );
+}
+
+.case-budget-button {
+  border-color:
+    var(
+      --color-primary
+    );
+  color:
+    var(
+      --color-primary
+    );
+}
+
+.case-error-message,
+.case-success-message {
+  margin: 0 0 20px;
+  padding: 14px 16px;
+  border-radius: 9px;
+}
+
+.case-error-message {
+  border: 1px solid #fecdca;
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.case-success-message {
+  border: 1px solid #a6f4c5;
+  background: #ecfdf3;
+  color: #027a48;
+}
+
 .empty-state {
-  text-align: center;
-  color: var(--color-text-secondary);
+  padding: 28px !important;
+  color:
+    var(
+      --color-text-secondary
+    );
+  text-align:
+    center !important;
+}
+
+@media (
+  max-width: 800px
+) {
+  .home-content {
+    width:
+      calc(
+        100% - 40px
+      );
+    padding:
+      28px 0 48px;
+  }
+
+  .home-header {
+    flex-direction:
+      column;
+  }
+
+  .case-form-grid,
+  .case-budget-summary {
+    grid-template-columns:
+      1fr;
+  }
+
+  .case-form-actions {
+    flex-direction:
+      column-reverse;
+  }
+
+  .case-form-actions button {
+    width: 100%;
+  }
 }

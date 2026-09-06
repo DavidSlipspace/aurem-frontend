@@ -116,14 +116,9 @@ function getPasswordResetDetails(): {
     )
   ) {
     return {
-      isResetPage:
-        false,
-
-      email:
-        "",
-
-      code:
-        ""
+      isResetPage: false,
+      email: "",
+      code: ""
     };
   }
 
@@ -134,16 +129,14 @@ function getPasswordResetDetails(): {
 
   const hashParams =
     new URLSearchParams(
-      window.location.hash
-        .replace(
-          /^#/,
-          ""
-        )
+      window.location.hash.replace(
+        /^#/,
+        ""
+      )
     );
 
   return {
-    isResetPage:
-      true,
+    isResetPage: true,
 
     email:
       searchParams.get(
@@ -174,7 +167,9 @@ export default function App() {
     useState<
       string |
       null
-    >(null);
+    >(
+      null
+    );
 
   const [
     user,
@@ -183,7 +178,9 @@ export default function App() {
     useState<
       UserResponse |
       null
-    >(null);
+    >(
+      null
+    );
 
   const [
     cases,
@@ -191,7 +188,9 @@ export default function App() {
   ] =
     useState<
       CaseResponse[]
-    >([]);
+    >(
+      []
+    );
 
   const [
     activePage,
@@ -325,11 +324,17 @@ export default function App() {
       {activePage ===
         "cases" && (
         <HomePage
+          idToken={
+            idToken
+          }
           cases={
             cases
           }
           user={
             user
+          }
+          onCasesChanged={
+            setCases
           }
         />
       )}
