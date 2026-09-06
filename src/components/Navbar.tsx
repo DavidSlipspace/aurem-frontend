@@ -132,7 +132,7 @@ export function Navbar({
               )
             }
           >
-            IPCM Profiles
+            Case Managers
           </button>
         )}
 

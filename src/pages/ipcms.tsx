@@ -360,14 +360,13 @@ export function IpcmsPage({
         <header className="ipcms-header">
           <div>
             <h1>
-              IPCM Profiles
+              Case Managers
             </h1>
 
             <p>
-              Manage IPCM access,
+              Manage access,
               onboarding, and
-              payment readiness
-              for your agency.
+              payment readiness.
             </p>
           </div>
 
@@ -385,7 +384,7 @@ export function IpcmsPage({
                 );
               }}
             >
-              + Invite IPCM
+              + Invite
             </button>
           )}
         </header>
@@ -424,23 +423,6 @@ export function IpcmsPage({
               }
             />
           )}
-
-        <div className="ipcms-table-toolbar">
-          <button
-            type="button"
-            className="ipcm-secondary-button"
-            onClick={() => {
-              void loadIpcms();
-            }}
-            disabled={
-              isLoading
-            }
-          >
-            {isLoading
-              ? "Refreshing..."
-              : "Refresh"}
-          </button>
-        </div>
 
         {isLoading ? (
           <div className="ipcms-loading">
