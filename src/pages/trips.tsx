@@ -131,7 +131,8 @@ function createFormFromTrip(
       trip.travelerProfileId,
 
     ipcmUserId:
-      trip.ipcmUserId ?? "",
+      trip.ipcmUserId ??
+      "",
 
     tripPurpose:
       trip.tripPurpose,
@@ -174,12 +175,15 @@ function createFormFromTrip(
       "",
 
     budgetDollars:
-      (
-        trip.budgetFilter /
-        100
-      ).toFixed(
-        2
-      ),
+      trip.budgetFilter >
+      0
+        ? (
+            trip.budgetFilter /
+            100
+          ).toFixed(
+            2
+          )
+        : "",
 
     companionTraveler:
       trip.companionTraveler,
@@ -196,11 +200,6 @@ function buildRequestPayload(
   formData:
     TripFormState
 ): TripRequest {
-  const budgetDollars =
-    Number(
-      formData.budgetDollars
-    );
-
   if (
     !formData.caseId
   ) {
@@ -221,20 +220,37 @@ function buildRequestPayload(
     !formData.ipcmUserId
   ) {
     throw new Error(
-      "Select an IPCM."
+      "Select a case manager."
     );
   }
 
+  let budgetDollars =
+    0;
+
+  const budgetValue =
+    formData
+      .budgetDollars
+      .trim();
+
   if (
-    !Number.isFinite(
-      budgetDollars
-    ) ||
-    budgetDollars <=
-      0
+    budgetValue
   ) {
-    throw new Error(
-      "Budget must be greater than zero."
-    );
+    budgetDollars =
+      Number(
+        budgetValue
+      );
+
+    if (
+      !Number.isFinite(
+        budgetDollars
+      ) ||
+      budgetDollars <
+        0
+    ) {
+      throw new Error(
+        "Budget must be a valid non-negative amount."
+      );
+    }
   }
 
   if (
@@ -598,8 +614,7 @@ export function TripsPage({
   );
 
   function handleFieldChange<
-    Field extends
-      keyof TripFormState
+    Field extends keyof TripFormState
   >(
     field:
       Field,
@@ -751,9 +766,7 @@ export function TripsPage({
       ) {
         await updateTrip(
           idToken,
-
           editingTripId,
-
           payload
         );
 
@@ -763,7 +776,6 @@ export function TripsPage({
       } else {
         await createTrip(
           idToken,
-
           payload
         );
 
@@ -864,7 +876,6 @@ export function TripsPage({
       const response =
         await sendTripToTraveler(
           idToken,
-
           trip.id
         );
 
@@ -880,11 +891,23 @@ export function TripsPage({
     } catch (
       error
     ) {
+      setTripPendingEmail(
+        null
+      );
+
       setErrorMessage(
         error instanceof Error
           ? error.message
           : "Unable to send the trip selection email."
       );
+
+      window.scrollTo({
+        top:
+          0,
+
+        behavior:
+          "smooth"
+      });
     } finally {
       setIsSendingTripId(
         null
@@ -1013,13 +1036,9 @@ export function TripsPage({
             tripPendingEmail
               ? [
                   `A secure trip-selection link will be sent to ${tripPendingEmail.travelerName}.`,
-
                   "",
-
                   tripPendingEmail.travelerEmail,
-
                   "",
-
                   "Any previously active link for this trip will be revoked."
                 ].join(
                   "\n"

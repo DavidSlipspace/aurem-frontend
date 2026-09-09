@@ -46,6 +46,21 @@ function formatCurrencyCents(
   );
 }
 
+function formatTripBudget(
+  amount: number
+): string {
+  if (
+    amount <=
+    0
+  ) {
+    return "Not set";
+  }
+
+  return formatCurrencyCents(
+    amount
+  );
+}
+
 function canSendTrip(
   trip:
     Trip
@@ -58,8 +73,6 @@ function canSendTrip(
     trip.returnDate &&
     trip.outboundAirport &&
     trip.returnAirport &&
-    trip.budgetFilter >
-      0 &&
     (
       trip.destinationCity ||
       trip.destinationAddress
@@ -158,7 +171,7 @@ export function TripsTable({
 
             {canManage && (
               <th>
-                IPCM
+                Case Manager
               </th>
             )}
 
@@ -191,7 +204,7 @@ export function TripsTable({
             </th>
 
             <th>
-              IPCM Approval
+              Case Manager Approval
             </th>
 
             <th>
@@ -315,7 +328,7 @@ export function TripsTable({
                     </td>
 
                     <td>
-                      {formatCurrencyCents(
+                      {formatTripBudget(
                         trip.budgetFilter
                       )}
                     </td>
@@ -353,7 +366,6 @@ export function TripsTable({
                           <span className="trip-selection-price">
                             {formatCurrencyCents(
                               flight.price,
-
                               flight.currency
                             )}
                           </span>
@@ -397,7 +409,6 @@ export function TripsTable({
                           <span className="trip-selection-price">
                             {formatCurrencyCents(
                               hotel.price,
-
                               hotel.currency
                             )}
                           </span>

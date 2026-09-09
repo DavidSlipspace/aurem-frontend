@@ -15,8 +15,7 @@ import type {
 } from "../../types/travelerProfile";
 
 export type TripFormState = {
-  caseId:
-    string;
+  caseId: string;
 
   travelerProfileId:
     string;
@@ -86,11 +85,8 @@ type TripFormProps = {
   onFieldChange: <
     Field extends keyof TripFormState
   >(
-    field:
-      Field,
-
-    value:
-      TripFormState[Field]
+    field: Field,
+    value: TripFormState[Field]
   ) => void;
 
   onSubmit: (
@@ -102,7 +98,7 @@ type TripFormProps = {
     () => void;
 };
 
-function getIpcmName(
+function getCaseManagerName(
   ipcm:
     IpcmDirectoryItem
 ): string {
@@ -229,7 +225,7 @@ export function TripForm({
         </label>
 
         <label>
-          IPCM *
+          Case Manager *
 
           <select
             value={
@@ -246,7 +242,7 @@ export function TripForm({
             required
           >
             <option value="">
-              Select an IPCM
+              Select a case manager
             </option>
 
             {ipcms.map(
@@ -262,7 +258,7 @@ export function TripForm({
                   }
                 >
                   {
-                    getIpcmName(
+                    getCaseManagerName(
                       ipcm
                     )
                   }
@@ -320,7 +316,7 @@ export function TripForm({
         </label>
 
         <label>
-          Budget *
+          Budget
 
           <div className="currency-input">
             <span>
@@ -329,8 +325,9 @@ export function TripForm({
 
             <input
               type="number"
-              min="0.01"
+              min="0"
               step="0.01"
+              placeholder="Optional until traveler link is sent"
               value={
                 formData.budgetDollars
               }
@@ -342,7 +339,6 @@ export function TripForm({
                   event.target.value
                 )
               }
-              required
             />
           </div>
         </label>
@@ -574,7 +570,7 @@ export function TripForm({
           />
 
           <span>
-            Require IPCM approval before purchase
+            Require Case Manager approval before purchase
           </span>
         </label>
       </div>
