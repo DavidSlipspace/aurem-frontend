@@ -13,8 +13,8 @@ export type CaseFormState = {
   caseManagerUserId:
     string;
 
-  ipcmUserId:
-    string;
+  travelerProfileIds:
+    string[];
 
   suggestedBudgetDollars:
     string;
@@ -68,6 +68,27 @@ function getUserLabel(
   );
 }
 
+function getTravelerLabel(
+  firstName: string,
+  middleName:
+    | string
+    | null,
+  lastName: string,
+  email: string
+): string {
+  const fullName = [
+    firstName,
+    middleName,
+    lastName
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return (
+    `${fullName} — ${email}`
+  );
+}
+
 export function CaseForm({
   formData,
   options,
@@ -93,11 +114,13 @@ export function CaseForm({
           </h2>
 
           <p>
-            Assign the operational
-            owners for this case.
-            The IPCM will set the
-            final approved budget
-            after assignment.
+            Assign the Case
+            Manager and travelers
+            associated with this
+            case. The Case Manager
+            will set the final
+            approved budget after
+            assignment.
           </p>
         </div>
       </div>
@@ -200,52 +223,89 @@ export function CaseForm({
               )
             )}
           </select>
+
+          <small>
+            The Case Manager is
+            the IPCM assigned to
+            this case.
+          </small>
         </label>
 
         <label>
-          IPCM *
+          Travelers *
 
           <select
+            multiple
             value={
               formData
-                .ipcmUserId
+                .travelerProfileIds
+            }
+            size={
+              Math.min(
+                Math.max(
+                  options
+                    .travelers
+                    .length,
+                  3
+                ),
+                6
+              )
             }
             onChange={(
               event
-            ) =>
+            ) => {
+              const selectedIds =
+                Array.from(
+                  event
+                    .currentTarget
+                    .selectedOptions
+                ).map(
+                  (
+                    option
+                  ) =>
+                    option.value
+                );
+
               onFieldChange(
-                "ipcmUserId",
-                event.target
-                  .value
-              )
-            }
+                "travelerProfileIds",
+                selectedIds
+              );
+            }}
             required
           >
-            <option value="">
-              Select an IPCM
-            </option>
-
-            {options.ipcms.map(
+            {options.travelers.map(
               (
-                ipcm
+                traveler
               ) => (
                 <option
                   key={
-                    ipcm.id
+                    traveler.id
                   }
                   value={
-                    ipcm.id
+                    traveler.id
                   }
                 >
-                  {getUserLabel(
-                    ipcm.firstName,
-                    ipcm.lastName,
-                    ipcm.email
+                  {getTravelerLabel(
+                    traveler
+                      .legalFirstName,
+                    traveler
+                      .legalMiddleName,
+                    traveler
+                      .legalLastName,
+                    traveler.email
                   )}
                 </option>
               )
             )}
           </select>
+
+          <small>
+            Select one or more
+            travelers. Hold Ctrl
+            on Windows or Command
+            on Mac to select
+            multiple travelers.
+          </small>
         </label>
 
         <label>
@@ -279,8 +339,9 @@ export function CaseForm({
 
           <small>
             Optional guidance only.
-            The assigned IPCM sets
-            the approved budget.
+            The assigned Case
+            Manager sets the
+            approved budget.
           </small>
         </label>
       </div>

@@ -75,6 +75,22 @@ function getStatusClass(
   );
 }
 
+function getTravelerDisplay(
+  travelerNames:
+    string[]
+): string {
+  if (
+    travelerNames.length ===
+    0
+  ) {
+    return "—";
+  }
+
+  return travelerNames.join(
+    ", "
+  );
+}
+
 export function CasesTable({
   cases,
   user,
@@ -107,7 +123,7 @@ export function CasesTable({
             </th>
 
             <th>
-              IPCM
+              Travelers
             </th>
 
             <th>
@@ -159,10 +175,10 @@ export function CasesTable({
                   </td>
 
                   <td>
-                    {
+                    {getTravelerDisplay(
                       caseItem
-                        .ipcmName
-                    }
+                        .travelerNames
+                    )}
                   </td>
 
                   <td>

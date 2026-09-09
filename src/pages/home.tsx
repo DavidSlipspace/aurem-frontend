@@ -56,16 +56,20 @@ type HomePageProps = {
 const EMPTY_OPTIONS:
   CaseOptionsResponse = {
     caseManagers: [],
-    ipcms: []
+    travelers: []
   };
 
 const EMPTY_FORM:
   CaseFormState = {
     caseReferenceId: "",
+
     caseManagerUserId: "",
-    ipcmUserId: "",
+
+    travelerProfileIds: [],
+
     suggestedBudgetDollars:
       "",
+
     status: "active"
   };
 
@@ -354,9 +358,9 @@ export function HomePage({
         caseItem
           .caseManagerUserId,
 
-      ipcmUserId:
+      travelerProfileIds:
         caseItem
-          .ipcmUserId,
+          .travelerProfileIds,
 
       suggestedBudgetDollars:
         centsToDollars(
@@ -407,6 +411,7 @@ export function HomePage({
         current
       ) => ({
         ...current,
+
         [field]:
           value
       })
@@ -420,6 +425,19 @@ export function HomePage({
     event.preventDefault();
 
     if (!isAdmin) {
+      return;
+    }
+
+    if (
+      formData
+        .travelerProfileIds
+        .length ===
+      0
+    ) {
+      setErrorMessage(
+        "Select at least one traveler for this case."
+      );
+
       return;
     }
 
@@ -447,9 +465,9 @@ export function HomePage({
             formData
               .caseManagerUserId,
 
-          ipcmUserId:
+          travelerProfileIds:
             formData
-              .ipcmUserId,
+              .travelerProfileIds,
 
           suggestedBudgetCents:
             dollarsToCents(

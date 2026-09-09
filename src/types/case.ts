@@ -4,10 +4,12 @@ export type CaseResponse = {
   caseReferenceId: string;
 
   caseManagerUserId: string;
+
   caseManagerName: string;
 
-  ipcmUserId: string;
-  ipcmName: string;
+  travelerProfileIds: string[];
+
+  travelerNames: string[];
 
   suggestedBudgetCents:
     | number
@@ -28,7 +30,22 @@ export type CaseUserOption = {
   id: string;
 
   firstName: string;
+
   lastName: string;
+
+  email: string;
+};
+
+export type CaseTravelerOption = {
+  id: string;
+
+  legalFirstName: string;
+
+  legalMiddleName:
+    | string
+    | null;
+
+  legalLastName: string;
 
   email: string;
 };
@@ -37,8 +54,8 @@ export type CaseOptionsResponse = {
   caseManagers:
     CaseUserOption[];
 
-  ipcms:
-    CaseUserOption[];
+  travelers:
+    CaseTravelerOption[];
 };
 
 export type CaseRequest = {
@@ -47,8 +64,8 @@ export type CaseRequest = {
   caseManagerUserId:
     string;
 
-  ipcmUserId:
-    string;
+  travelerProfileIds:
+    string[];
 
   suggestedBudgetCents:
     | number
