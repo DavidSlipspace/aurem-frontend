@@ -1,4 +1,7 @@
 import type {
+  ConfirmAchSetupRequest,
+  ConfirmAchSetupResponse,
+  CreateAchSetupIntentResponse,
   PaymentComponentKeyResponse,
   PaymentMethodsResponse,
   SaveCardPaymentMethodRequest,
@@ -186,5 +189,101 @@ export async function saveCardPaymentMethod(
   return (
     data as
       SavePaymentMethodResponse
+  );
+}
+
+export async function createAchSetupIntent(
+  idToken: string
+): Promise<CreateAchSetupIntentResponse> {
+  const response =
+    await fetch(
+      `${baseUrl}/payment-methods/ach/setup`,
+      {
+        method:
+          "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${idToken}`,
+
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            {}
+          )
+      }
+    );
+
+  const data =
+    await parseResponseBody(
+      response
+    );
+
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Unable to start secure bank account setup."
+      )
+    );
+  }
+
+  return (
+    data as
+      CreateAchSetupIntentResponse
+  );
+}
+
+export async function confirmAchSetup(
+  idToken: string,
+  payload:
+    ConfirmAchSetupRequest
+): Promise<ConfirmAchSetupResponse> {
+  const response =
+    await fetch(
+      `${baseUrl}/payment-methods/ach/confirm`,
+      {
+        method:
+          "POST",
+
+        headers: {
+          Authorization:
+            `Bearer ${idToken}`,
+
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+  const data =
+    await parseResponseBody(
+      response
+    );
+
+  if (
+    !response.ok
+  ) {
+    throw new Error(
+      getErrorMessage(
+        data,
+        "Unable to save the bank account."
+      )
+    );
+  }
+
+  return (
+    data as
+      ConfirmAchSetupResponse
   );
 }

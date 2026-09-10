@@ -1,190 +1,144 @@
-import type {
-  PaymentComponentKeyResponse,
-  PaymentMethodsResponse,
-  SaveCardPaymentMethodRequest,
-  SavePaymentMethodResponse
-} from "../types/payment";
+export type PaymentMethodType =
+  | "card"
+  | "bank_account";
 
-const baseUrl =
-  import.meta.env
-    .VITE_API_BASE_URL;
+export type PaymentMethodStatus =
+  | "pending"
+  | "active"
+  | "requires_action"
+  | "inactive";
 
-function getErrorMessage(
-  data: unknown,
-  fallbackMessage: string
-): string {
-  if (
-    typeof data ===
-      "object" &&
-    data !== null &&
-    "message" in data &&
-    typeof data.message ===
-      "string"
-  ) {
-    return data.message;
-  }
+export type IpcmPaymentMethod = {
+  id: string;
 
-  return fallbackMessage;
-}
+  type:
+    PaymentMethodType;
 
-async function parseResponseBody(
-  response: Response
-): Promise<unknown> {
-  const contentType =
-    response.headers.get(
-      "content-type"
-    );
+  provider:
+    string;
 
-  if (
-    contentType?.includes(
-      "application/json"
-    )
-  ) {
-    return response.json();
-  }
+  displayName:
+    | string
+    | null;
 
-  const text =
-    await response.text();
+  cardBrand:
+    | string
+    | null;
 
-  return text
-    ? {
-        message:
-          text
-      }
-    : {};
-}
+  lastFour:
+    | string
+    | null;
 
-export async function getPaymentMethods(
-  idToken: string
-): Promise<PaymentMethodsResponse> {
-  const response =
-    await fetch(
-      `${baseUrl}/payment-methods`,
-      {
-        method:
-          "GET",
+  bankName:
+    | string
+    | null;
 
-        headers: {
-          Authorization:
-            `Bearer ${idToken}`
-        }
-      }
-    );
+  bankAccountType:
+    | string
+    | null;
 
-  const data =
-    await parseResponseBody(
-      response
-    );
+  status:
+    PaymentMethodStatus;
 
-  if (
-    !response.ok
-  ) {
-    throw new Error(
-      getErrorMessage(
-        data,
-        "Unable to load payment methods."
-      )
-    );
-  }
+  isDefault:
+    boolean;
+};
 
-  return (
-    data as
-      PaymentMethodsResponse
-  );
-}
+export type IpcmPaymentProfile = {
+  userId:
+    string;
 
-export async function createPaymentComponentKey(
-  idToken: string
-): Promise<PaymentComponentKeyResponse> {
-  const response =
-    await fetch(
-      `${baseUrl}/payment-methods/component-key`,
-      {
-        method:
-          "POST",
+  firstName:
+    string;
 
-        headers: {
-          Authorization:
-            `Bearer ${idToken}`,
+  lastName:
+    string;
 
-          "Content-Type":
-            "application/json"
-        },
+  email:
+    string;
 
-        body:
-          JSON.stringify(
-            {}
-          )
-      }
-    );
+  card:
+    | IpcmPaymentMethod
+    | null;
 
-  const data =
-    await parseResponseBody(
-      response
-    );
+  bankAccount:
+    | IpcmPaymentMethod
+    | null;
+};
 
-  if (
-    !response.ok
-  ) {
-    throw new Error(
-      getErrorMessage(
-        data,
-        "Unable to start secure card setup."
-      )
-    );
-  }
+export type PaymentMethodsResponse = {
+  mode:
+    | "admin"
+    | "self";
 
-  return (
-    data as
-      PaymentComponentKeyResponse
-  );
-}
+  ipcms:
+    IpcmPaymentProfile[];
+};
 
-export async function saveCardPaymentMethod(
-  idToken: string,
-  payload:
-    SaveCardPaymentMethodRequest
-): Promise<SavePaymentMethodResponse> {
-  const response =
-    await fetch(
-      `${baseUrl}/payment-methods`,
-      {
-        method:
-          "POST",
+export type PaymentComponentKeyResponse = {
+  componentClientKey:
+    string;
+};
 
-        headers: {
-          Authorization:
-            `Bearer ${idToken}`,
+export type SaveCardPaymentMethodRequest = {
+  type:
+    "card";
 
-          "Content-Type":
-            "application/json"
-        },
+  providerPaymentMethodId:
+    string;
 
-        body:
-          JSON.stringify(
-            payload
-          )
-      }
-    );
+  displayName:
+    string;
 
-  const data =
-    await parseResponseBody(
-      response
-    );
+  cardBrand:
+    string;
 
-  if (
-    !response.ok
-  ) {
-    throw new Error(
-      getErrorMessage(
-        data,
-        "Unable to save the card."
-      )
-    );
-  }
+  lastFour:
+    string;
+};
 
-  return (
-    data as
-      SavePaymentMethodResponse
-  );
-}
+export type SavePaymentMethodResponse = {
+  message:
+    string;
+};
+
+export type CreateAchSetupIntentResponse = {
+  clientSecret:
+    string;
+
+  setupIntentId:
+    string;
+};
+
+export type ConfirmAchSetupRequest = {
+  setupIntentId:
+    string;
+};
+
+export type ConfirmAchSetupResponse = {
+  message:
+    string;
+
+  status:
+    PaymentMethodStatus;
+
+  paymentMethod: {
+    provider:
+      "stripe";
+
+    providerPaymentMethodId:
+      string;
+
+    bankName:
+      | string
+      | null;
+
+    lastFour:
+      | string
+      | null;
+
+    bankAccountType:
+      | string
+      | null;
+  };
+};

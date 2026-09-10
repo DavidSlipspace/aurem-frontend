@@ -12,6 +12,10 @@ import {
 } from "../components/payments/AdminPaymentMethodsPanel";
 
 import {
+  AchSetupModal
+} from "../components/payments/AchSetupModal";
+
+import {
   CardSetupModal
 } from "../components/payments/CardSetupModal";
 
@@ -71,6 +75,15 @@ export function PaymentsPage({
   const [
     cardSetupProfile,
     setCardSetupProfile
+  ] =
+    useState<
+      IpcmPaymentProfile |
+      null
+    >(null);
+
+  const [
+    achSetupProfile,
+    setAchSetupProfile
   ] =
     useState<
       IpcmPaymentProfile |
@@ -141,22 +154,25 @@ export function PaymentsPage({
       return;
     }
 
-    setNoticeMessage(
-      "Secure bank account connection is the next payment milestone. The payment architecture is prepared for a separate tokenized bank-account provider without changing the IPCM payment profile model."
+    setAchSetupProfile(
+      profile
     );
-
-    window.scrollTo({
-      top:
-        0,
-
-      behavior:
-        "smooth"
-    });
   }
 
   async function handleCardSaved() {
     setNoticeMessage(
       "Your travel card was saved successfully."
+    );
+
+    await loadPaymentMethods();
+  }
+
+  async function handleBankSaved(
+    message:
+      string
+  ) {
+    setNoticeMessage(
+      message
     );
 
     await loadPaymentMethods();
@@ -181,12 +197,13 @@ export function PaymentsPage({
               payment sources
               associated with
               your IPCM profile.
-              Card credentials
-              are securely
-              tokenized by the
-              payment provider
-              and are never
-              stored in Aurem.
+              Sensitive payment
+              credentials are
+              collected directly
+              by the payment
+              provider and are
+              never stored in
+              Aurem.
             </p>
           </div>
         </header>
@@ -332,6 +349,22 @@ export function PaymentsPage({
           }
           onSaved={
             handleCardSaved
+          }
+        />
+      )}
+
+      {achSetupProfile && (
+        <AchSetupModal
+          idToken={
+            idToken
+          }
+          onClose={() =>
+            setAchSetupProfile(
+              null
+            )
+          }
+          onSaved={
+            handleBankSaved
           }
         />
       )}
