@@ -470,6 +470,87 @@
   cursor: not-allowed;
 }
 
+.payment-ach-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.payment-ach-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.payment-ach-field input {
+  width: 100%;
+  padding: 11px 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-weight: 400;
+  outline: none;
+}
+
+.payment-ach-field input:focus {
+  border-color: var(--color-primary);
+}
+
+.payment-ach-field input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.payment-ach-bank-summary {
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-table-row-hover);
+}
+
+.payment-ach-bank-summary h3 {
+  margin: 4px 0;
+  color: var(--color-text-primary);
+  font-size: 18px;
+}
+
+.payment-ach-bank-summary p:last-child {
+  margin: 5px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.payment-ach-mandate {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.payment-ach-mandate h3 {
+  margin: 0 0 12px;
+  color: var(--color-text-primary);
+  font-size: 16px;
+}
+
+.payment-ach-mandate p {
+  margin: 8px 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.payment-ach-mandate strong {
+  color: var(--color-text-primary);
+}
+
 @media (max-width: 800px) {
   .payments-content {
     width: calc(100% - 40px);
@@ -496,23 +577,5 @@
 
   .payment-modal-actions button {
     width: 100%;
-  }
-
-  .payment-stripe-ach-form {
-    padding: 20px;
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    background: #ffffff;
-  }
-
-  .payment-ach-note {
-    margin-top: 12px;
-    padding: 12px 14px;
-    border: 1px solid var(--color-border);
-    border-radius: 9px;
-    background: var(--color-table-row-hover);
-    color: var(--color-text-secondary);
-    font-size: 13px;
-    line-height: 1.55;
   }
 }

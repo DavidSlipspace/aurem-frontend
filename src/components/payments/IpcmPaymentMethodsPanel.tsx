@@ -11,9 +11,11 @@ type IpcmPaymentMethodsPanelProps = {
   profile:
     IpcmPaymentProfile;
 
-  canManage: boolean;
+  canManage:
+    boolean;
 
-  showIdentity?: boolean;
+  showIdentity?:
+    boolean;
 
   onConfigure:
     (
@@ -47,7 +49,7 @@ export function IpcmPaymentMethodsPanel({
           </div>
 
           <span className="ipcm-payment-role">
-            IPCM
+            Case Manager
           </span>
         </header>
       )}
@@ -62,7 +64,9 @@ export function IpcmPaymentMethodsPanel({
             canManage
           }
           onConfigure={
-            (type) =>
+            (
+              type
+            ) =>
               onConfigure(
                 profile,
                 type
@@ -79,7 +83,9 @@ export function IpcmPaymentMethodsPanel({
             canManage
           }
           onConfigure={
-            (type) =>
+            (
+              type
+            ) =>
               onConfigure(
                 profile,
                 type

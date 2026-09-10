@@ -1,15 +1,7 @@
 import {
   useEffect,
-  useMemo,
   useState
 } from "react";
-
-import {
-  Elements,
-  PaymentElement,
-  useElements,
-  useStripe
-} from "@stripe/react-stripe-js";
 
 import {
   loadStripe
@@ -20,26 +12,16 @@ import {
   createAchSetupIntent
 } from "../../api/paymentApi";
 
+import type {
+  IpcmPaymentProfile
+} from "../../types/payment";
+
 type AchSetupModalProps = {
   idToken:
     string;
 
-  onClose:
-    () => void;
-
-  onSaved:
-    (
-      message:
-        string
-    ) => Promise<void>;
-};
-
-type AchSetupFormProps = {
-  idToken:
-    string;
-
-  setupIntentId:
-    string;
+  profile:
+    IpcmPaymentProfile;
 
   onClose:
     () => void;
@@ -51,193 +33,128 @@ type AchSetupFormProps = {
     ) => Promise<void>;
 };
 
-function AchSetupForm({
-  idToken,
-  setupIntentId,
-  onClose,
-  onSaved
-}: AchSetupFormProps) {
-  const stripe =
-    useStripe();
+type BankSummary = {
+  bankName:
+    string;
 
-  const elements =
-    useElements();
+  lastFour:
+    string;
 
-  const [
-    isSaving,
-    setIsSaving
-  ] =
-    useState(
-      false
-    );
+  accountType:
+    string;
+};
 
-  const [
-    errorMessage,
-    setErrorMessage
-  ] =
-    useState("");
+type ExpandedBankPaymentMethod = {
+  id?:
+    string;
 
-  async function handleSave() {
-    if (
-      !stripe ||
-      !elements ||
-      isSaving
-    ) {
-      return;
-    }
+  us_bank_account?: {
+    bank_name?:
+      string |
+      null;
 
-    setIsSaving(
-      true
-    );
+    last4?:
+      string |
+      null;
 
-    setErrorMessage(
-      ""
-    );
+    account_type?:
+      string |
+      null;
+  };
+};
 
-    try {
-      const result =
-        await stripe
-          .confirmSetup({
-            elements,
+type ExpandedSetupIntent = {
+  id:
+    string;
 
-            confirmParams: {
-              return_url:
-                window
-                  .location
-                  .href
-            },
+  status:
+    string;
 
-            redirect:
-              "if_required"
-          });
+  payment_method?:
+    | string
+    | ExpandedBankPaymentMethod
+    | null;
+};
 
-      if (
-        result.error
-      ) {
-        throw new Error(
-          result.error
-            .message ||
-            "Stripe could not save this bank account."
-        );
-      }
+function getBankSummary(
+  setupIntent:
+    ExpandedSetupIntent
+): BankSummary {
+  const paymentMethod =
+    setupIntent
+      .payment_method;
 
-      const confirmedSetupIntentId =
-        result.setupIntent
-          ?.id ||
-        setupIntentId;
+  if (
+    !paymentMethod ||
+    typeof paymentMethod ===
+      "string"
+  ) {
+    return {
+      bankName:
+        "Bank account",
 
-      const response =
-        await confirmAchSetup(
-          idToken,
-          {
-            setupIntentId:
-              confirmedSetupIntentId
-          }
-        );
+      lastFour:
+        "",
 
-      await onSaved(
-        response.message
-      );
-
-      onClose();
-    } catch (
-      error
-    ) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to save the bank account."
-      );
-    } finally {
-      setIsSaving(
-        false
-      );
-    }
+      accountType:
+        ""
+    };
   }
 
-  return (
-    <>
-      {errorMessage && (
-        <div
-          className="payment-card-error"
-          role="alert"
-        >
-          {
-            errorMessage
-          }
-        </div>
-      )}
+  return {
+    bankName:
+      paymentMethod
+        .us_bank_account
+        ?.bank_name ||
+      "Bank account",
 
-      <div className="payment-stripe-ach-form">
-        <PaymentElement
-          options={{
-            layout:
-              "tabs"
-          }}
-        />
-      </div>
+    lastFour:
+      paymentMethod
+        .us_bank_account
+        ?.last4 ||
+      "",
 
-      <div className="payment-modal-security-copy">
-        <strong>
-          Bank account security
-        </strong>
+    accountType:
+      paymentMethod
+        .us_bank_account
+        ?.account_type ||
+      ""
+  };
+}
 
-        <span>
-          Your bank credentials
-          are collected directly
-          by Stripe. Aurem stores
-          only the Stripe payment
-          reference and masked
-          account metadata.
-        </span>
-      </div>
+function formatAccountType(
+  value:
+    string
+): string {
+  if (
+    !value
+  ) {
+    return "";
+  }
 
-      <div className="payment-ach-note">
-        Stripe may verify your
-        account instantly through
-        your bank login. If manual
-        verification is required,
-        Stripe may send
-        microdeposit instructions.
-      </div>
-
-      <div className="payment-modal-actions">
-        <button
-          type="button"
-          className="payment-modal-secondary"
-          onClick={
-            onClose
-          }
-          disabled={
-            isSaving
-          }
-        >
-          Cancel
-        </button>
-
-        <button
-          type="button"
-          className="payment-modal-primary"
-          onClick={() =>
-            void handleSave()
-          }
-          disabled={
-            !stripe ||
-            !elements ||
-            isSaving
-          }
-        >
-          {isSaving
-            ? "Saving bank account..."
-            : "Save Bank Account"}
-        </button>
-      </div>
-    </>
-  );
+  return value
+    .split("_")
+    .map(
+      (
+        part
+      ) =>
+        part
+          .charAt(
+            0
+          )
+          .toUpperCase() +
+        part.slice(
+          1
+        )
+    )
+    .join(
+      " "
+    );
 }
 
 export function AchSetupModal({
   idToken,
+  profile,
   onClose,
   onSaved
 }: AchSetupModalProps) {
@@ -247,18 +164,17 @@ export function AchSetupModal({
       | string
       | undefined;
 
-  const stripePromise =
-    useMemo(
-      () =>
-        publishableKey
-          ? loadStripe(
-              publishableKey
-            )
-          : null,
-      [
-        publishableKey
-      ]
-    );
+  const [
+    stripe,
+    setStripe
+  ] =
+    useState<
+      Awaited<
+        ReturnType<
+          typeof loadStripe
+        >
+      >
+    >(null);
 
   const [
     clientSecret,
@@ -279,11 +195,53 @@ export function AchSetupModal({
     >(null);
 
   const [
+    accountHolderName,
+    setAccountHolderName
+  ] =
+    useState(
+      `${profile.firstName} ${profile.lastName}`
+        .trim()
+    );
+
+  const [
+    billingEmail,
+    setBillingEmail
+  ] =
+    useState(
+      profile.email
+    );
+
+  const [
+    bankSummary,
+    setBankSummary
+  ] =
+    useState<
+      BankSummary |
+      null
+    >(null);
+
+  const [
     isLoading,
     setIsLoading
   ] =
     useState(
       true
+    );
+
+  const [
+    isCollecting,
+    setIsCollecting
+  ] =
+    useState(
+      false
+    );
+
+  const [
+    isConfirming,
+    setIsConfirming
+  ] =
+    useState(
+      false
     );
 
   const [
@@ -294,21 +252,7 @@ export function AchSetupModal({
 
   useEffect(
     () => {
-      async function loadSetupIntent() {
-        if (
-          !publishableKey
-        ) {
-          setErrorMessage(
-            "VITE_STRIPE_PUBLISHABLE_KEY is not configured."
-          );
-
-          setIsLoading(
-            false
-          );
-
-          return;
-        }
-
+      async function prepareSetup() {
         setIsLoading(
           true
         );
@@ -318,17 +262,48 @@ export function AchSetupModal({
         );
 
         try {
-          const response =
-            await createAchSetupIntent(
-              idToken
+          if (
+            !publishableKey
+          ) {
+            throw new Error(
+              "VITE_STRIPE_PUBLISHABLE_KEY is not configured."
             );
+          }
+
+          const [
+            stripeClient,
+            setupResponse
+          ] =
+            await Promise.all([
+              loadStripe(
+                publishableKey
+              ),
+
+              createAchSetupIntent(
+                idToken
+              )
+            ]);
+
+          if (
+            !stripeClient
+          ) {
+            throw new Error(
+              "Unable to initialize Stripe."
+            );
+          }
+
+          setStripe(
+            stripeClient
+          );
 
           setClientSecret(
-            response.clientSecret
+            setupResponse
+              .clientSecret
           );
 
           setSetupIntentId(
-            response.setupIntentId
+            setupResponse
+              .setupIntentId
           );
         } catch (
           error
@@ -345,13 +320,249 @@ export function AchSetupModal({
         }
       }
 
-      void loadSetupIntent();
+      void prepareSetup();
     },
     [
       idToken,
       publishableKey
     ]
   );
+
+  async function handleCollectBankAccount() {
+    if (
+      !stripe ||
+      !clientSecret ||
+      isCollecting ||
+      isConfirming
+    ) {
+      return;
+    }
+
+    const normalizedName =
+      accountHolderName
+        .trim();
+
+    const normalizedEmail =
+      billingEmail
+        .trim();
+
+    if (
+      !normalizedName
+    ) {
+      setErrorMessage(
+        "Account holder name is required."
+      );
+
+      return;
+    }
+
+    if (
+      !normalizedEmail
+    ) {
+      setErrorMessage(
+        "Billing email is required."
+      );
+
+      return;
+    }
+
+    setIsCollecting(
+      true
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    try {
+      const result =
+        await stripe
+          .collectBankAccountForSetup({
+            clientSecret,
+
+            params: {
+              payment_method_type:
+                "us_bank_account",
+
+              payment_method_data: {
+                billing_details: {
+                  name:
+                    normalizedName,
+
+                  email:
+                    normalizedEmail
+                }
+              }
+            },
+
+            expand: [
+              "payment_method"
+            ]
+          });
+
+      if (
+        result.error
+      ) {
+        throw new Error(
+          result.error
+            .message ||
+            "Stripe could not collect the bank account."
+        );
+      }
+
+      if (
+        !result.setupIntent
+      ) {
+        throw new Error(
+          "Stripe did not return a bank account setup session."
+        );
+      }
+
+      const setupIntent =
+        result.setupIntent as
+          unknown as
+          ExpandedSetupIntent;
+
+      if (
+        setupIntent.status ===
+          "requires_payment_method"
+      ) {
+        throw new Error(
+          "Bank account connection was canceled or could not be completed."
+        );
+      }
+
+      if (
+        setupIntent.status !==
+          "requires_confirmation"
+      ) {
+        throw new Error(
+          `Unexpected bank account setup status: ${setupIntent.status}.`
+        );
+      }
+
+      setBankSummary(
+        getBankSummary(
+          setupIntent
+        )
+      );
+    } catch (
+      error
+    ) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to connect the bank account."
+      );
+    } finally {
+      setIsCollecting(
+        false
+      );
+    }
+  }
+
+  async function handleAuthorizeAndSave() {
+    if (
+      !stripe ||
+      !clientSecret ||
+      !setupIntentId ||
+      !bankSummary ||
+      isCollecting ||
+      isConfirming
+    ) {
+      return;
+    }
+
+    setIsConfirming(
+      true
+    );
+
+    setErrorMessage(
+      ""
+    );
+
+    try {
+      const result =
+        await stripe
+          .confirmUsBankAccountSetup(
+            clientSecret
+          );
+
+      if (
+        result.error
+      ) {
+        throw new Error(
+          result.error
+            .message ||
+            "Stripe could not authorize this bank account."
+        );
+      }
+
+      if (
+        !result.setupIntent
+      ) {
+        throw new Error(
+          "Stripe did not return the completed bank account setup."
+        );
+      }
+
+      if (
+        result.setupIntent
+          .status ===
+          "requires_payment_method"
+      ) {
+        throw new Error(
+          "Bank account authorization failed. Please choose a different account or try again."
+        );
+      }
+
+      const response =
+        await confirmAchSetup(
+          idToken,
+          {
+            setupIntentId:
+              result
+                .setupIntent
+                .id ||
+              setupIntentId
+          }
+        );
+
+      await onSaved(
+        response.message
+      );
+
+      onClose();
+    } catch (
+      error
+    ) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to save the bank account."
+      );
+    } finally {
+      setIsConfirming(
+        false
+      );
+    }
+  }
+
+  const authorizationDate =
+    new Date()
+      .toLocaleDateString(
+        "en-US",
+        {
+          year:
+            "numeric",
+
+          month:
+            "long",
+
+          day:
+            "numeric"
+        }
+      );
 
   return (
     <div
@@ -373,18 +584,20 @@ export function AchSetupModal({
             <h2
               id="payment-ach-modal-title"
             >
-              Connect bank account
+              {profile.bankAccount
+                ? "Replace bank account"
+                : "Connect bank account"}
             </h2>
 
             <p>
               Connect the bank
-              account that will
-              eventually fund
+              account that may
+              eventually be used
+              to fund approved
               travel purchases.
-              Aurem never receives
-              or stores your full
-              routing or account
-              number.
+              Bank credentials
+              are collected
+              directly by Stripe.
             </p>
           </div>
 
@@ -393,6 +606,10 @@ export function AchSetupModal({
             className="payment-modal-close"
             onClick={
               onClose
+            }
+            disabled={
+              isCollecting ||
+              isConfirming
             }
             aria-label="Close bank account setup"
           >
@@ -403,7 +620,7 @@ export function AchSetupModal({
         {isLoading && (
           <div className="payment-card-loading">
             Preparing secure bank
-            account form...
+            account setup...
           </div>
         )}
 
@@ -419,38 +636,256 @@ export function AchSetupModal({
         )}
 
         {!isLoading &&
-          !errorMessage &&
-          stripePromise &&
+          stripe &&
           clientSecret &&
-          setupIntentId && (
-            <Elements
-              stripe={
-                stripePromise
-              }
-              options={{
-                clientSecret,
+          !bankSummary && (
+            <>
+              <div className="payment-ach-form">
+                <label className="payment-ach-field">
+                  <span>
+                    Account holder
+                    name
+                  </span>
 
-                appearance: {
-                  theme:
-                    "stripe"
-                }
-              }}
-            >
-              <AchSetupForm
-                idToken={
-                  idToken
-                }
-                setupIntentId={
-                  setupIntentId
-                }
-                onClose={
-                  onClose
-                }
-                onSaved={
-                  onSaved
-                }
-              />
-            </Elements>
+                  <input
+                    type="text"
+                    value={
+                      accountHolderName
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setAccountHolderName(
+                        event
+                          .target
+                          .value
+                      )
+                    }
+                    autoComplete="name"
+                    disabled={
+                      isCollecting
+                    }
+                  />
+                </label>
+
+                <label className="payment-ach-field">
+                  <span>
+                    Billing email
+                  </span>
+
+                  <input
+                    type="email"
+                    value={
+                      billingEmail
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setBillingEmail(
+                        event
+                          .target
+                          .value
+                      )
+                    }
+                    autoComplete="email"
+                    disabled={
+                      isCollecting
+                    }
+                  />
+                </label>
+              </div>
+
+              <div className="payment-modal-security-copy">
+                <strong>
+                  Bank security
+                </strong>
+
+                <span>
+                  Stripe opens the
+                  secure bank
+                  connection flow.
+                  Aurem never
+                  receives your
+                  online banking
+                  credentials,
+                  routing number,
+                  or full account
+                  number.
+                </span>
+              </div>
+
+              <div className="payment-modal-actions">
+                <button
+                  type="button"
+                  className="payment-modal-secondary"
+                  onClick={
+                    onClose
+                  }
+                  disabled={
+                    isCollecting
+                  }
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="payment-modal-primary"
+                  onClick={() =>
+                    void handleCollectBankAccount()
+                  }
+                  disabled={
+                    isCollecting
+                  }
+                >
+                  {isCollecting
+                    ? "Connecting..."
+                    : "Choose Bank Account"}
+                </button>
+              </div>
+            </>
+          )}
+
+        {!isLoading &&
+          bankSummary && (
+            <>
+              <div className="payment-ach-bank-summary">
+                <p className="payment-method-eyebrow">
+                  Selected bank
+                  account
+                </p>
+
+                <h3>
+                  {
+                    bankSummary
+                      .bankName
+                  }
+
+                  {bankSummary
+                    .lastFour
+                    ? ` •••• ${bankSummary.lastFour}`
+                    : ""}
+                </h3>
+
+                {bankSummary
+                  .accountType && (
+                    <p>
+                      {formatAccountType(
+                        bankSummary
+                          .accountType
+                      )}
+                    </p>
+                  )}
+              </div>
+
+              <div className="payment-ach-mandate">
+                <h3>
+                  ACH authorization
+                </h3>
+
+                <p>
+                  Account holder:{" "}
+                  <strong>
+                    {
+                      accountHolderName
+                    }
+                  </strong>
+                </p>
+
+                <p>
+                  Account:{" "}
+                  <strong>
+                    {
+                      bankSummary
+                        .bankName
+                    }
+
+                    {bankSummary
+                      .lastFour
+                      ? ` ending in ${bankSummary.lastFour}`
+                      : ""}
+                  </strong>
+                </p>
+
+                <p>
+                  Authorization
+                  date:{" "}
+                  <strong>
+                    {
+                      authorizationDate
+                    }
+                  </strong>
+                </p>
+
+                <p>
+                  By clicking
+                  Authorize and
+                  Save, you
+                  authorize Aurem
+                  to debit the bank
+                  account specified
+                  above for amounts
+                  owed in connection
+                  with services or
+                  purchases you
+                  authorize through
+                  Aurem, until this
+                  authorization is
+                  revoked.
+                </p>
+
+                <p>
+                  If you use Aurem
+                  services
+                  periodically,
+                  you authorize
+                  Aurem to debit
+                  this bank account
+                  periodically for
+                  authorized
+                  transactions.
+                  Payments outside
+                  of those
+                  authorized uses
+                  will require the
+                  applicable
+                  authorization.
+                </p>
+              </div>
+
+              <div className="payment-modal-actions">
+                <button
+                  type="button"
+                  className="payment-modal-secondary"
+                  onClick={() =>
+                    setBankSummary(
+                      null
+                    )
+                  }
+                  disabled={
+                    isConfirming
+                  }
+                >
+                  Choose Different
+                  Account
+                </button>
+
+                <button
+                  type="button"
+                  className="payment-modal-primary"
+                  onClick={() =>
+                    void handleAuthorizeAndSave()
+                  }
+                  disabled={
+                    isConfirming
+                  }
+                >
+                  {isConfirming
+                    ? "Saving bank account..."
+                    : "Authorize and Save"}
+                </button>
+              </div>
+            </>
           )}
       </section>
     </div>

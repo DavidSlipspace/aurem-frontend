@@ -32,13 +32,14 @@ export function AdminPaymentMethodsPanel({
     return (
       <div className="payments-empty-state">
         <h2>
-          No IPCMs found
+          No Case Managers
+          found
         </h2>
 
         <p>
           There are no active
-          IPCM users in your
-          company yet.
+          Case Manager users
+          in your company yet.
         </p>
       </div>
     );
@@ -47,7 +48,9 @@ export function AdminPaymentMethodsPanel({
   return (
     <div className="admin-payment-method-list">
       {profiles.map(
-        (profile) => (
+        (
+          profile
+        ) => (
           <IpcmPaymentMethodsPanel
             key={
               profile.userId
@@ -55,7 +58,9 @@ export function AdminPaymentMethodsPanel({
             profile={
               profile
             }
-            canManage
+            canManage={
+              false
+            }
             onConfigure={
               onConfigure
             }

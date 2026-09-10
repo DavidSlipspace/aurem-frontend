@@ -9,7 +9,8 @@ export type PaymentMethodStatus =
   | "inactive";
 
 export type IpcmPaymentMethod = {
-  id: string;
+  id:
+    string;
 
   type:
     PaymentMethodType;

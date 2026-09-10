@@ -13,14 +13,19 @@ const baseUrl =
     .VITE_API_BASE_URL;
 
 function getErrorMessage(
-  data: unknown,
-  fallbackMessage: string
+  data:
+    unknown,
+
+  fallbackMessage:
+    string
 ): string {
   if (
     typeof data ===
       "object" &&
-    data !== null &&
-    "message" in data &&
+    data !==
+      null &&
+    "message" in
+      data &&
     typeof data.message ===
       "string"
   ) {
@@ -31,7 +36,8 @@ function getErrorMessage(
 }
 
 async function parseResponseBody(
-  response: Response
+  response:
+    Response
 ): Promise<unknown> {
   const contentType =
     response.headers.get(
@@ -58,7 +64,8 @@ async function parseResponseBody(
 }
 
 export async function getPaymentMethods(
-  idToken: string
+  idToken:
+    string
 ): Promise<PaymentMethodsResponse> {
   const response =
     await fetch(
@@ -97,7 +104,8 @@ export async function getPaymentMethods(
 }
 
 export async function createPaymentComponentKey(
-  idToken: string
+  idToken:
+    string
 ): Promise<PaymentComponentKeyResponse> {
   const response =
     await fetch(
@@ -144,7 +152,9 @@ export async function createPaymentComponentKey(
 }
 
 export async function saveCardPaymentMethod(
-  idToken: string,
+  idToken:
+    string,
+
   payload:
     SaveCardPaymentMethodRequest
 ): Promise<SavePaymentMethodResponse> {
@@ -193,7 +203,8 @@ export async function saveCardPaymentMethod(
 }
 
 export async function createAchSetupIntent(
-  idToken: string
+  idToken:
+    string
 ): Promise<CreateAchSetupIntentResponse> {
   const response =
     await fetch(
@@ -240,7 +251,9 @@ export async function createAchSetupIntent(
 }
 
 export async function confirmAchSetup(
-  idToken: string,
+  idToken:
+    string,
+
   payload:
     ConfirmAchSetupRequest
 ): Promise<ConfirmAchSetupResponse> {

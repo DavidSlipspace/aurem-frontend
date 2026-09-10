@@ -196,14 +196,14 @@ export function PaymentsPage({
               Configure the
               payment sources
               associated with
-              your IPCM profile.
-              Sensitive payment
-              credentials are
-              collected directly
-              by the payment
-              provider and are
-              never stored in
-              Aurem.
+              your Case Manager
+              profile. Sensitive
+              payment credentials
+              are collected
+              directly by the
+              payment provider
+              and are never stored
+              in Aurem.
             </p>
           </div>
         </header>
@@ -261,15 +261,15 @@ export function PaymentsPage({
                 <>
                   <div className="payments-section-heading">
                     <h2>
-                      IPCM payment
-                      profiles
+                      Case Manager
+                      payment profiles
                     </h2>
 
                     <p>
                       Review payment
                       configuration
-                      for IPCMs in
-                      your company.
+                      for Case Managers
+                      in your company.
                     </p>
                   </div>
 
@@ -294,8 +294,8 @@ export function PaymentsPage({
                       These payment
                       sources are
                       associated
-                      only with
-                      your IPCM
+                      only with your
+                      Case Manager
                       profile.
                     </p>
                   </div>
@@ -324,7 +324,8 @@ export function PaymentsPage({
                       <p>
                         We could not
                         locate your
-                        IPCM payment
+                        Case Manager
+                        payment
                         profile.
                       </p>
                     </div>
@@ -357,6 +358,9 @@ export function PaymentsPage({
         <AchSetupModal
           idToken={
             idToken
+          }
+          profile={
+            achSetupProfile
           }
           onClose={() =>
             setAchSetupProfile(

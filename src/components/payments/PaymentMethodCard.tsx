@@ -4,13 +4,15 @@ import type {
 } from "../../types/payment";
 
 type PaymentMethodCardProps = {
-  type: PaymentMethodType;
+  type:
+    PaymentMethodType;
 
   method:
     | IpcmPaymentMethod
     | null;
 
-  canManage: boolean;
+  canManage:
+    boolean;
 
   onConfigure:
     (
@@ -20,21 +22,26 @@ type PaymentMethodCardProps = {
 };
 
 function getTitle(
-  type: PaymentMethodType
+  type:
+    PaymentMethodType
 ): string {
-  return type === "card"
+  return type ===
+    "card"
     ? "Travel card"
     : "Bank account";
 }
 
 function getActionLabel(
-  type: PaymentMethodType,
+  type:
+    PaymentMethodType,
+
   method:
     | IpcmPaymentMethod
     | null
 ): string {
   if (
-    type === "card"
+    type ===
+    "card"
   ) {
     return method
       ? "Replace card"
@@ -42,31 +49,46 @@ function getActionLabel(
   }
 
   return method
-    ? "Manage bank"
+    ? "Replace bank account"
     : "Connect bank account";
 }
 
 function formatStatus(
-  status: string
+  status:
+    string
 ): string {
   return status
-    .split("_")
-    .map(
-      (part) =>
-        part
-          .charAt(0)
-          .toUpperCase() +
-        part.slice(1)
+    .split(
+      "_"
     )
-    .join(" ");
+    .map(
+      (
+        part
+      ) =>
+        part
+          .charAt(
+            0
+          )
+          .toUpperCase() +
+        part.slice(
+          1
+        )
+    )
+    .join(
+      " "
+    );
 }
 
 function getPrimaryLabel(
-  type: PaymentMethodType,
-  method: IpcmPaymentMethod
+  type:
+    PaymentMethodType,
+
+  method:
+    IpcmPaymentMethod
 ): string {
   if (
-    type === "card"
+    type ===
+    "card"
   ) {
     const brand =
       method.cardBrand ||
@@ -89,11 +111,15 @@ function getPrimaryLabel(
 }
 
 function getSecondaryLabel(
-  type: PaymentMethodType,
-  method: IpcmPaymentMethod
+  type:
+    PaymentMethodType,
+
+  method:
+    IpcmPaymentMethod
 ): string | null {
   if (
-    type === "card"
+    type ===
+    "card"
   ) {
     return (
       method.displayName &&
@@ -116,7 +142,9 @@ export function PaymentMethodCard({
   onConfigure
 }: PaymentMethodCardProps) {
   const title =
-    getTitle(type);
+    getTitle(
+      type
+    );
 
   const secondaryLabel =
     method
@@ -133,14 +161,17 @@ export function PaymentMethodCard({
           className="payment-method-icon"
           aria-hidden="true"
         >
-          {type === "card"
+          {type ===
+            "card"
             ? "▰"
             : "⌂"}
         </div>
 
         <div>
           <p className="payment-method-eyebrow">
-            {title}
+            {
+              title
+            }
           </p>
 
           <h3>
@@ -158,7 +189,9 @@ export function PaymentMethodCard({
         <>
           {secondaryLabel && (
             <p className="payment-method-detail">
-              {secondaryLabel}
+              {
+                secondaryLabel
+              }
             </p>
           )}
 
@@ -183,9 +216,10 @@ export function PaymentMethodCard({
         </>
       ) : (
         <p className="payment-method-empty-copy">
-          {type === "card"
-            ? "Add the IPCM travel card that will eventually be used for supplier purchases."
-            : "Connect the IPCM bank account that may be used as an agency funding source."}
+          {type ===
+          "card"
+            ? "Add the Case Manager travel card that will eventually be used for supplier purchases."
+            : "Connect the Case Manager bank account that may eventually be used as a travel funding source."}
         </p>
       )}
 
@@ -194,7 +228,9 @@ export function PaymentMethodCard({
           type="button"
           className="payment-method-action"
           onClick={() =>
-            onConfigure(type)
+            onConfigure(
+              type
+            )
           }
         >
           {getActionLabel(
