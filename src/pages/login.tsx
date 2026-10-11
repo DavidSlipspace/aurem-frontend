@@ -158,7 +158,7 @@ export function LoginPage({
       );
 
       setSuccessMessage(
-        "If an Aurem account exists for that email address, a password reset link has been sent."
+        "If an Orvo account exists for that email address, a password reset link has been sent."
       );
     } catch (
       error
@@ -179,7 +179,7 @@ export function LoginPage({
     <main className="login-page">
       <section className="login-card">
         <div className="login-brand">
-          Aurem
+          Orvo
         </div>
 
         <div className="login-heading">
@@ -192,7 +192,7 @@ export function LoginPage({
           <p>
             {isForgotPassword
               ? "Enter your account email and we'll send you a secure password reset link."
-              : "Sign in to continue to the Aurem portal."}
+              : "Sign in to continue to the Orvo portal."}
           </p>
         </div>
 

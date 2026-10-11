@@ -57,7 +57,7 @@ export function Navbar({
     >
       <div className="navbar-left">
         <div className="navbar-brand">
-          Aurem
+          Orvo
         </div>
 
         <button

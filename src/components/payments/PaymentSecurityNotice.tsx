@@ -14,7 +14,7 @@ export function PaymentSecurityNotice() {
         </h3>
 
         <p>
-          Aurem is designed to
+          Orvo is designed to
           store only provider
           references and masked
           payment metadata.
@@ -23,7 +23,7 @@ export function PaymentSecurityNotice() {
           credentials, and raw
           bank account numbers
           will not be stored in
-          Aurem.
+          Orvo.
         </p>
       </div>
     </aside>

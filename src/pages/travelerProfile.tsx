@@ -1,7 +1,7 @@
 import {
-  FormEvent,
   useEffect,
-  useState
+  useState,
+  type FormEvent
 } from "react";
 
 import {

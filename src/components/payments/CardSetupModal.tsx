@@ -210,57 +210,19 @@ export function CardSetupModal({
   }
 
   function handleSave() {
-    if (
-      !isValid ||
-      isSaving
-    ) {
+    if (!isValid || isSaving) {
       return;
     }
 
-    setErrorMessage(
-      ""
-    );
-
-    setIsSaving(
-      true
-    );
+    setErrorMessage("");
+    setIsSaving(true);
 
     try {
-      const result =
-        saveCard();
-
-      if (
-        result &&
-        typeof (
-          result as Promise<unknown>
-        ).catch ===
-          "function"
-      ) {
-        void (
-          result as Promise<unknown>
-        ).catch(
-          (
-            error:
-              unknown
-          ) => {
-            setIsSaving(
-              false
-            );
-
-            setErrorMessage(
-              error instanceof Error
-                ? error.message
-                : "Unable to save the card."
-            );
-          }
-        );
-      }
-    } catch (
-      error
-    ) {
-      setIsSaving(
-        false
-      );
+      // Duffel reports the outcome through
+      // onSaveCardSuccess and onSaveCardFailure.
+      saveCard();
+    } catch (error) {
+      setIsSaving(false);
 
       setErrorMessage(
         error instanceof Error
@@ -298,7 +260,7 @@ export function CardSetupModal({
               are entered directly
               into Duffel's secure
               card component.
-              Aurem stores only
+              Orvo stores only
               the card reference,
               brand, and last four
               digits.
@@ -418,7 +380,7 @@ export function CardSetupModal({
                 </strong>
 
                 <span>
-                  Aurem never
+                  Orvo never
                   receives or
                   stores the full
                   card number or

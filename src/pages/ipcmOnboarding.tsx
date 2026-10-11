@@ -172,7 +172,7 @@ export function IpcmOnboardingPage({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Unable to create your Aurem account."
+          : "Unable to create your Orvo account."
       );
     } finally {
       setIsSubmitting(
@@ -188,7 +188,7 @@ export function IpcmOnboardingPage({
       <main className="ipcm-onboarding-page">
         <section className="ipcm-onboarding-card">
           <div className="ipcm-onboarding-brand">
-            Aurem
+            Orvo
           </div>
 
           <div className="ipcm-onboarding-state">
@@ -207,7 +207,7 @@ export function IpcmOnboardingPage({
       <main className="ipcm-onboarding-page">
         <section className="ipcm-onboarding-card">
           <div className="ipcm-onboarding-brand">
-            Aurem
+            Orvo
           </div>
 
           <div className="ipcm-onboarding-intro">
@@ -216,7 +216,7 @@ export function IpcmOnboardingPage({
             </p>
 
             <h1>
-              Welcome to Aurem
+              Welcome to Orvo
             </h1>
 
             <p>
@@ -254,7 +254,7 @@ export function IpcmOnboardingPage({
       <main className="ipcm-onboarding-page">
         <section className="ipcm-onboarding-card">
           <div className="ipcm-onboarding-brand">
-            Aurem
+            Orvo
           </div>
 
           <div className="ipcm-onboarding-intro">
@@ -289,7 +289,7 @@ export function IpcmOnboardingPage({
     <main className="ipcm-onboarding-page">
       <section className="ipcm-onboarding-card">
         <div className="ipcm-onboarding-brand">
-          Aurem
+          Orvo
         </div>
 
         <div className="ipcm-onboarding-intro">
@@ -298,7 +298,7 @@ export function IpcmOnboardingPage({
           </p>
 
           <h1>
-            Create your Aurem account
+            Create your Orvo account
           </h1>
 
           <p>
@@ -450,7 +450,7 @@ export function IpcmOnboardingPage({
           >
             {isSubmitting
               ? "Creating account..."
-              : "Create Aurem Account"}
+              : "Create Orvo Account"}
           </button>
         </form>
       </section>

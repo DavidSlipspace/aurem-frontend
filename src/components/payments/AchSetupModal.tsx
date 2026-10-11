@@ -704,7 +704,7 @@ export function AchSetupModal({
                   Stripe opens the
                   secure bank
                   connection flow.
-                  Aurem never
+                  Orvo never
                   receives your
                   online banking
                   credentials,
@@ -821,7 +821,7 @@ export function AchSetupModal({
                   By clicking
                   Authorize and
                   Save, you
-                  authorize Aurem
+                  authorize Orvo
                   to debit the bank
                   account specified
                   above for amounts
@@ -829,17 +829,17 @@ export function AchSetupModal({
                   with services or
                   purchases you
                   authorize through
-                  Aurem, until this
+                  Orvo, until this
                   authorization is
                   revoked.
                 </p>
 
                 <p>
-                  If you use Aurem
+                  If you use Orvo
                   services
                   periodically,
                   you authorize
-                  Aurem to debit
+                  Orvo to debit
                   this bank account
                   periodically for
                   authorized

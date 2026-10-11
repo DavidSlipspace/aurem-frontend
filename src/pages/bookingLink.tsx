@@ -1401,7 +1401,7 @@ export function BookingLinkPage({
         <section className="booking-link-shell">
           <header className="booking-link-header">
             <div className="booking-link-brand">
-              Aurem Travel
+              Orvo Travel
             </div>
           </header>
 
@@ -1428,7 +1428,7 @@ export function BookingLinkPage({
         <section className="booking-link-shell">
           <header className="booking-link-header">
             <div className="booking-link-brand">
-              Aurem Travel
+              Orvo Travel
             </div>
           </header>
 
@@ -1458,7 +1458,7 @@ export function BookingLinkPage({
         <section className="booking-link-shell">
           <header className="booking-link-header">
             <div className="booking-link-brand">
-              Aurem Travel
+              Orvo Travel
             </div>
 
             <div className="booking-link-header-reference">
@@ -1519,7 +1519,7 @@ export function BookingLinkPage({
       <section className="booking-link-shell">
         <header className="booking-link-header">
           <div className="booking-link-brand">
-            Aurem Travel
+            Orvo Travel
           </div>
 
           <div className="booking-link-header-reference">

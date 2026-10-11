@@ -129,7 +129,7 @@ export function ResetPasswordPage({
     <main className="reset-password-page">
       <section className="reset-password-card">
         <div className="reset-password-brand">
-          Aurem
+          Orvo
         </div>
 
         {isComplete ? (
@@ -174,7 +174,7 @@ export function ResetPasswordPage({
 
               <p>
                 Enter a new password
-                for your Aurem
+                for your Orvo
                 account.
               </p>
             </div>

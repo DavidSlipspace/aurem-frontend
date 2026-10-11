@@ -203,7 +203,7 @@ export function PaymentsPage({
               directly by the
               payment provider
               and are never stored
-              in Aurem.
+              in Orvo.
             </p>
           </div>
         </header>

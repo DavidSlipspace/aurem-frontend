@@ -86,7 +86,7 @@ export function RemoveIpcmDialog({
               )}. The invitation link will no longer work.`
             : `This will deactivate ${getDisplayName(
                 item
-              )}'s Aurem account and disable sign-in access.`}
+              )}'s Orvo account and disable sign-in access.`}
         </p>
 
         {!isInvitation && (
