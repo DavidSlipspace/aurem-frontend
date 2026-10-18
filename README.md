@@ -1,8 +1,8 @@
-# Aurem Frontend
+# Orvo Frontend
 
 ## Overview
 
-Aurem is a role-based web platform built using React, TypeScript, AWS, and PostgreSQL.
+Orvo is a role-based web platform built using React, TypeScript, AWS, and PostgreSQL.
 
 This repository contains the frontend application responsible for:
 
@@ -33,7 +33,7 @@ The frontend consumes services exposed through Amazon API Gateway and AWS Lambda
 
 ### Shared Components
 
-The Aurem platform maintains a separate Common Repository which serves as the source of truth for shared assets across applications.
+The Orvo platform maintains a separate Common Repository which serves as the source of truth for shared assets across applications.
 
 Planned shared assets include:
 

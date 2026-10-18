@@ -16,7 +16,7 @@ type BookingLinkResponse = {
 
   tripReferenceId: string;
 
-  gcName: string;
+  travelerName: string;
 
   expiresAt: string;
 
@@ -108,7 +108,7 @@ type HotelOption = {
 type HotelSearchResponse = {
   tripReferenceId: string;
 
-  gcName: string;
+  travelerName: string;
 
   destination: string;
 
@@ -222,7 +222,7 @@ type FlightOption = {
 type FlightSearchResponse = {
   tripReferenceId: string;
 
-  gcName: string;
+  travelerName: string;
 
   originAirportCode: string;
 
@@ -1401,7 +1401,7 @@ export function BookingLinkPage({
         <section className="booking-link-shell">
           <header className="booking-link-header">
             <div className="booking-link-brand">
-              Aurem Travel
+              Orvo Travel
             </div>
           </header>
 
@@ -1428,7 +1428,7 @@ export function BookingLinkPage({
         <section className="booking-link-shell">
           <header className="booking-link-header">
             <div className="booking-link-brand">
-              Aurem Travel
+              Orvo Travel
             </div>
           </header>
 
@@ -1458,7 +1458,7 @@ export function BookingLinkPage({
         <section className="booking-link-shell">
           <header className="booking-link-header">
             <div className="booking-link-brand">
-              Aurem Travel
+              Orvo Travel
             </div>
 
             <div className="booking-link-header-reference">
@@ -1519,7 +1519,7 @@ export function BookingLinkPage({
       <section className="booking-link-shell">
         <header className="booking-link-header">
           <div className="booking-link-brand">
-            Aurem Travel
+            Orvo Travel
           </div>
 
           <div className="booking-link-header-reference">
@@ -1883,7 +1883,7 @@ export function BookingLinkPage({
               </p>
 
               <h1>
-                Hello, {bookingLink.gcName}
+                Hello, {bookingLink.travelerName}
               </h1>
 
               <p>

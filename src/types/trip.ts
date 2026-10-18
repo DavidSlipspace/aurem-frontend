@@ -77,29 +77,47 @@ export type SelectedTripHotel = {
 export type Trip = {
   id: string;
 
-  tripReferenceId: string;
+  tripReferenceId:
+    string;
 
-  caseId: string;
+  caseId:
+    string;
 
-  caseReferenceId: string;
+  caseReferenceId:
+    string;
 
-  gcProfileId: string;
+  travelerProfileId:
+    string;
 
-  gcName: string;
+  travelerName:
+    string;
 
-  gcEmail: string;
+  travelerEmail:
+    string;
 
-  tripPurpose: string;
+  ipcmUserId:
+    string;
 
-  status: string;
+  ipcmName:
+    string;
 
-  outboundDate: string;
+  tripPurpose:
+    string;
 
-  returnDate: string;
+  status:
+    string;
 
-  outboundAirport: string;
+  outboundDate:
+    string;
 
-  returnAirport: string;
+  returnDate:
+    string;
+
+  outboundAirport:
+    string;
+
+  returnAirport:
+    string;
 
   destinationCity?:
     | string
@@ -117,11 +135,14 @@ export type Trip = {
     | number
     | null;
 
-  budgetFilter: number;
+  budgetFilter:
+    number;
 
-  companionTraveler: boolean;
+  companionTraveler:
+    boolean;
 
-  ipcmApprovalRequired: boolean;
+  ipcmApprovalRequired:
+    boolean;
 
   bookingLinkExpiresAt?:
     | string
@@ -137,49 +158,73 @@ export type Trip = {
 };
 
 export type TripsResponse = {
-  trips: Trip[];
+  trips:
+    Trip[];
 };
 
 export type TripRequest = {
-  caseId: string;
+  caseId:
+    string;
 
-  gcProfileId: string;
+  travelerProfileId:
+    string;
 
-  tripPurpose: string;
+  ipcmUserId:
+    string;
 
-  outboundDate: string;
+  tripPurpose:
+    string;
 
-  returnDate: string;
+  outboundDate:
+    string;
 
-  outboundAirport: string;
+  returnDate:
+    string;
 
-  returnAirport: string;
+  outboundAirport:
+    string;
 
-  destinationCity?: string;
+  returnAirport:
+    string;
 
-  destinationAddress?: string;
+  destinationCity?:
+    string;
 
-  hotelProximityPreference?: string;
+  destinationAddress?:
+    string;
 
-  minimumHotelStarRating?: number;
+  hotelProximityPreference?:
+    string;
 
-  budgetFilter: number;
+  minimumHotelStarRating?:
+    number;
 
-  companionTraveler: boolean;
+  budgetFilter:
+    number;
 
-  ipcmApprovalRequired: boolean;
+  companionTraveler:
+    boolean;
 
-  status?: string;
+  ipcmApprovalRequired:
+    boolean;
+
+  status?:
+    string;
 };
 
-export type SendTripToGcResponse = {
-  message: string;
+export type SendTripToTravelerResponse = {
+  message:
+    string;
 
-  tripId: string;
+  tripId:
+    string;
 
-  status: string;
+  status:
+    string;
 
-  sentTo: string;
+  sentTo:
+    string;
 
-  expiresAt: string;
+  expiresAt:
+    string;
 };

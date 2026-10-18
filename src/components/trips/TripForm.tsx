@@ -1,36 +1,86 @@
-import type { FormEvent } from "react";
+import type {
+  FormEvent
+} from "react";
 
-import type { CaseResponse } from "../../types/case";
-import type { GcProfile } from "../../types/gcProfile";
+import type {
+  CaseResponse
+} from "../../types/case";
+
+import type {
+  IpcmDirectoryItem
+} from "../../types/ipcm";
+
+import type {
+  TravelerProfile
+} from "../../types/travelerProfile";
 
 export type TripFormState = {
   caseId: string;
-  gcProfileId: string;
-  tripPurpose: string;
 
-  outboundDate: string;
-  returnDate: string;
-  outboundAirport: string;
-  returnAirport: string;
+  travelerProfileId:
+    string;
 
-  destinationCity: string;
-  destinationAddress: string;
-  hotelProximityPreference: string;
-  minimumHotelStarRating: string;
+  ipcmUserId:
+    string;
 
-  budgetDollars: string;
-  companionTraveler: boolean;
-  ipcmApprovalRequired: boolean;
+  tripPurpose:
+    string;
 
-  status: string;
+  outboundDate:
+    string;
+
+  returnDate:
+    string;
+
+  outboundAirport:
+    string;
+
+  returnAirport:
+    string;
+
+  destinationCity:
+    string;
+
+  destinationAddress:
+    string;
+
+  hotelProximityPreference:
+    string;
+
+  minimumHotelStarRating:
+    string;
+
+  budgetDollars:
+    string;
+
+  companionTraveler:
+    boolean;
+
+  ipcmApprovalRequired:
+    boolean;
+
+  status:
+    string;
 };
 
 type TripFormProps = {
-  formData: TripFormState;
-  cases: CaseResponse[];
-  gcProfiles: GcProfile[];
-  isEditing: boolean;
-  isSaving: boolean;
+  formData:
+    TripFormState;
+
+  cases:
+    CaseResponse[];
+
+  travelerProfiles:
+    TravelerProfile[];
+
+  ipcms:
+    IpcmDirectoryItem[];
+
+  isEditing:
+    boolean;
+
+  isSaving:
+    boolean;
 
   onFieldChange: <
     Field extends keyof TripFormState
@@ -40,16 +90,33 @@ type TripFormProps = {
   ) => void;
 
   onSubmit: (
-    event: FormEvent<HTMLFormElement>
+    event:
+      FormEvent<HTMLFormElement>
   ) => void;
 
-  onCancel: () => void;
+  onCancel:
+    () => void;
 };
+
+function getCaseManagerName(
+  ipcm:
+    IpcmDirectoryItem
+): string {
+  const name =
+    `${ipcm.firstName ?? ""} ` +
+    `${ipcm.lastName ?? ""}`;
+
+  return (
+    name.trim() ||
+    ipcm.email
+  );
+}
 
 export function TripForm({
   formData,
   cases,
-  gcProfiles,
+  travelerProfiles,
+  ipcms,
   isEditing,
   isSaving,
   onFieldChange,
@@ -59,18 +126,27 @@ export function TripForm({
   return (
     <form
       className="trip-form-card"
-      onSubmit={onSubmit}
+      onSubmit={
+        onSubmit
+      }
     >
       <h2>
-        {isEditing ? "Edit Trip" : "Create Trip"}
+        {isEditing
+          ? "Edit Trip"
+          : "Create Trip"}
       </h2>
 
       <div className="trip-form-grid">
         <label>
           Case *
+
           <select
-            value={formData.caseId}
-            onChange={(event) =>
+            value={
+              formData.caseId
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "caseId",
                 event.target.value
@@ -78,50 +154,130 @@ export function TripForm({
             }
             required
           >
-            <option value="">Select a case</option>
+            <option value="">
+              Select a case
+            </option>
 
-            {cases.map((caseItem) => (
-              <option
-                key={caseItem.id}
-                value={caseItem.id}
-              >
-                {caseItem.caseReferenceId}
-              </option>
-            ))}
+            {cases.map(
+              (
+                caseItem
+              ) => (
+                <option
+                  key={
+                    caseItem.id
+                  }
+                  value={
+                    caseItem.id
+                  }
+                >
+                  {
+                    caseItem.caseReferenceId
+                  }
+                </option>
+              )
+            )}
           </select>
         </label>
 
         <label>
-          GC Profile *
+          Traveler Profile *
+
           <select
-            value={formData.gcProfileId}
-            onChange={(event) =>
+            value={
+              formData.travelerProfileId
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
-                "gcProfileId",
+                "travelerProfileId",
                 event.target.value
               )
             }
             required
           >
-            <option value="">Select a GC</option>
+            <option value="">
+              Select a traveler
+            </option>
 
-            {gcProfiles.map((profile) => (
-              <option
-                key={profile.id}
-                value={profile.id}
-              >
-                {profile.legalFirstName}{" "}
-                {profile.legalLastName}
-              </option>
-            ))}
+            {travelerProfiles.map(
+              (
+                profile
+              ) => (
+                <option
+                  key={
+                    profile.id
+                  }
+                  value={
+                    profile.id
+                  }
+                >
+                  {
+                    profile.legalFirstName
+                  }{" "}
+                  {
+                    profile.legalLastName
+                  }
+                </option>
+              )
+            )}
+          </select>
+        </label>
+
+        <label>
+          Case Manager *
+
+          <select
+            value={
+              formData.ipcmUserId
+            }
+            onChange={(
+              event
+            ) =>
+              onFieldChange(
+                "ipcmUserId",
+                event.target.value
+              )
+            }
+            required
+          >
+            <option value="">
+              Select a case manager
+            </option>
+
+            {ipcms.map(
+              (
+                ipcm
+              ) => (
+                <option
+                  key={
+                    ipcm.id
+                  }
+                  value={
+                    ipcm.id
+                  }
+                >
+                  {
+                    getCaseManagerName(
+                      ipcm
+                    )
+                  }
+                </option>
+              )
+            )}
           </select>
         </label>
 
         <label>
           Trip Purpose *
+
           <select
-            value={formData.tripPurpose}
-            onChange={(event) =>
+            value={
+              formData.tripPurpose
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "tripPurpose",
                 event.target.value
@@ -149,38 +305,55 @@ export function TripForm({
               Consultation
             </option>
 
-            <option value="Legal">Legal</option>
-            <option value="Other">Other</option>
+            <option value="Legal">
+              Legal
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
           </select>
         </label>
 
         <label>
-          Budget *
+          Budget
+
           <div className="currency-input">
-            <span>$</span>
+            <span>
+              $
+            </span>
 
             <input
               type="number"
-              min="0.01"
+              min="0"
               step="0.01"
-              value={formData.budgetDollars}
-              onChange={(event) =>
+              placeholder="Optional until traveler link is sent"
+              value={
+                formData.budgetDollars
+              }
+              onChange={(
+                event
+              ) =>
                 onFieldChange(
                   "budgetDollars",
                   event.target.value
                 )
               }
-              required
             />
           </div>
         </label>
 
         <label>
           Outbound Date *
+
           <input
             type="date"
-            value={formData.outboundDate}
-            onChange={(event) =>
+            value={
+              formData.outboundDate
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "outboundDate",
                 event.target.value
@@ -192,11 +365,19 @@ export function TripForm({
 
         <label>
           Return Date *
+
           <input
             type="date"
-            min={formData.outboundDate || undefined}
-            value={formData.returnDate}
-            onChange={(event) =>
+            min={
+              formData.outboundDate ||
+              undefined
+            }
+            value={
+              formData.returnDate
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "returnDate",
                 event.target.value
@@ -208,11 +389,18 @@ export function TripForm({
 
         <label>
           Outbound Airport *
+
           <input
-            maxLength={10}
+            maxLength={
+              10
+            }
             placeholder="DFW"
-            value={formData.outboundAirport}
-            onChange={(event) =>
+            value={
+              formData.outboundAirport
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "outboundAirport",
                 event.target.value
@@ -224,11 +412,18 @@ export function TripForm({
 
         <label>
           Return Airport *
+
           <input
-            maxLength={10}
+            maxLength={
+              10
+            }
             placeholder="DFW"
-            value={formData.returnAirport}
-            onChange={(event) =>
+            value={
+              formData.returnAirport
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "returnAirport",
                 event.target.value
@@ -240,10 +435,15 @@ export function TripForm({
 
         <label>
           Destination City
+
           <input
             placeholder="Denver"
-            value={formData.destinationCity}
-            onChange={(event) =>
+            value={
+              formData.destinationCity
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "destinationCity",
                 event.target.value
@@ -254,10 +454,15 @@ export function TripForm({
 
         <label>
           Destination Address
+
           <input
             placeholder="123 Clinic Way"
-            value={formData.destinationAddress}
-            onChange={(event) =>
+            value={
+              formData.destinationAddress
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "destinationAddress",
                 event.target.value
@@ -268,12 +473,15 @@ export function TripForm({
 
         <label>
           Hotel Proximity Preference
+
           <input
             placeholder="Within 5 miles"
             value={
               formData.hotelProximityPreference
             }
-            onChange={(event) =>
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "hotelProximityPreference",
                 event.target.value
@@ -284,31 +492,55 @@ export function TripForm({
 
         <label>
           Minimum Hotel Star Rating
+
           <select
             value={
               formData.minimumHotelStarRating
             }
-            onChange={(event) =>
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "minimumHotelStarRating",
                 event.target.value
               )
             }
           >
-            <option value="">No minimum</option>
-            <option value="1">1 Star</option>
-            <option value="2">2 Stars</option>
-            <option value="3">3 Stars</option>
-            <option value="4">4 Stars</option>
-            <option value="5">5 Stars</option>
+            <option value="">
+              No minimum
+            </option>
+
+            <option value="1">
+              1 Star
+            </option>
+
+            <option value="2">
+              2 Stars
+            </option>
+
+            <option value="3">
+              3 Stars
+            </option>
+
+            <option value="4">
+              4 Stars
+            </option>
+
+            <option value="5">
+              5 Stars
+            </option>
           </select>
         </label>
 
         <label className="trip-checkbox-field">
           <input
             type="checkbox"
-            checked={formData.companionTraveler}
-            onChange={(event) =>
+            checked={
+              formData.companionTraveler
+            }
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "companionTraveler",
                 event.target.checked
@@ -316,7 +548,9 @@ export function TripForm({
             }
           />
 
-          <span>Companion traveler included</span>
+          <span>
+            Companion traveler included
+          </span>
         </label>
 
         <label className="trip-checkbox-field">
@@ -325,7 +559,9 @@ export function TripForm({
             checked={
               formData.ipcmApprovalRequired
             }
-            onChange={(event) =>
+            onChange={(
+              event
+            ) =>
               onFieldChange(
                 "ipcmApprovalRequired",
                 event.target.checked
@@ -334,7 +570,7 @@ export function TripForm({
           />
 
           <span>
-            Require IPCM approval before purchase
+            Require Case Manager approval before purchase
           </span>
         </label>
       </div>
@@ -343,15 +579,21 @@ export function TripForm({
         <button
           type="button"
           className="secondary-button"
-          onClick={onCancel}
-          disabled={isSaving}
+          onClick={
+            onCancel
+          }
+          disabled={
+            isSaving
+          }
         >
           Cancel
         </button>
 
         <button
           type="submit"
-          disabled={isSaving}
+          disabled={
+            isSaving
+          }
         >
           {isSaving
             ? "Saving..."
