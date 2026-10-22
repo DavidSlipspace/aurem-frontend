@@ -1,65 +1,65 @@
+
 type CognitoErrorResponse = {
   __type?: string;
   message?: string;
 };
 
 type CognitoAuthResponse = {
+  ChallengeName?: string;
+  Session?: string;
+  ChallengeParameters?: {
+    USER_ID_FOR_SRP?: string;
+    USERNAME?: string;
+    requiredAttributes?: string;
+  };
   AuthenticationResult?: {
     IdToken?: string;
   };
 };
 
+export type AuthenticationResult =
+  | {
+      status: "authenticated";
+      idToken: string;
+    }
+  | {
+      status: "new_password_required";
+      session: string;
+      username: string;
+    };
+
 const cognitoUrl =
-  import.meta.env
-    .VITE_COGNITO_AUTH_URL;
+  import.meta.env.VITE_COGNITO_AUTH_URL;
 
 const clientId =
-  import.meta.env
-    .VITE_COGNITO_CLIENT_ID;
+  import.meta.env.VITE_COGNITO_CLIENT_ID;
 
 async function cognitoRequest<T>(
   target: string,
   body: unknown
 ): Promise<T> {
-  const response =
-    await fetch(
-      cognitoUrl,
-      {
-        method:
-          "POST",
+  const response = await fetch(cognitoUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-amz-json-1.1",
+      "X-Amz-Target":
+        `AWSCognitoIdentityProviderService.${target}`
+    },
+    body: JSON.stringify(body)
+  });
 
-        headers: {
-          "Content-Type":
-            "application/x-amz-json-1.1",
-
-          "X-Amz-Target":
-            `AWSCognitoIdentityProviderService.${target}`
-        },
-
-        body:
-          JSON.stringify(
-            body
-          )
-      }
-    );
-
-  const data =
-    await response.json() as
-      T &
-      CognitoErrorResponse;
+  const data = await response.json() as
+    T & CognitoErrorResponse;
 
   if (!response.ok) {
-    const error =
-      new Error(
-        data.message ??
-        data.__type ??
-        "Cognito request failed."
-      );
+    const error = new Error(
+      data.message ??
+      data.__type ??
+      "Cognito request failed."
+    );
 
     error.name =
-      data.__type
-        ?.split("#")
-        .pop() ??
+      data.__type?.split("#").pop() ??
       "CognitoError";
 
     throw error;
@@ -71,59 +71,131 @@ async function cognitoRequest<T>(
 export async function authenticateUser(
   email: string,
   password: string
-): Promise<string> {
+): Promise<AuthenticationResult> {
+  const normalizedEmail =
+    email.trim().toLowerCase();
+
   const data =
     await cognitoRequest<CognitoAuthResponse>(
       "InitiateAuth",
       {
-        AuthFlow:
-          "USER_PASSWORD_AUTH",
-
-        ClientId:
-          clientId,
-
+        AuthFlow: "USER_PASSWORD_AUTH",
+        ClientId: clientId,
         AuthParameters: {
-          USERNAME:
-            email
-              .trim()
-              .toLowerCase(),
-
-          PASSWORD:
-            password
+          USERNAME: normalizedEmail,
+          PASSWORD: password
         }
       }
     );
 
-  const idToken =
-    data.AuthenticationResult
-      ?.IdToken;
+  if (data.ChallengeName === "NEW_PASSWORD_REQUIRED") {
+    if (!data.Session) {
+      throw new Error(
+        "Cognito did not return a password challenge session. Please try signing in again."
+      );
+    }
 
-  if (!idToken) {
+    return {
+      status: "new_password_required",
+      session: data.Session,
+      username:
+        data.ChallengeParameters?.USERNAME ??
+        data.ChallengeParameters?.USER_ID_FOR_SRP ??
+        normalizedEmail
+    };
+  }
+
+  const idToken =
+    data.AuthenticationResult?.IdToken;
+
+  if (idToken) {
+    return {
+      status: "authenticated",
+      idToken
+    };
+  }
+
+  if (data.ChallengeName) {
     throw new Error(
-      "Authentication succeeded but no ID token was returned."
+      `Additional authentication is required: ${data.ChallengeName}.`
     );
   }
 
-  return idToken;
+  throw new Error(
+    "Authentication succeeded but no ID token was returned."
+  );
+}
+
+export async function completeNewPasswordChallenge(
+  username: string,
+  session: string,
+  newPassword: string
+): Promise<string> {
+  try {
+    const data =
+      await cognitoRequest<CognitoAuthResponse>(
+        "RespondToAuthChallenge",
+        {
+          ClientId: clientId,
+          ChallengeName: "NEW_PASSWORD_REQUIRED",
+          Session: session,
+          ChallengeResponses: {
+            USERNAME: username,
+            NEW_PASSWORD: newPassword
+          }
+        }
+      );
+
+    const idToken =
+      data.AuthenticationResult?.IdToken;
+
+    if (idToken) {
+      return idToken;
+    }
+
+    if (data.ChallengeName) {
+      throw new Error(
+        `Additional authentication is required: ${data.ChallengeName}.`
+      );
+    }
+
+    throw new Error(
+      "Password was submitted, but Cognito did not return an ID token. Please sign in again."
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === "InvalidPasswordException") {
+        throw new Error(
+          "The new password does not meet the password requirements."
+        );
+      }
+
+      if (
+        error.name === "NotAuthorizedException" ||
+        error.name === "ExpiredCodeException"
+      ) {
+        throw new Error(
+          "Your password setup session has expired. Please return to sign in and try again."
+        );
+      }
+    }
+
+    throw error;
+  }
 }
 
 export async function requestPasswordReset(
   email: string
 ): Promise<void> {
   const normalizedEmail =
-    email
-      .trim()
-      .toLowerCase();
+    email.trim().toLowerCase();
 
   try {
     await cognitoRequest(
       "ForgotPassword",
       {
-        ClientId:
-          clientId,
-
-        Username:
-          normalizedEmail
+        ClientId: clientId,
+        Username: normalizedEmail
       }
     );
   } catch (error) {
@@ -135,10 +207,8 @@ export async function requestPasswordReset(
     if (
       error instanceof Error &&
       (
-        error.name ===
-          "UserNotFoundException" ||
-        error.name ===
-          "InvalidParameterException"
+        error.name === "UserNotFoundException" ||
+        error.name === "InvalidParameterException"
       )
     ) {
       return;
@@ -157,29 +227,17 @@ export async function confirmPasswordReset(
     await cognitoRequest(
       "ConfirmForgotPassword",
       {
-        ClientId:
-          clientId,
-
-        Username:
-          email
-            .trim()
-            .toLowerCase(),
-
+        ClientId: clientId,
+        Username: email.trim().toLowerCase(),
         ConfirmationCode:
-          confirmationCode
-            .trim(),
-
-        Password:
-          newPassword
+          confirmationCode.trim(),
+        Password: newPassword
       }
     );
   } catch (error) {
-    if (
-      error instanceof Error
-    ) {
+    if (error instanceof Error) {
       if (
-        error.name ===
-        "CodeMismatchException"
+        error.name === "CodeMismatchException"
       ) {
         throw new Error(
           "This password reset link is invalid. Request a new reset email."
@@ -187,8 +245,7 @@ export async function confirmPasswordReset(
       }
 
       if (
-        error.name ===
-        "ExpiredCodeException"
+        error.name === "ExpiredCodeException"
       ) {
         throw new Error(
           "This password reset link has expired. Request a new reset email."
@@ -196,8 +253,7 @@ export async function confirmPasswordReset(
       }
 
       if (
-        error.name ===
-        "InvalidPasswordException"
+        error.name === "InvalidPasswordException"
       ) {
         throw new Error(
           "The new password does not meet the password requirements."
