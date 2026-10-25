@@ -92,31 +92,57 @@ export function CardSetupModal({ idToken, onClose, onSaved }: CardSetupModalProp
   }
 
   return (
-    <div className="payment-modal-overlay" role="presentation">
-      <section className="payment-modal" role="dialog" aria-modal="true" aria-label="Add credit card">
-        <div className="payment-modal-header">
-          <h2>Add credit card</h2>
-          <button type="button" onClick={onClose} disabled={isSaving} aria-label="Close">×</button>
+    <>
+      <style>{`
+        .orvo-card-overlay { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(12, 24, 42, .62); backdrop-filter: blur(3px); }
+        .orvo-card-modal { width: 100%; max-width: 510px; max-height: calc(100vh - 40px); overflow-y: auto; border-radius: 18px; background: #fff; color: #17243a; box-shadow: 0 24px 80px rgba(0,0,0,.25); font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif; }
+        .orvo-card-modal * { box-sizing: border-box; }
+        .orvo-card-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 26px 30px 20px; border-bottom: 1px solid #e9edf2; }
+        .orvo-card-header h2 { margin: 0; font-size: 22px; line-height: 1.3; font-weight: 700; }
+        .orvo-card-subtitle { margin: 6px 0 0; color: #66758b; font-size: 13px; line-height: 1.5; }
+        .orvo-card-close { border: 0; background: #f3f5f8; color: #526176; font-size: 23px; line-height: 1; width: 34px; height: 34px; border-radius: 9px; cursor: pointer; }
+        .orvo-card-body { padding: 24px 30px 20px; display: flex; flex-direction: column; gap: 18px; }
+        .orvo-card-field { display: flex; flex-direction: column; gap: 8px; }
+        .orvo-card-field label { display: block; font-size: 13px; font-weight: 650; color: #27364c; }
+        .orvo-card-name { width: 100%; height: 46px; padding: 0 14px; border: 1px solid #cbd4e0; border-radius: 9px; font: inherit; font-size: 15px; background: #fff; color: #17243a; }
+        .orvo-card-name:focus { outline: 2px solid #a8c5ef; border-color: #4378b7; }
+        .orvo-card-element { min-height: 48px; padding: 14px; border: 1px solid #cbd4e0; border-radius: 9px; background: #fff; }
+        .orvo-card-consent { display: flex; gap: 11px; align-items: flex-start; padding: 15px; background: #f7f9fc; border: 1px solid #e5eaf1; border-radius: 10px; font-size: 12px; line-height: 1.6; color: #344258; cursor: pointer; }
+        .orvo-card-consent input { margin: 3px 0 0; flex-shrink: 0; width: 16px; height: 16px; accent-color: #245d9b; }
+        .orvo-card-security { display: flex; gap: 8px; align-items: flex-start; margin: 0; color: #6c7a8f; font-size: 12px; line-height: 1.55; }
+        .orvo-card-error { margin: 0; padding: 12px 14px; border-radius: 8px; background: #fff1f0; color: #a52924; font-size: 13px; line-height: 1.5; }
+        .orvo-card-actions { display: flex; justify-content: flex-end; gap: 12px; padding: 18px 30px 26px; border-top: 1px solid #e9edf2; }
+        .orvo-card-actions button { min-height: 44px; border-radius: 9px; padding: 0 20px; font-size: 14px; font-weight: 650; cursor: pointer; }
+        .orvo-card-cancel { background: #fff; border: 1px solid #cbd4e0; color: #33435a; }
+        .orvo-card-save { background: #245d9b; border: 1px solid #245d9b; color: #fff; }
+        .orvo-card-actions button:disabled { opacity: .55; cursor: not-allowed; }
+        @media (max-width: 540px) { .orvo-card-header { padding: 20px; } .orvo-card-body { padding: 20px; } .orvo-card-actions { padding: 16px 20px 20px; } }
+      `}</style>
+    <div className="orvo-card-overlay" role="presentation">
+      <section className="orvo-card-modal" role="dialog" aria-modal="true" aria-label="Add credit card">
+        <div className="orvo-card-header">
+          <div><h2>Add credit card</h2><p className="orvo-card-subtitle">Securely save a card for future travel payments.</p></div>
+          <button type="button" onClick={onClose} disabled={isSaving} className="orvo-card-close" aria-label="Close">×</button>
         </div>
         <form onSubmit={(event) => { void handleSave(event); }}>
-          <div className="payment-modal-body">
-            <label htmlFor="stripe-cardholder-name">Name on card</label>
-            <input id="stripe-cardholder-name" autoComplete="cc-name" value={cardholderName}
-              onChange={(event) => setCardholderName(event.target.value)} disabled={isSaving} required />
-            <label>Card details</label>
-            <div ref={cardContainerRef} className="payment-modal-card-element" style={{ minHeight: 44, padding: "12px 8px" }} />
+          <div className="orvo-card-body">
+            <div className="orvo-card-field"><label htmlFor="stripe-cardholder-name">Name on card</label>
+            <input className="orvo-card-name" id="stripe-cardholder-name" autoComplete="cc-name" value={cardholderName}
+              onChange={(event) => setCardholderName(event.target.value)} disabled={isSaving} placeholder="Full name as shown on card" required /></div>
+            <div className="orvo-card-field"><label>Card details</label>
+            <div ref={cardContainerRef} className="orvo-card-element" /></div>
             {isLoading && <p>Loading secure card form…</p>}
-            <label className="payment-modal-consent">
+            <label className="orvo-card-consent">
               <input type="checkbox" checked={authorized} disabled={isSaving}
                 onChange={(event) => setAuthorized(event.target.checked)} />
               I am the cardholder or am authorized to save this card for future travel-related charges under Orvo's disclosed payment terms.
             </label>
-            <p className="payment-modal-security-copy">Card details are collected securely by Stripe. Orvo does not receive your full card number or CVC.</p>
-            {errorMessage && <p role="alert" className="payment-modal-error">{errorMessage}</p>}
+            <p className="orvo-card-security">Card details are collected securely by Stripe. Orvo does not receive your full card number or CVC.</p>
+            {errorMessage && <p role="alert" className="orvo-card-error">{errorMessage}</p>}
           </div>
-          <div className="payment-modal-actions">
-            <button type="button" className="payment-modal-secondary" onClick={onClose} disabled={isSaving}>Cancel</button>
-            <button type="submit" className="payment-modal-primary"
+          <div className="orvo-card-actions">
+            <button type="button" className="orvo-card-cancel" onClick={onClose} disabled={isSaving}>Cancel</button>
+            <button type="submit" className="orvo-card-save"
               disabled={isLoading || isSaving || !isValid || !authorized || !cardholderName.trim() || !clientSecret}>
               {isSaving ? "Saving card…" : "Save card"}
             </button>
@@ -124,5 +150,6 @@ export function CardSetupModal({ idToken, onClose, onSaved }: CardSetupModalProp
         </form>
       </section>
     </div>
+    </>
   );
 }
