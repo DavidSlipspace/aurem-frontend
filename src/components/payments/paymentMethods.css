@@ -1,0 +1,43 @@
+/* Scoped Orvo payment-method styling. Does not affect Stripe enrollment modals. */
+.orvo-pm-panel { --pm-ink:#15243b; --pm-muted:#68778a; --pm-border:#e5eaf1; --pm-primary:#255ad5; color:var(--pm-ink); width:100%; }
+.orvo-pm-panel * { box-sizing:border-box; }
+.orvo-pm-panel__header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 0 24px; margin-bottom:24px; border-bottom:1px solid var(--pm-border); }
+.orvo-pm-panel__identity { display:flex; align-items:center; gap:13px; min-width:0; }
+.orvo-pm-panel__avatar { flex:0 0 44px; height:44px; border-radius:13px; display:grid; place-items:center; background:#eaf0fc; color:#3155a0; font-size:14px; font-weight:800; letter-spacing:.03em; }
+.orvo-pm-panel__person { min-width:0; }
+.orvo-pm-panel__person h2 { font-size:17px; line-height:1.3; font-weight:750; margin:0 0 3px; color:var(--pm-ink); }
+.orvo-pm-panel__person p { font-size:13px; color:var(--pm-muted); margin:0; overflow-wrap:anywhere; }
+.orvo-pm-panel__role { white-space:nowrap; border:1px solid var(--pm-border); border-radius:999px; background:#f7f9fc; padding:6px 11px; color:#52627a; font-size:11px; font-weight:700; }
+.orvo-pm-panel__heading { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:20px; }
+.orvo-pm-panel__heading h3 { margin:0 0 6px; font-size:21px; line-height:1.25; letter-spacing:-.035em; font-weight:800; color:var(--pm-ink); }
+.orvo-pm-panel__heading p { margin:0; font-size:13px; line-height:1.55; color:var(--pm-muted); }
+.orvo-pm-panel__secure { display:inline-flex; align-items:center; gap:6px; flex-shrink:0; font-size:12px; color:#52705e; font-weight:650; padding-top:5px; }
+.orvo-pm-panel__secure svg { width:17px; height:17px; }
+.orvo-pm-panel__grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+.orvo-pm-card { display:flex; flex-direction:column; min-width:0; min-height:284px; padding:23px; background:#fff; border:1px solid var(--pm-border); border-radius:17px; box-shadow:0 3px 14px rgba(20,39,70,.035); transition:box-shadow .2s,border-color .2s,transform .2s; }
+.orvo-pm-card:hover { border-color:#d5dfed; box-shadow:0 9px 25px rgba(20,39,70,.075); transform:translateY(-1px); }
+.orvo-pm-card__top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:23px; }
+.orvo-pm-card__icon { display:grid; place-items:center; height:45px; width:45px; flex:0 0 45px; border-radius:13px; }
+.orvo-pm-card__icon--card { color:#315fca; background:#ebf1ff; }
+.orvo-pm-card__icon--bank { color:#426b64; background:#eaf5f1; }
+.orvo-pm-card__icon svg { width:23px; height:23px; }
+.orvo-pm-status { display:inline-flex; align-items:center; gap:7px; max-width:100%; border-radius:999px; padding:7px 10px; font-size:11px; line-height:1; font-weight:750; white-space:nowrap; }
+.orvo-pm-status__dot { width:6px; height:6px; flex:0 0 6px; border-radius:50%; background:currentColor; }
+.orvo-pm-status--active { background:#e9f7ef; color:#18744b; }
+.orvo-pm-status--pending { background:#fff5df; color:#9c6a16; }
+.orvo-pm-status--neutral { background:#f0f3f7; color:#6b788b; }
+.orvo-pm-card__body { flex:1; }
+.orvo-pm-card__eyebrow { margin:0 0 7px; font-size:11px; font-weight:800; letter-spacing:.11em; text-transform:uppercase; color:#79869a; }
+.orvo-pm-card__name { margin:0 0 8px; color:var(--pm-ink); font-size:20px; line-height:1.3; font-weight:800; letter-spacing:-.025em; overflow-wrap:anywhere; }
+.orvo-pm-card__description { color:var(--pm-muted); margin:0; font-size:13px; line-height:1.55; }
+.orvo-pm-card__default { display:inline-block; margin-top:11px; padding:5px 9px; border-radius:6px; background:#f0f4fc; color:#355ba6; font-size:11px; font-weight:700; }
+.orvo-pm-card__footer { padding-top:20px; }
+.orvo-pm-card__security { display:flex; align-items:center; gap:7px; color:#78869a; font-size:11px; line-height:1.4; margin-bottom:15px; }
+.orvo-pm-card__security svg { flex:0 0 14px; height:14px; width:14px; }
+.orvo-pm-card__action { width:100%; min-height:43px; display:flex; align-items:center; justify-content:center; gap:9px; border:1px solid #d7e1f2; border-radius:10px; background:#f7faff; color:#2456bd; font:inherit; font-size:13px; font-weight:750; cursor:pointer; transition:background .2s,border-color .2s; }
+.orvo-pm-card__action:hover { background:#ebf2ff; border-color:#b9cbeb; }
+.orvo-pm-card__action:focus-visible { outline:3px solid #95b7ff; outline-offset:3px; }
+.orvo-pm-card__action svg { width:16px; height:16px; }
+@media(max-width:720px) { .orvo-pm-panel__grid { grid-template-columns:1fr; } .orvo-pm-card { min-height:250px; } }
+@media(max-width:480px) { .orvo-pm-panel__header { align-items:flex-start; flex-direction:column; } .orvo-pm-panel__heading { flex-direction:column; gap:6px; } .orvo-pm-card { padding:19px; } .orvo-pm-card__name { font-size:18px; } }
+@media(prefers-reduced-motion:reduce) { .orvo-pm-card,.orvo-pm-card__action { transition:none; } .orvo-pm-card:hover { transform:none; } }
