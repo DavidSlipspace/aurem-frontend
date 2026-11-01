@@ -35,6 +35,8 @@ import type {
   UserResponse
 } from "../types/user";
 
+import { isAdmin as hasAdminRole, isCaseManager } from "../utils/userRoles";
+
 import "./home.css";
 
 type HomePageProps = {
@@ -131,13 +133,8 @@ export function HomePage({
   user,
   onCasesChanged
 }: HomePageProps) {
-  const isAdmin =
-    user.role ===
-    "Admin";
-
-  const isIpcm =
-    user.role ===
-    "IPCM";
+  const isAdmin = hasAdminRole(user);
+  const isIpcm = isCaseManager(user);
 
   const [
     options,

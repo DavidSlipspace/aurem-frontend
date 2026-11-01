@@ -98,20 +98,6 @@ type TripFormProps = {
     () => void;
 };
 
-function getCaseManagerName(
-  ipcm:
-    IpcmDirectoryItem
-): string {
-  const name =
-    `${ipcm.firstName ?? ""} ` +
-    `${ipcm.lastName ?? ""}`;
-
-  return (
-    name.trim() ||
-    ipcm.email
-  );
-}
-
 export function TripForm({
   formData,
   cases,
@@ -123,6 +109,11 @@ export function TripForm({
   onSubmit,
   onCancel
 }: TripFormProps) {
+  const selectedCase = cases.find((item) => item.id === formData.caseId);
+  const allowedTravelerIds = new Set(selectedCase?.travelerProfileIds ?? []);
+  const eligibleTravelers = travelerProfiles.filter((profile) => allowedTravelerIds.has(profile.id));
+  void ipcms;
+
   return (
     <form
       className="trip-form-card"
@@ -200,7 +191,7 @@ export function TripForm({
               Select a traveler
             </option>
 
-            {travelerProfiles.map(
+            {eligibleTravelers.map(
               (
                 profile
               ) => (
@@ -227,45 +218,13 @@ export function TripForm({
         <label>
           Case Manager *
 
-          <select
-            value={
-              formData.ipcmUserId
-            }
-            onChange={(
-              event
-            ) =>
-              onFieldChange(
-                "ipcmUserId",
-                event.target.value
-              )
-            }
-            required
-          >
-            <option value="">
-              Select a case manager
-            </option>
-
-            {ipcms.map(
-              (
-                ipcm
-              ) => (
-                <option
-                  key={
-                    ipcm.id
-                  }
-                  value={
-                    ipcm.id
-                  }
-                >
-                  {
-                    getCaseManagerName(
-                      ipcm
-                    )
-                  }
-                </option>
-              )
-            )}
-          </select>
+          <input
+            type="text"
+            value={selectedCase?.caseManagerName ?? "Select a case first"}
+            readOnly
+            aria-label="Assigned Case Manager"
+          />
+          <input type="hidden" value={selectedCase?.caseManagerUserId ?? ""} />
         </label>
 
         <label>
