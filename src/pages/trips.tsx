@@ -58,6 +58,8 @@ import type {
   UserResponse
 } from "../types/user";
 
+import { isAdmin as hasAdminRole, isCaseManager } from "../utils/userRoles";
+
 import "./trips.css";
 
 type TripsPageProps = {
@@ -353,15 +355,9 @@ export function TripsPage({
   idToken,
   user
 }: TripsPageProps) {
-  const canManageTrips =
-    user.role ===
-      "Admin" ||
-    user.role ===
-      "Case Manager";
-
-  const isIpcm =
-    user.role ===
-    "IPCM";
+  const isAdmin = hasAdminRole(user);
+  const isIpcm = isCaseManager(user);
+  const canManageTrips = isAdmin || isIpcm;
 
   const [
     trips,
@@ -628,6 +624,19 @@ export function TripsPage({
       return;
     }
 
+    if (field === "ipcmUserId") return;
+
+    if (field === "caseId") {
+      const selected = cases.find((item) => item.id === value);
+      setFormData((current) => ({
+        ...current,
+        caseId: String(value),
+        travelerProfileId: "",
+        ipcmUserId: selected?.caseManagerUserId ?? ""
+      }));
+      return;
+    }
+
     setFormData(
       (
         current
@@ -679,11 +688,12 @@ export function TripsPage({
       return;
     }
 
-    setFormData(
-      createFormFromTrip(
-        trip
-      )
-    );
+    const selectedCase = cases.find((item) => item.id === trip.caseId);
+    if (!selectedCase) return;
+    setFormData({
+      ...createFormFromTrip(trip),
+      ipcmUserId: selectedCase.caseManagerUserId
+    });
 
     setEditingTripId(
       trip.id
@@ -756,10 +766,15 @@ export function TripsPage({
     );
 
     try {
-      const payload =
-        buildRequestPayload(
-          formData
-        );
+      const selectedCase = cases.find((item) => item.id === formData.caseId);
+      if (!selectedCase) throw new Error("Select an authorized case.");
+      if (!selectedCase.travelerProfileIds.includes(formData.travelerProfileId)) {
+        throw new Error("Select a traveler assigned to this case.");
+      }
+      const payload = buildRequestPayload({
+        ...formData,
+        ipcmUserId: selectedCase.caseManagerUserId
+      });
 
       if (
         editingTripId
