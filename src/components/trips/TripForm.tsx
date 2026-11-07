@@ -355,7 +355,7 @@ export function TripForm({
         />
 
         <AirportAutocomplete
-          label="Return Airport"
+          label="Destination Airport"
           value={formData.returnAirport}
           onChange={(code) => onFieldChange("returnAirport", code)}
           disabled={isSaving}
