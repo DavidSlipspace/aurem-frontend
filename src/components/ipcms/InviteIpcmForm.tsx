@@ -53,13 +53,13 @@ export function InviteIpcmForm({
       <div className="invite-ipcm-card-header">
         <div>
           <h2>
-            Invite IPCM
+            Invite Case Manager
           </h2>
 
           <p>
             A secure account
             creation link will be
-            sent to the IPCM's
+            sent to the Case Manager's
             email address.
           </p>
         </div>
