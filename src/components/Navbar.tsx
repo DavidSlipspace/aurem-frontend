@@ -7,7 +7,7 @@ import {
   isCaseManager
 } from "../utils/userRoles";
 
-import "./navbar.css";
+import "./Navbar.css";
 
 type Page =
   | "cases"
