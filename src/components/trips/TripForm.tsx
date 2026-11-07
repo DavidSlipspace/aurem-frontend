@@ -39,6 +39,11 @@ export type TripFormState = {
   returnAirport:
     string;
 
+  returnDepartureAirport: string;
+  returnArrivalAirport: string;
+  differentReturnArrival: boolean;
+  differentReturnDeparture: boolean;
+
   destinationCity:
     string;
 
@@ -347,19 +352,57 @@ export function TripForm({
           />
         </label>
 
-        <AirportAutocomplete
-          label="Outbound Airport"
-          value={formData.outboundAirport}
-          onChange={(code) => onFieldChange("outboundAirport", code)}
-          disabled={isSaving}
-        />
+        <div className="trip-airport-group">
+          <AirportAutocomplete
+            label="Outbound Airport"
+            value={formData.outboundAirport}
+            onChange={(code) => onFieldChange("outboundAirport", code)}
+            disabled={isSaving}
+          />
+          <label className="trip-checkbox-field">
+            <input
+              type="checkbox"
+              checked={formData.differentReturnArrival}
+              onChange={(event) => onFieldChange("differentReturnArrival", event.target.checked)}
+              disabled={isSaving}
+            />
+            <span>Return to a different airport</span>
+          </label>
+          {formData.differentReturnArrival && (
+            <AirportAutocomplete
+              label="Return Arrival Airport"
+              value={formData.returnArrivalAirport}
+              onChange={(code) => onFieldChange("returnArrivalAirport", code)}
+              disabled={isSaving}
+            />
+          )}
+        </div>
 
-        <AirportAutocomplete
-          label="Destination Airport"
-          value={formData.returnAirport}
-          onChange={(code) => onFieldChange("returnAirport", code)}
-          disabled={isSaving}
-        />
+        <div className="trip-airport-group">
+          <AirportAutocomplete
+            label="Destination Airport"
+            value={formData.returnAirport}
+            onChange={(code) => onFieldChange("returnAirport", code)}
+            disabled={isSaving}
+          />
+          <label className="trip-checkbox-field">
+            <input
+              type="checkbox"
+              checked={formData.differentReturnDeparture}
+              onChange={(event) => onFieldChange("differentReturnDeparture", event.target.checked)}
+              disabled={isSaving}
+            />
+            <span>Depart from a different airport</span>
+          </label>
+          {formData.differentReturnDeparture && (
+            <AirportAutocomplete
+              label="Return Departure Airport"
+              value={formData.returnDepartureAirport}
+              onChange={(code) => onFieldChange("returnDepartureAirport", code)}
+              disabled={isSaving}
+            />
+          )}
+        </div>
 
         <label>
           Destination City
