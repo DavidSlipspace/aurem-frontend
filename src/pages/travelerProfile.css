@@ -1,246 +1,53 @@
-.traveler-page {
-  min-height: calc(100vh - 64px);
-}
+/* Traveler profile page and form — aligned with the Trip form design. */
+.traveler-page { min-height: calc(100vh - 64px); }
+.traveler-content { padding: 32px; }
+.traveler-header { margin-bottom: 32px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.traveler-header h1 { margin: 0 0 24px; }
+.traveler-header p { margin: 0; color: var(--color-text-secondary); }
+.traveler-header button, .traveler-form-actions button { margin: 0; padding: 11px 18px; border: none; border-radius: 9px; background: var(--color-primary); color: white; font-weight: 700; cursor: pointer; transition: background .15s ease, transform .15s ease; }
+.traveler-header button:hover, .traveler-form-actions button:hover { background: var(--color-primary-hover); }
+.traveler-header button:disabled, .traveler-form-actions button:disabled, .table-action-button:disabled { opacity: .65; cursor: not-allowed; }
 
-.traveler-content {
-  padding: 32px;
-}
+.traveler-form-card { max-width: 1100px; margin: 0 0 28px; padding: 0; overflow: hidden; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-surface); box-shadow: 0 8px 30px rgba(16,24,40,.045); }
+.traveler-form-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 28px 32px 25px; border-bottom: 1px solid var(--color-border); }
+.traveler-form-heading h2 { margin: 0 0 6px; font-size: 24px; letter-spacing: -.035em; color: var(--color-text-primary); }
+.traveler-form-heading p { margin: 0; color: var(--color-text-secondary); font-size: 14px; line-height: 1.5; }
+.traveler-form-required-note { white-space: nowrap; padding-top: 6px; font-size: 12px; color: var(--color-text-secondary); }
+.traveler-form-section { padding: 28px 32px 30px; border-bottom: 1px solid var(--color-border); }
+.traveler-section-heading { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 22px; }
+.traveler-section-number { display: inline-flex; flex: 0 0 32px; height: 32px; align-items: center; justify-content: center; border-radius: 9px; background: var(--color-table-row-hover); color: var(--color-text-secondary); font-size: 12px; font-weight: 800; }
+.traveler-section-heading h3 { margin: 1px 0 5px; font-size: 16px; font-weight: 750; color: var(--color-text-primary); letter-spacing: -.015em; }
+.traveler-section-heading p { margin: 0; font-size: 13px; color: var(--color-text-secondary); }
+.traveler-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px 22px; }
+.traveler-form-grid > label { display: flex; flex-direction: column; gap: 8px; min-width: 0; font-size: 13px; font-weight: 650; color: var(--color-text-primary); }
+.traveler-form-grid input, .traveler-form-grid select { width: 100%; min-height: 46px; box-sizing: border-box; padding: 11px 13px; border: 1px solid var(--color-border); border-radius: 9px; background: var(--color-surface); color: var(--color-text-primary); font: inherit; font-size: 14px; transition: border-color .15s, box-shadow .15s; }
+.traveler-form-grid input:focus, .traveler-form-grid select:focus { border-color: var(--color-primary); outline: none; box-shadow: 0 0 0 3px rgba(90,110,145,.12); }
+.traveler-form-grid input:disabled, .traveler-form-grid select:disabled { opacity: .65; cursor: not-allowed; }
+.traveler-form-grid input::placeholder { color: var(--color-text-secondary); opacity: .8; }
+.traveler-form-grid small { font-weight: 400; font-size: 12px; color: var(--color-text-secondary); }
+.traveler-form-grid select option { color: var(--color-text-primary); }
+.traveler-form-grid input[type="date"]:invalid { color: var(--color-text-secondary); }
+.traveler-form-actions { display: flex; justify-content: flex-end; gap: 12px; margin: 0; padding: 22px 32px; background: var(--color-surface); }
+.traveler-form-actions .secondary-button { background: var(--color-table-row-hover); color: var(--color-text-primary); border: 1px solid var(--color-border); }
+.traveler-form-actions .secondary-button:hover { background: var(--color-border); }
 
-.traveler-header {
-  margin-bottom: 32px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.traveler-header h1 {
-  margin: 0 0 12px;
-}
-
-.traveler-header p {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-
-.traveler-header button,
-.traveler-form-actions button {
-  margin: 0;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background: var(--color-primary);
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.traveler-header button:hover,
-.traveler-form-actions button:hover {
-  background: var(--color-primary-hover);
-}
-
-.traveler-header button:disabled,
-.traveler-form-actions button:disabled,
-.table-action-button:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.traveler-form-card {
-  margin-bottom: 24px;
-  padding: 24px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background: var(--color-surface);
-}
-
-.traveler-form-card h2 {
-  margin: 0 0 20px;
-}
-
-.traveler-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.traveler-form-grid label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-weight: 600;
-}
-
-.traveler-form-grid input,
-.traveler-form-grid select {
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  font: inherit;
-  box-sizing: border-box;
-}
-
-.traveler-form-grid input:focus,
-.traveler-form-grid select:focus {
-  outline: 2px solid rgba(17, 24, 39, 0.15);
-  border-color: var(--color-primary);
-}
-
-.traveler-form-actions {
-  margin-top: 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-.traveler-form-actions .secondary-button {
-  background: #f3f4f6;
-  color: var(--color-text-primary);
-}
-
-.traveler-form-actions .secondary-button:hover {
-  background: var(--color-border);
-}
-
-.traveler-table-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  overflow-x: auto;
-}
-
-.traveler-table-card table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.traveler-table-card thead {
-  background: var(--color-table-header);
-}
-
-.traveler-table-card th,
-.traveler-table-card td {
-  padding: 14px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.traveler-table-card th {
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.traveler-table-card tbody tr:hover {
-  background: var(--color-table-row-hover);
-}
-
-.traveler-status {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 12px;
-  text-transform: capitalize;
-}
-
-.status-active {
-  background: #ecfdf3;
-  color: #027a48;
-}
-
-.status-inactive {
-  background: #fef3f2;
-  color: #b42318;
-}
-
-.table-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.table-action-button {
-  margin: 0;
-  padding: 6px 10px;
-  border: none;
-  border-radius: 6px;
-  background: #f3f4f6;
-  color: var(--color-text-primary);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.table-action-button:hover {
-  background: var(--color-border);
-}
-
-.table-action-button.success {
-  color: #027a48;
-}
-
-.table-action-button.danger {
-  color: var(--color-error);
-}
-
-.traveler-error {
-  color: var(--color-error);
-  margin: 0 0 16px;
-}
-
-.traveler-success {
-  color: var(--color-success);
-  margin: 0 0 16px;
-}
-
-.empty-state {
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-
-@media (max-width: 800px) {
-  .traveler-content {
-    padding: 20px;
-  }
-
-  .traveler-header {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .traveler-form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .traveler-form-actions {
-    flex-direction: column-reverse;
-  }
-
-  .traveler-form-actions button {
-    width: 100%;
-  }
-}
-
-.traveler-form-grid select:required:invalid {
-  color: var(--color-text-secondary);
-}
-
-.traveler-form-grid select option {
-  color: var(--color-text-primary);
-}
-
-.traveler-form-grid select option[value=""] {
-  color: var(--color-text-secondary);
-}
-
-.traveler-form-grid input[type="date"] {
-  color: var(--color-text-secondary);
-}
-
-.traveler-form-grid input[type="date"]:valid {
-  color: var(--color-text-primary);
-}
+/* Existing traveler table and status styles preserved. */
+.traveler-table-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; overflow-x: auto; }
+.traveler-table-card table { width: 100%; border-collapse: collapse; }
+.traveler-table-card thead { background: var(--color-table-header); }
+.traveler-table-card th, .traveler-table-card td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.traveler-table-card th { font-size: 13px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; }
+.traveler-table-card tbody tr:hover { background: var(--color-table-row-hover); }
+.traveler-status { display: inline-block; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; text-transform: capitalize; }
+.status-active { background: #ecfdf3; color: #027a48; }
+.status-inactive { background: #fef3f2; color: #b42318; }
+.table-actions { display: flex; gap: 8px; }
+.table-action-button { margin: 0; padding: 6px 10px; border: none; border-radius: 6px; background: #f3f4f6; color: var(--color-text-primary); font-weight: 700; cursor: pointer; }
+.table-action-button:hover { background: var(--color-border); }
+.table-action-button.success { color: #027a48; }
+.table-action-button.danger { color: var(--color-error); }
+.traveler-error { color: var(--color-error); margin: 0 0 16px; }
+.traveler-success { color: var(--color-success); margin: 0 0 16px; }
+.empty-state { text-align: center; color: var(--color-text-secondary); }
+@media (max-width: 800px) { .traveler-content { padding: 20px; } .traveler-header { flex-direction: column; } .traveler-form-grid { grid-template-columns: 1fr; } .traveler-form-heading, .traveler-form-section { padding: 22px 20px; } .traveler-form-actions { padding: 20px; flex-direction: column-reverse; } .traveler-form-actions button { width: 100%; } }
+@media (max-width: 480px) { .traveler-content { padding: 16px; } .traveler-form-heading { flex-direction: column; gap: 8px; } .traveler-form-heading h2 { font-size: 21px; } }
