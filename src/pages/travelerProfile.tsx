@@ -3,33 +3,26 @@ import {
   useState,
   type FormEvent
 } from "react";
-
 import {
   createTravelerProfile,
   getTravelerProfiles,
   updateTravelerProfile
 } from "../api/travelerProfileApi";
-
 import type {
   TravelerProfile,
   TravelerProfileRequest
 } from "../types/travelerProfile";
-
 import { SeatPreference } from "../types/seatPreference";
-
 import "./travelerProfile.css";
-
 type TravelerProfilesPageProps = {
   idToken: string;
 };
-
 type TravelerProfileFormState = Omit<
   TravelerProfileRequest,
   "seatPreference"
 > & {
   seatPreference: SeatPreference | "";
 };
-
 const emptyForm: TravelerProfileFormState = {
   legalFirstName: "",
   legalMiddleName: "",
@@ -44,7 +37,6 @@ const emptyForm: TravelerProfileFormState = {
   hotelRewardsNumber: "",
   seatPreference: ""
 };
-
 export function TravelerProfilesPage({
   idToken
 }: TravelerProfilesPageProps) {
@@ -110,7 +102,7 @@ export function TravelerProfilesPage({
     return value.trim().toLowerCase();
   }
   function isValidEmail(value: string) {
-    return /^[^\s@]+@[^\s@]+**\.**[^\s@]+$/.test(value);
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
   function handleNewProfile() {
     setFormData(emptyForm);
@@ -356,7 +348,7 @@ export function TravelerProfilesPage({
             </h2>
             <div className="traveler-form-grid">
               <label>
-                Legal First Name \*
+                Legal First Name *
                 <input
                   value={formData.legalFirstName}
                   onChange={(event) =>
@@ -387,7 +379,7 @@ export function TravelerProfilesPage({
                 />
               </label>
               <label>
-                Legal Last Name \*
+                Legal Last Name *
                 <input
                   value={formData.legalLastName}
                   onChange={(event) =>
@@ -402,7 +394,7 @@ export function TravelerProfilesPage({
                 />
               </label>
               <label>
-                Date of Birth \*
+                Date of Birth *
                 <input
                   type="date"
                   value={formData.dateOfBirth}
@@ -420,7 +412,7 @@ export function TravelerProfilesPage({
                 />
               </label>
               <label>
-                Email \*
+                Email *
                 <input
                   type="email"
                   value={formData.email}
@@ -444,7 +436,7 @@ export function TravelerProfilesPage({
                 />
               </label>
               <label>
-                Phone \*
+                Phone *
                 <input
                   type="tel"
                   value={formData.phone}
@@ -456,7 +448,7 @@ export function TravelerProfilesPage({
                   autoComplete="tel-national"
                   inputMode="numeric"
                   maxLength={13}
-                  pattern="\\(\d{3}\\)\d{3}-\d{4}"
+                  pattern="\(\d{3}\)\d{3}-\d{4}"
                   placeholder="(111)111-1111"
                   title="Enter a 10-digit phone number."
                   required
@@ -484,7 +476,6 @@ export function TravelerProfilesPage({
                   value={
                     formData.seatPreference ?? ""
                   }
-                  required
                   onChange={(event) =>
                     handleChange(
                       "seatPreference",
