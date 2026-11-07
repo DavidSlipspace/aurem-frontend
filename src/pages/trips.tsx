@@ -96,6 +96,11 @@ function createEmptyForm():
     returnAirport:
       "",
 
+    returnDepartureAirport: "",
+    returnArrivalAirport: "",
+    differentReturnDeparture: false,
+    differentReturnArrival: false,
+
     destinationCity:
       "",
 
@@ -158,6 +163,11 @@ function createFormFromTrip(
 
     returnAirport:
       trip.returnAirport,
+
+    returnDepartureAirport: trip.returnDepartureAirport ?? "",
+    returnArrivalAirport: trip.returnArrivalAirport ?? "",
+    differentReturnDeparture: !!trip.returnDepartureAirport,
+    differentReturnArrival: !!trip.returnArrivalAirport,
 
     destinationCity:
       trip.destinationCity ??
@@ -279,6 +289,15 @@ function buildRequestPayload(
     );
   }
 
+  for (const [enabled, code, label] of [
+    [formData.differentReturnDeparture, formData.returnDepartureAirport, "Return departure airport"],
+    [formData.differentReturnArrival, formData.returnArrivalAirport, "Return arrival airport"]
+  ] as const) {
+    if (enabled && !/^[A-Z]{3}$/.test(code.trim().toUpperCase())) {
+      throw new Error(`Select a valid ${label.toLowerCase()}.`);
+    }
+  }
+
   const minimumHotelStarRating =
     formData.minimumHotelStarRating ===
     ""
@@ -316,6 +335,14 @@ function buildRequestPayload(
       formData.returnAirport
         .trim()
         .toUpperCase(),
+
+    returnDepartureAirport: formData.differentReturnDeparture
+      ? formData.returnDepartureAirport.trim().toUpperCase()
+      : null,
+
+    returnArrivalAirport: formData.differentReturnArrival
+      ? formData.returnArrivalAirport.trim().toUpperCase()
+      : null,
 
     destinationCity:
       formData.destinationCity
@@ -625,6 +652,16 @@ export function TripsPage({
     }
 
     if (field === "ipcmUserId") return;
+
+    if (field === "differentReturnArrival" || field === "differentReturnDeparture") {
+      setFormData((current) => ({
+        ...current,
+        [field]: value,
+        ...(field === "differentReturnArrival" && !value ? { returnArrivalAirport: "" } : {}),
+        ...(field === "differentReturnDeparture" && !value ? { returnDepartureAirport: "" } : {})
+      }));
+      return;
+    }
 
     if (field === "caseId") {
       const selected = cases.find((item) => item.id === value);
