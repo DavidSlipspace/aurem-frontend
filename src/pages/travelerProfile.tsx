@@ -50,30 +50,22 @@ export function TravelerProfilesPage({
 }: TravelerProfilesPageProps) {
   const [profiles, setProfiles] =
     useState<TravelerProfile[]>([]);
-
   const [formData, setFormData] =
     useState<TravelerProfileFormState>(emptyForm);
-
   const [editingProfileId, setEditingProfileId] =
     useState<string | null>(null);
-
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] =
     useState("");
-
   const [isLoading, setIsLoading] = useState(false);
-
   useEffect(() => {
     loadProfiles();
   }, [idToken]);
-
   async function loadProfiles() {
     try {
       setErrorMessage("");
-
       const response = await getTravelerProfiles(idToken);
-
       setProfiles(response.travelerProfiles);
     } catch (error) {
       setErrorMessage(
@@ -83,7 +75,6 @@ export function TravelerProfilesPage({
       );
     }
   }
-
   function handleChange(
     field: keyof TravelerProfileFormState,
     value: string
@@ -93,44 +84,34 @@ export function TravelerProfilesPage({
       [field]: value
     }));
   }
-
   function getPhoneDigits(value: string) {
     return value.replace(/\D/g, "").slice(0, 10);
   }
-
   function formatPhoneNumber(value: string) {
     const digits = getPhoneDigits(value);
-
     if (digits.length === 0) {
       return "";
     }
-
     if (digits.length <= 3) {
       return `(${digits}`;
     }
-
     if (digits.length <= 6) {
       return `(${digits.slice(0, 3)})${digits.slice(3)}`;
     }
-
     return `(${digits.slice(0, 3)})${digits.slice(
       3,
       6
     )}-${digits.slice(6, 10)}`;
   }
-
   function handlePhoneChange(value: string) {
     handleChange("phone", formatPhoneNumber(value));
   }
-
   function normalizeEmail(value: string) {
     return value.trim().toLowerCase();
   }
-
   function isValidEmail(value: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    return /^[^\s@]+@[^\s@]+**\.**[^\s@]+$/.test(value);
   }
-
   function handleNewProfile() {
     setFormData(emptyForm);
     setEditingProfileId(null);
@@ -138,7 +119,6 @@ export function TravelerProfilesPage({
     setErrorMessage("");
     setSuccessMessage("");
   }
-
   function handleEdit(profile: TravelerProfile) {
     setFormData({
       legalFirstName: profile.legalFirstName,
@@ -163,40 +143,33 @@ export function TravelerProfilesPage({
         (profile.seatPreference as SeatPreference) ?? "",
       status: profile.status
     });
-
     setEditingProfileId(profile.id);
     setShowForm(true);
     setErrorMessage("");
     setSuccessMessage("");
   }
-
   function handleCancel() {
     setFormData(emptyForm);
     setEditingProfileId(null);
     setShowForm(false);
   }
-
   function buildRequestPayload(
     status?: string
   ): TravelerProfileRequest {
     const normalizedEmail = normalizeEmail(
       formData.email
     );
-
     const phoneDigits = getPhoneDigits(formData.phone);
-
     if (!isValidEmail(normalizedEmail)) {
       throw new Error(
         "Enter a valid email address."
       );
     }
-
     if (phoneDigits.length !== 10) {
       throw new Error(
         "Phone number must contain exactly 10 digits."
       );
     }
-
     return {
       legalFirstName:
         formData.legalFirstName.trim(),
@@ -228,7 +201,6 @@ export function TravelerProfilesPage({
       status: status ?? formData.status
     };
   }
-
   async function handleStatusChange(
     profile: TravelerProfile,
     newStatus: "active" | "inactive"
@@ -237,21 +209,17 @@ export function TravelerProfilesPage({
       newStatus === "active"
         ? "activate"
         : "deactivate";
-
     const confirmed = window.confirm(
       `Are you sure you want to ${action} ` +
         `${profile.legalFirstName} ` +
         `${profile.legalLastName}?`
     );
-
     if (!confirmed) {
       return;
     }
-
     setIsLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
-
     try {
       const payload: TravelerProfileRequest = {
         legalFirstName:
@@ -284,13 +252,11 @@ export function TravelerProfilesPage({
           profile.seatPreference ?? "",
         status: newStatus
       };
-
       await updateTravelerProfile(
         idToken,
         profile.id,
         payload
       );
-
       setSuccessMessage(
         `Traveler profile ${
           newStatus === "active"
@@ -298,7 +264,6 @@ export function TravelerProfilesPage({
             : "deactivated"
         }.`
       );
-
       await loadProfiles();
     } catch (error) {
       setErrorMessage(
@@ -310,26 +275,21 @@ export function TravelerProfilesPage({
       setIsLoading(false);
     }
   }
-
   async function handleSubmit(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
-
     setIsLoading(true);
     setErrorMessage("");
     setSuccessMessage("");
-
     try {
       const payload = buildRequestPayload();
-
       if (editingProfileId) {
         await updateTravelerProfile(
           idToken,
           editingProfileId,
           payload
         );
-
         setSuccessMessage(
           "Traveler profile updated."
         );
@@ -338,14 +298,11 @@ export function TravelerProfilesPage({
           idToken,
           payload
         );
-
         setSuccessMessage(
           "Traveler profile created."
         );
       }
-
       await loadProfiles();
-
       setFormData(emptyForm);
       setEditingProfileId(null);
       setShowForm(false);
@@ -359,7 +316,6 @@ export function TravelerProfilesPage({
       setIsLoading(false);
     }
   }
-
   return (
     <main className="traveler-page">
       <section className="traveler-content">
@@ -370,7 +326,6 @@ export function TravelerProfilesPage({
               Create and manage travel profiles.
             </p>
           </div>
-
           <button
             type="button"
             onClick={handleNewProfile}
@@ -379,19 +334,16 @@ export function TravelerProfilesPage({
             + New Traveler Profile
           </button>
         </div>
-
         {successMessage && (
           <p className="traveler-success">
             {successMessage}
           </p>
         )}
-
         {errorMessage && (
           <p className="traveler-error">
             {errorMessage}
           </p>
         )}
-
         {showForm && (
           <form
             className="traveler-form-card"
@@ -402,10 +354,9 @@ export function TravelerProfilesPage({
                 ? "Edit Traveler Profile"
                 : "New Traveler Profile"}
             </h2>
-
             <div className="traveler-form-grid">
               <label>
-                Legal First Name *
+                Legal First Name \*
                 <input
                   value={formData.legalFirstName}
                   onChange={(event) =>
@@ -419,7 +370,6 @@ export function TravelerProfilesPage({
                   required
                 />
               </label>
-
               <label>
                 Legal Middle Name
                 <input
@@ -436,9 +386,8 @@ export function TravelerProfilesPage({
                   maxLength={100}
                 />
               </label>
-
               <label>
-                Legal Last Name *
+                Legal Last Name \*
                 <input
                   value={formData.legalLastName}
                   onChange={(event) =>
@@ -452,9 +401,8 @@ export function TravelerProfilesPage({
                   required
                 />
               </label>
-
               <label>
-                Date of Birth *
+                Date of Birth \*
                 <input
                   type="date"
                   value={formData.dateOfBirth}
@@ -471,9 +419,8 @@ export function TravelerProfilesPage({
                   required
                 />
               </label>
-
               <label>
-                Email *
+                Email \*
                 <input
                   type="email"
                   value={formData.email}
@@ -496,9 +443,8 @@ export function TravelerProfilesPage({
                   required
                 />
               </label>
-
               <label>
-                Phone *
+                Phone \*
                 <input
                   type="tel"
                   value={formData.phone}
@@ -510,13 +456,12 @@ export function TravelerProfilesPage({
                   autoComplete="tel-national"
                   inputMode="numeric"
                   maxLength={13}
-                  pattern="\(\d{3}\)\d{3}-\d{4}"
+                  pattern="\\(\d{3}\\)\d{3}-\d{4}"
                   placeholder="(111)111-1111"
                   title="Enter a 10-digit phone number."
                   required
                 />
               </label>
-
               <label>
                 TSA PreCheck Number
                 <input
@@ -533,7 +478,6 @@ export function TravelerProfilesPage({
                   maxLength={25}
                 />
               </label>
-
               <label>
                 Seat Preference
                 <select
@@ -551,9 +495,8 @@ export function TravelerProfilesPage({
                   }
                 >
                   <option value="">
-                    Select a seat preference
+                    No Preference
                   </option>
-
                   {Object.values(SeatPreference).map(
                     (preference) => (
                       <option
@@ -566,7 +509,6 @@ export function TravelerProfilesPage({
                   )}
                 </select>
               </label>
-
               <label>
                 Frequent Flyer Program
                 <input
@@ -582,7 +524,6 @@ export function TravelerProfilesPage({
                   maxLength={100}
                 />
               </label>
-
               <label>
                 Frequent Flyer Number
                 <input
@@ -599,7 +540,6 @@ export function TravelerProfilesPage({
                   maxLength={50}
                 />
               </label>
-
               <label>
                 Hotel Rewards Program
                 <input
@@ -615,7 +555,6 @@ export function TravelerProfilesPage({
                   maxLength={100}
                 />
               </label>
-
               <label>
                 Hotel Rewards Number
                 <input
@@ -633,7 +572,6 @@ export function TravelerProfilesPage({
                 />
               </label>
             </div>
-
             <div className="traveler-form-actions">
               <button
                 type="button"
@@ -643,7 +581,6 @@ export function TravelerProfilesPage({
               >
                 Cancel
               </button>
-
               <button
                 type="submit"
                 disabled={isLoading}
@@ -657,7 +594,6 @@ export function TravelerProfilesPage({
             </div>
           </form>
         )}
-
         <div className="traveler-table-card">
           <table>
             <thead>
@@ -672,7 +608,6 @@ export function TravelerProfilesPage({
                 <th>Actions</th>
               </tr>
             </thead>
-
             <tbody>
               {profiles.length > 0 ? (
                 profiles.map((profile) => (
@@ -681,28 +616,22 @@ export function TravelerProfilesPage({
                       {profile.legalFirstName}{" "}
                       {profile.legalLastName}
                     </td>
-
                     <td>
                       {profile.dateOfBirth?.substring(
                         0,
                         10
                       )}
                     </td>
-
                     <td>{profile.email}</td>
-
                     <td>
                       {formatPhoneNumber(profile.phone)}
                     </td>
-
                     <td>
                       {profile.tsaPrecheckNumber || "-"}
                     </td>
-
                     <td>
-                      {profile.seatPreference || "-"}
+                      {profile.seatPreference || "No Preference"}
                     </td>
-
                     <td>
                       <span
                         className={`traveler-status ${
@@ -714,7 +643,6 @@ export function TravelerProfilesPage({
                         {profile.status}
                       </span>
                     </td>
-
                     <td>
                       <div className="table-actions">
                         <button
@@ -727,7 +655,6 @@ export function TravelerProfilesPage({
                         >
                           Edit
                         </button>
-
                         {profile.status === "active" ? (
                           <button
                             type="button"
