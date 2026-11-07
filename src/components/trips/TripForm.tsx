@@ -1,3 +1,4 @@
+import { AirportAutocomplete } from "./AirportAutocomplete";
 import type {
   FormEvent
 } from "react";
@@ -346,51 +347,19 @@ export function TripForm({
           />
         </label>
 
-        <label>
-          Outbound Airport *
+        <AirportAutocomplete
+          label="Outbound Airport"
+          value={formData.outboundAirport}
+          onChange={(code) => onFieldChange("outboundAirport", code)}
+          disabled={isSaving}
+        />
 
-          <input
-            maxLength={
-              10
-            }
-            placeholder="DFW"
-            value={
-              formData.outboundAirport
-            }
-            onChange={(
-              event
-            ) =>
-              onFieldChange(
-                "outboundAirport",
-                event.target.value
-              )
-            }
-            required
-          />
-        </label>
-
-        <label>
-          Return Airport *
-
-          <input
-            maxLength={
-              10
-            }
-            placeholder="DFW"
-            value={
-              formData.returnAirport
-            }
-            onChange={(
-              event
-            ) =>
-              onFieldChange(
-                "returnAirport",
-                event.target.value
-              )
-            }
-            required
-          />
-        </label>
+        <AirportAutocomplete
+          label="Return Airport"
+          value={formData.returnAirport}
+          onChange={(code) => onFieldChange("returnAirport", code)}
+          disabled={isSaving}
+        />
 
         <label>
           Destination City
