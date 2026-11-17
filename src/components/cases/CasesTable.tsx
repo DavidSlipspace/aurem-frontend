@@ -10,9 +10,7 @@ type CasesTableProps = {
 };
 
 function formatCurrency(cents: number | null): string {
-  return cents === null ? "—" : new Intl.NumberFormat("en-US", {
-    style: "currency", currency: "USD"
-  }).format(cents / 100);
+  return cents === null ? "—" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 }
 
 export function CasesTable({ cases, user, onEdit, onSetBudget }: CasesTableProps) {
@@ -36,7 +34,7 @@ export function CasesTable({ cases, user, onEdit, onSetBudget }: CasesTableProps
               <td>{formatCurrency(item.approvedBudgetCents)}</td>
               <td><span className={item.status.trim().toLowerCase() === "active" ? "case-status case-status-active" : "case-status case-status-neutral"}>{item.status}</span></td>
               {(admin || manager) && <td><div className="case-row-actions">
-                {admin && <button type="button" className="case-table-button" onClick={() => onEdit(item)}>Edit</button>}
+                {(admin || manager) && <button type="button" className="case-table-button" onClick={() => onEdit(item)}>Edit</button>}
                 {manager && <button type="button" className="case-table-button case-budget-button" onClick={() => onSetBudget(item)}>{item.approvedBudgetCents === null ? "Set Budget" : "Update Budget"}</button>}
               </div></td>}
             </tr>

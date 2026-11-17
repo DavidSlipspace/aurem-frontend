@@ -239,7 +239,7 @@ export function HomePage({
   const loadOptions =
     useCallback(
       async () => {
-        if (!isAdmin) {
+        if (!isAdmin && !isIpcm) {
           return;
         }
 
@@ -272,20 +272,20 @@ export function HomePage({
       },
       [
         idToken,
-        isAdmin
+        isAdmin,
+        isIpcm
       ]
     );
 
   useEffect(
     () => {
-      if (
-        isAdmin
-      ) {
+      if (isAdmin || isIpcm) {
         void loadOptions();
       }
     },
     [
       isAdmin,
+      isIpcm,
       loadOptions
     ]
   );
@@ -317,9 +317,10 @@ export function HomePage({
       null
     );
 
-    setFormData(
-      EMPTY_FORM
-    );
+    setFormData({
+      ...EMPTY_FORM,
+      caseManagerUserId: isIpcm ? (options.caseManagers[0]?.id ?? "") : ""
+    });
 
     setShowCaseForm(
       true
@@ -421,7 +422,7 @@ export function HomePage({
   ) {
     event.preventDefault();
 
-    if (!isAdmin) {
+    if (!isAdmin && !isIpcm) {
       return;
     }
 
@@ -459,8 +460,7 @@ export function HomePage({
               .trim(),
 
           caseManagerUserId:
-            formData
-              .caseManagerUserId,
+            isIpcm ? (options.caseManagers[0]?.id ?? "") : formData.caseManagerUserId,
 
           travelerProfileIds:
             formData
@@ -591,7 +591,7 @@ export function HomePage({
             </p>
           </div>
 
-          {isAdmin && (
+          {(isAdmin || isIpcm) && (
             <button
               type="button"
               className="case-primary-button"
@@ -599,7 +599,7 @@ export function HomePage({
                 handleCreateCase
               }
               disabled={
-                isLoadingOptions
+                isLoadingOptions || (isIpcm && options.caseManagers.length === 0)
               }
             >
               + Create Case
@@ -629,12 +629,13 @@ export function HomePage({
           </div>
         )}
 
-        {isAdmin &&
+        {(isAdmin || isIpcm) &&
           showCaseForm && (
             <CaseForm
               formData={
                 formData
               }
+              isCaseManager={isIpcm}
               options={
                 options
               }
