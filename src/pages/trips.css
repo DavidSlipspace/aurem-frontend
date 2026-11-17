@@ -78,3 +78,20 @@
 .empty-state { color: var(--color-text-secondary); text-align: center !important; }
 @media (max-width: 800px) { .trips-content { padding: 20px; } .trips-header { flex-direction: column; } .trip-form-grid { grid-template-columns: 1fr; } .trip-form-heading, .trip-form-section { padding: 22px 20px; } .trip-form-actions { padding: 20px; flex-direction: column-reverse; } .trip-form-actions button { width: 100%; } }
 @media (max-width: 480px) { .trips-content { padding: 16px; } .trip-form-heading { flex-direction: column; gap: 8px; } .trip-form-heading h2 { font-size: 21px; } .trip-airport-group { padding: 14px; } }
+
+/* Clear unchecked and checked states, including browser dark mode. */
+.trip-form-grid .trip-checkbox-field input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none; background: #fff;
+  border: 1.5px solid #718096; border-radius: 4px; position: relative;
+}
+.trip-form-grid .trip-checkbox-field input[type="checkbox"]:checked {
+  background: var(--color-primary, #174a75); border-color: var(--color-primary, #174a75);
+}
+.trip-form-grid .trip-checkbox-field input[type="checkbox"]:checked::after {
+  content: ""; position: absolute; width: 4px; height: 8px; left: 5px; top: 1px;
+  border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.trip-form-grid .trip-checkbox-field input[type="checkbox"]:focus-visible {
+  outline: 3px solid #8ab9ec; outline-offset: 2px;
+}
+.trip-budget-controls { display: flex; flex-direction: column; gap: 12px; }
