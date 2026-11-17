@@ -147,10 +147,10 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
           <div><h3 id="trip-destination-heading">Destination & stay</h3><p>Provide the destination details and hotel preferences.</p></div>
         </div>
         <div className="trip-form-grid">
-          <div className="trip-assigned-manager"><span className="trip-field-label">Destination city</span>
-            <strong>{formData.destinationCity || "Select a destination airport"}</strong>
-            <span>Automatically determined from the destination airport</span>
-          </div>
+          <label>Destination city
+            <input type="text" maxLength={100} placeholder="Select a destination airport or enter a city" value={formData.destinationCity} onChange={(event) => onFieldChange("destinationCity", event.target.value)} disabled={isSaving} required />
+            <small>Automatically filled when you select a destination airport. You can edit it.</small>
+          </label>
           <label>Clinic ZIP code (optional)
             <input inputMode="numeric" autoComplete="postal-code" maxLength={10} placeholder="e.g. 80202" pattern="[0-9]{5}(-[0-9]{4})?" value={formData.clinicZipCode} onChange={(event) => onFieldChange("clinicZipCode", event.target.value)} disabled={isSaving} />
             <small>Approximate hotel search area. Do not enter a clinic street address.</small>
