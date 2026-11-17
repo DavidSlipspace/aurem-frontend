@@ -247,7 +247,7 @@ function buildRequestPayload(
     throw new Error("Enter a valid non-negative manual trip budget.");
   }
   if (formData.clinicZipCode.trim() && !/^\d{5}(?:-\d{4})?$/.test(formData.clinicZipCode.trim())) {
-    throw new Error("Clinic ZIP must be a valid US ZIP code.");
+    throw new Error("Destination ZIP must be a valid US ZIP code.");
   }
   if (!formData.destinationCity.trim()) {
     throw new Error("Select a destination airport with a recognized city.");
