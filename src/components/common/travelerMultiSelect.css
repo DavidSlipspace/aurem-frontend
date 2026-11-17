@@ -239,3 +239,15 @@
   .traveler-multi-select .traveler-multi-select__toggle { width: 100%; }
   .traveler-multi-select__options { max-height: 210px; }
 }
+
+/* Trip form input rules are more specific than the shared selector rules.
+   Reserve space for the icon so it cannot overlap the placeholder or query. */
+.trip-form-grid .traveler-multi-select input.traveler-multi-select__search:not([type="checkbox"]) {
+  padding-left: 42px;
+  padding-right: 12px;
+  text-indent: 0;
+}
+.trip-form-grid .traveler-multi-select__search-icon {
+  left: 14px;
+  z-index: 1;
+}
