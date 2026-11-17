@@ -58,6 +58,8 @@ import type {
   UserResponse
 } from "../types/user";
 
+import { loadAirports } from "../components/trips/airportData";
+
 import { isAdmin as hasAdminRole, isCaseManager } from "../utils/userRoles";
 
 import "./trips.css";
@@ -104,7 +106,7 @@ function createEmptyForm():
     destinationCity:
       "",
 
-    destinationAddress:
+    clinicZipCode:
       "",
 
     hotelProximityPreference:
@@ -115,6 +117,7 @@ function createEmptyForm():
 
     budgetDollars:
       "",
+    budgetIsManual: false,
 
     companionTraveler:
       false,
@@ -173,8 +176,8 @@ function createFormFromTrip(
       trip.destinationCity ??
       "",
 
-    destinationAddress:
-      trip.destinationAddress ??
+    clinicZipCode:
+      trip.clinicZipCode ??
       "",
 
     hotelProximityPreference:
@@ -186,8 +189,10 @@ function createFormFromTrip(
         ?.toString() ??
       "",
 
+    budgetIsManual: trip.budgetIsManual ?? true,
+
     budgetDollars:
-      trip.budgetFilter >
+      (trip.budgetIsManual ?? true) && trip.budgetFilter >
       0
         ? (
             trip.budgetFilter /
@@ -236,46 +241,15 @@ function buildRequestPayload(
     );
   }
 
-  let budgetDollars =
-    0;
-
-  const budgetValue =
-    formData
-      .budgetDollars
-      .trim();
-
-  if (
-    budgetValue
-  ) {
-    budgetDollars =
-      Number(
-        budgetValue
-      );
-
-    if (
-      !Number.isFinite(
-        budgetDollars
-      ) ||
-      budgetDollars <
-        0
-    ) {
-      throw new Error(
-        "Budget must be a valid non-negative amount."
-      );
-    }
+  const budgetValue = formData.budgetDollars.trim();
+  if (formData.budgetIsManual && (!budgetValue || !Number.isFinite(Number(budgetValue)) || Number(budgetValue) < 0)) {
+    throw new Error("Enter a valid non-negative manual trip budget.");
   }
-
-  if (
-    !formData
-      .destinationCity
-      .trim() &&
-    !formData
-      .destinationAddress
-      .trim()
-  ) {
-    throw new Error(
-      "Enter either a destination city or destination address."
-    );
+  if (formData.clinicZipCode.trim() && !/^\d{5}(?:-\d{4})?$/.test(formData.clinicZipCode.trim())) {
+    throw new Error("Clinic ZIP must be a valid US ZIP code.");
+  }
+  if (!formData.destinationCity.trim()) {
+    throw new Error("Select a destination airport with a recognized city.");
   }
 
   if (
@@ -349,10 +323,7 @@ function buildRequestPayload(
         .trim() ||
       undefined,
 
-    destinationAddress:
-      formData.destinationAddress
-        .trim() ||
-      undefined,
+    clinicZipCode: formData.clinicZipCode.trim() || undefined,
 
     hotelProximityPreference:
       formData.hotelProximityPreference
@@ -361,11 +332,8 @@ function buildRequestPayload(
 
     minimumHotelStarRating,
 
-    budgetFilter:
-      Math.round(
-        budgetDollars *
-          100
-      ),
+    budgetFilter: formData.budgetIsManual ? Math.round(Number(budgetValue) * 100) : null,
+    budgetIsManual: formData.budgetIsManual,
 
     companionTraveler:
       formData.companionTraveler,
@@ -636,6 +604,21 @@ export function TripsPage({
     ]
   );
 
+  useEffect(() => {
+    const code = formData.returnAirport.trim().toUpperCase();
+    if (!code) return;
+    let active = true;
+    void loadAirports().then((airports) => {
+      const airport = airports.find((item) => item.code === code);
+      if (active && airport?.city) {
+        setFormData((current) => current.returnAirport === code && current.destinationCity !== airport.city
+          ? { ...current, destinationCity: airport.city }
+          : current);
+      }
+    }).catch(() => { /* Existing airport selector displays loading errors. */ });
+    return () => { active = false; };
+  }, [formData.returnAirport]);
+
   function handleFieldChange<
     Field extends keyof TripFormState
   >(
@@ -668,7 +651,11 @@ export function TripsPage({
       setFormData((current) => ({
         ...current,
         caseId: String(value),
-        travelerProfileId: "",
+        travelerProfileId: selected?.travelerProfileIds.length === 1
+          ? selected.travelerProfileIds[0]
+          : "",
+        budgetDollars: "",
+        budgetIsManual: false,
         ipcmUserId: selected?.caseManagerUserId ?? ""
       }));
       return;
@@ -1028,9 +1015,9 @@ export function TripsPage({
               travelerProfiles={
                 travelerProfiles
               }
-              ipcms={
-                ipcms
-              }
+              ipcms={ipcms}
+              trips={trips}
+              editingTripId={editingTripId}
               isEditing={
                 editingTripId !==
                 null
