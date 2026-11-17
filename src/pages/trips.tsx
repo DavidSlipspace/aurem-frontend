@@ -2,6 +2,7 @@ import {
   type FormEvent,
   useCallback,
   useEffect,
+  useRef,
   useState
 } from "react";
 
@@ -604,20 +605,8 @@ export function TripsPage({
     ]
   );
 
-  useEffect(() => {
-    const code = formData.returnAirport.trim().toUpperCase();
-    if (!code) return;
-    let active = true;
-    void loadAirports().then((airports) => {
-      const airport = airports.find((item) => item.code === code);
-      if (active && airport?.city) {
-        setFormData((current) => current.returnAirport === code && current.destinationCity !== airport.city
-          ? { ...current, destinationCity: airport.city }
-          : current);
-      }
-    }).catch(() => { /* Existing airport selector displays loading errors. */ });
-    return () => { active = false; };
-  }, [formData.returnAirport]);
+  // Ignore stale airport lookups and preserve manually edited destination cities.
+  const destinationEditVersion = useRef(0);
 
   function handleFieldChange<
     Field extends keyof TripFormState
@@ -635,6 +624,26 @@ export function TripsPage({
     }
 
     if (field === "ipcmUserId") return;
+    if (field === "destinationCity") {
+      destinationEditVersion.current += 1;
+    }
+
+    if (field === "returnAirport") {
+      const code = String(value).trim().toUpperCase();
+      const lookupVersion = ++destinationEditVersion.current;
+      setFormData((current) => ({ ...current, returnAirport: code, destinationCity: "" }));
+      if (code) {
+        void loadAirports().then((airports) => {
+          const airport = airports.find((item) => item.code === code);
+          if (!airport?.city || destinationEditVersion.current !== lookupVersion) return;
+          setFormData((current) => current.returnAirport === code
+            ? { ...current, destinationCity: airport.city }
+            : current);
+        }).catch(() => { /* Airport autocomplete handles availability errors. */ });
+      }
+      return;
+    }
+
 
     if (field === "differentReturnArrival" || field === "differentReturnDeparture") {
       setFormData((current) => ({
