@@ -1,4 +1,5 @@
 import { AirportAutocomplete } from "./AirportAutocomplete";
+import { TravelerMultiSelect } from "../common/TravelerMultiSelect";
 import type { FormEvent } from "react";
 import type { CaseResponse } from "../../types/case";
 import type { IpcmDirectoryItem } from "../../types/ipcm";
@@ -7,7 +8,7 @@ import type { TravelerProfile } from "../../types/travelerProfile";
 
 export type TripFormState = {
   caseId: string;
-  travelerProfileId: string;
+  travelerProfileIds: string[];
   ipcmUserId: string;
   tripPurpose: string;
   outboundDate: string;
@@ -71,7 +72,7 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
       <section className="trip-form-section" aria-labelledby="trip-traveler-heading">
         <div className="trip-section-heading">
           <span className="trip-section-number">01</span>
-          <div><h3 id="trip-traveler-heading">Traveler details</h3><p>Assign the trip to a case and traveler.</p></div>
+          <div><h3 id="trip-traveler-heading">Traveler details</h3><p>Assign the trip to a case and select one or more of its travelers.</p></div>
         </div>
         <div className="trip-form-grid">
           <label>Case *
@@ -80,19 +81,7 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
               {cases.map((item) => <option key={item.id} value={item.id}>{item.caseReferenceId}</option>)}
             </select>
           </label>
-          {eligibleTravelers.length > 1 ? (
-            <label>Traveler *
-              <select value={formData.travelerProfileId} onChange={(event) => onFieldChange("travelerProfileId", event.target.value)} required disabled={isSaving}>
-                <option value="">Select a traveler</option>
-                {eligibleTravelers.map((profile) => <option key={profile.id} value={profile.id}>{profile.legalFirstName} {profile.legalLastName}</option>)}
-              </select>
-            </label>
-          ) : (
-            <div className="trip-assigned-manager"><span className="trip-field-label">Traveler</span>
-              <strong>{eligibleTravelers.length === 1 ? `${eligibleTravelers[0].legalFirstName} ${eligibleTravelers[0].legalLastName}` : "Select a case to view"}</strong>
-              <span>Automatically selected when the case has one traveler</span>
-            </div>
-          )}
+          <TravelerMultiSelect label="Travelers" required options={eligibleTravelers.map((profile) => ({ id: profile.id, name: [profile.legalFirstName, profile.legalMiddleName, profile.legalLastName].filter(Boolean).join(" "), email: profile.email }))} selectedIds={formData.travelerProfileIds} onChange={(ids) => onFieldChange("travelerProfileIds", ids)} disabled={isSaving} emptyMessage="Select a case with assigned active travelers." />
           <label>Trip purpose *
             <select value={formData.tripPurpose} onChange={(event) => onFieldChange("tripPurpose", event.target.value)} required disabled={isSaving}>
               <option value="">Select a purpose</option>
@@ -151,9 +140,9 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
             <input type="text" maxLength={100} placeholder="Select a destination airport or enter a city" value={formData.destinationCity} onChange={(event) => onFieldChange("destinationCity", event.target.value)} disabled={isSaving} required />
             <small>Automatically filled when you select a destination airport. You can edit it.</small>
           </label>
-          <label>Clinic ZIP code (optional)
+          <label>Destination ZIP Code (optional)
             <input inputMode="numeric" autoComplete="postal-code" maxLength={10} placeholder="e.g. 80202" pattern="[0-9]{5}(-[0-9]{4})?" value={formData.clinicZipCode} onChange={(event) => onFieldChange("clinicZipCode", event.target.value)} disabled={isSaving} />
-            <small>Approximate hotel search area. Do not enter a clinic street address.</small>
+            <small>Optional destination ZIP for hotel searches.</small>
           </label>
           <label>Hotel location preference
             <input placeholder="e.g. Within 5 miles" value={formData.hotelProximityPreference} onChange={(event) => onFieldChange("hotelProximityPreference", event.target.value)} disabled={isSaving} />
@@ -165,7 +154,7 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
             </select>
           </label>
         </div>
-        <p className="trip-section-hint">Hotels are searched near the clinic ZIP code when supplied, otherwise near the destination city.</p>
+        <p className="trip-section-hint">Hotels are searched near the destination ZIP Code when supplied, otherwise near the destination city.</p>
       </section>
 
       <section className="trip-form-section" aria-labelledby="trip-preferences-heading">
@@ -203,7 +192,7 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
 
       <footer className="trip-form-actions">
         <button type="button" className="secondary-button" onClick={onCancel} disabled={isSaving}>Cancel</button>
-        <button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : isEditing ? "Save changes" : "Create trip"}</button>
+        <button type="submit" disabled={isSaving || formData.travelerProfileIds.length === 0}>{isSaving ? "Saving..." : isEditing ? "Save changes" : "Create trip"}</button>
       </footer>
     </form>
   );

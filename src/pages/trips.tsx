@@ -78,8 +78,8 @@ function createEmptyForm():
     caseId:
       "",
 
-    travelerProfileId:
-      "",
+    travelerProfileIds:
+      [],
 
     ipcmUserId:
       "",
@@ -138,8 +138,8 @@ function createFormFromTrip(
     caseId:
       trip.caseId,
 
-    travelerProfileId:
-      trip.travelerProfileId,
+    travelerProfileIds:
+      trip.travelerProfileIds?.length ? trip.travelerProfileIds : [trip.travelerProfileId].filter(Boolean),
 
     ipcmUserId:
       trip.ipcmUserId ??
@@ -227,10 +227,10 @@ function buildRequestPayload(
   }
 
   if (
-    !formData.travelerProfileId
+    formData.travelerProfileIds.length === 0
   ) {
     throw new Error(
-      "Select a traveler."
+      "Select at least one traveler."
     );
   }
 
@@ -286,7 +286,9 @@ function buildRequestPayload(
       formData.caseId,
 
     travelerProfileId:
-      formData.travelerProfileId,
+      formData.travelerProfileIds[0],
+
+    travelerProfileIds: [...formData.travelerProfileIds],
 
     ipcmUserId:
       formData.ipcmUserId,
@@ -660,9 +662,9 @@ export function TripsPage({
       setFormData((current) => ({
         ...current,
         caseId: String(value),
-        travelerProfileId: selected?.travelerProfileIds.length === 1
-          ? selected.travelerProfileIds[0]
-          : "",
+        travelerProfileIds: selected?.travelerProfileIds.length === 1
+          ? [...selected.travelerProfileIds]
+          : [],
         budgetDollars: "",
         budgetIsManual: false,
         ipcmUserId: selected?.caseManagerUserId ?? ""
@@ -801,8 +803,8 @@ export function TripsPage({
     try {
       const selectedCase = cases.find((item) => item.id === formData.caseId);
       if (!selectedCase) throw new Error("Select an authorized case.");
-      if (!selectedCase.travelerProfileIds.includes(formData.travelerProfileId)) {
-        throw new Error("Select a traveler assigned to this case.");
+      if (formData.travelerProfileIds.length === 0 || formData.travelerProfileIds.some((id) => !selectedCase.travelerProfileIds.includes(id))) {
+        throw new Error("Select at least one traveler assigned to this case.");
       }
       const payload = buildRequestPayload({
         ...formData,
