@@ -75,7 +75,7 @@ function canSendTrip(
     trip.returnAirport &&
     (
       trip.destinationCity ||
-      trip.destinationAddress
+      trip.clinicZipCode
     )
   );
 }
@@ -323,7 +323,7 @@ export function TripsTable({
 
                     <td>
                       {trip.destinationCity ||
-                        trip.destinationAddress ||
+                        trip.clinicZipCode ||
                         "-"}
                     </td>
 
