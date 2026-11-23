@@ -34,3 +34,7 @@
 .login-error,.login-success { margin:0 0 14px; }
 .login-success { padding:12px 14px; border:1px solid #a6f4c5; border-radius:9px; background:#ecfdf3; color:#027a48; font-size:13px; }
 .login-card input::placeholder { color:#8190a3; }
+
+/* Official white wordmark displayed against Orvo navy. */
+.login-brand { display: inline-flex; align-items: center; padding: 13px 18px; border-radius: 10px; background: #13294b; }
+.login-brand img { width: 140px; max-width: 100%; height: auto; }
