@@ -1,108 +1,22 @@
-.profile-page {
-  min-height: calc(100vh - 64px);
-  background: var(--color-background, #f8fafc);
-}
-
-.profile-content {
-  width: min(760px, calc(100% - 64px));
-  margin: 0 auto;
-  padding: 40px 0 64px;
-}
-
-.profile-header {
-  margin-bottom: 28px;
-}
-
-.profile-header h1 {
-  margin: 0 0 18px;
-}
-
-.profile-header p {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-
-.profile-card {
-  padding: 24px;
-  display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  border: 1px solid var(--color-border);
-  border-radius: 16px;
-  background: var(--color-surface);
-}
-
-.profile-card label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-weight: 700;
-}
-
-.profile-card label:last-of-type {
-  grid-column: 1 / -1;
-}
-
-.profile-card input {
-  min-height: 44px;
-  padding: 10px 12px;
-  box-sizing: border-box;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  font: inherit;
-}
-
-.profile-card input[readonly] {
-  background: var(--color-table-row-hover);
-  color: var(--color-text-secondary);
-}
-
-.profile-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.profile-actions button {
-  margin: 0;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  background: var(--color-primary);
-  color: white;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.profile-success,
-.profile-error {
-  margin-bottom: 20px;
-  padding: 14px 16px;
-  border-radius: 9px;
-}
-
-.profile-success {
-  border: 1px solid #a6f4c5;
-  background: #ecfdf3;
-  color: #027a48;
-}
-
-.profile-error {
-  border: 1px solid #fecdca;
-  background: #fef3f2;
-  color: #b42318;
-}
-
-@media (max-width: 800px) {
-  .profile-content {
-    width: calc(100% - 40px);
-  }
-
-  .profile-card {
-    grid-template-columns: 1fr;
-  }
-}
+/* Orvo — My Profile */
+.profile-page { min-height: calc(100vh - 64px); background: var(--color-background, #f4f7fb); }
+.profile-content { width: min(760px, calc(100% - 64px)); margin: 0 auto; padding: 40px 0 64px; }
+.profile-header { margin-bottom: 28px; }
+.profile-header h1 { margin: 0 0 10px; color: var(--color-text-primary, #13294b); font-size: clamp(30px, 4vw, 40px); letter-spacing: -.035em; }
+.profile-header p { margin: 0; color: var(--color-text-secondary, #627086); line-height: 1.6; }
+.profile-card { padding: 28px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; border: 1px solid var(--color-border, #dce4ee); border-radius: 16px; background: var(--color-surface, #fff); box-shadow: 0 8px 28px rgba(19,41,75,.05); }
+.profile-card label { display: flex; flex-direction: column; gap: 9px; min-width: 0; color: var(--color-text-primary, #13294b); font-size: 13px; font-weight: 700; }
+.profile-card label:last-of-type { grid-column: 1 / -1; }
+.profile-card input { width: 100%; min-height: 46px; padding: 11px 13px; box-sizing: border-box; border: 1px solid var(--color-border, #dce4ee); border-radius: 9px; background: var(--color-surface, #fff); color: var(--color-text-primary, #13294b); font: inherit; font-size: 14px; transition: border-color .15s ease, box-shadow .15s ease; }
+.profile-card input:focus-visible { border-color: #5b8fd9; outline: none; box-shadow: 0 0 0 3px rgba(91,143,217,.2); }
+.profile-card input[readonly] { background: var(--color-background, #f4f7fb); color: var(--color-text-secondary, #627086); cursor: default; }
+.profile-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; padding-top: 6px; }
+.profile-actions button { margin: 0; padding: 11px 18px; border: 1px solid var(--color-primary, #13294b); border-radius: 9px; background: var(--color-primary, #13294b); color: #fff; font: inherit; font-weight: 700; cursor: pointer; transition: background-color .15s ease; }
+.profile-actions button:hover { background: var(--color-primary-hover, #203e68); }
+.profile-actions button:disabled { opacity: .6; cursor: not-allowed; }
+.profile-actions button:focus-visible { outline: 3px solid #5b8fd9; outline-offset: 2px; }
+.profile-success, .profile-error { margin-bottom: 20px; padding: 14px 16px; border-radius: 9px; line-height: 1.5; }
+.profile-success { border: 1px solid #a6f4c5; background: #ecfdf3; color: #166534; }
+.profile-error { border: 1px solid #fecdca; background: #fef3f2; color: #b42318; }
+@media (max-width: 800px) { .profile-content { width: calc(100% - 40px); padding: 28px 0 48px; } .profile-card { grid-template-columns: 1fr; padding: 22px 20px; } }
+@media (max-width: 480px) { .profile-content { width: calc(100% - 32px); } .profile-actions button { width: 100%; } }
