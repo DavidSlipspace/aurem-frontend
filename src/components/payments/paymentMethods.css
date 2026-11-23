@@ -1,9 +1,9 @@
 /* Scoped Orvo payment-method styling. Does not affect Stripe enrollment modals. */
-.orvo-pm-panel { --pm-ink:#15243b; --pm-muted:#68778a; --pm-border:#e5eaf1; --pm-primary:#255ad5; color:var(--pm-ink); width:100%; }
+.orvo-pm-panel { --pm-ink:var(--color-text-primary,#172b46); --pm-muted:var(--color-text-secondary,#62748a); --pm-border:var(--color-border,#dce4ee); --pm-primary:var(--color-primary,#13294b); color:var(--pm-ink); width:100%; }
 .orvo-pm-panel * { box-sizing:border-box; }
 .orvo-pm-panel__header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 0 24px; margin-bottom:24px; border-bottom:1px solid var(--pm-border); }
 .orvo-pm-panel__identity { display:flex; align-items:center; gap:13px; min-width:0; }
-.orvo-pm-panel__avatar { flex:0 0 44px; height:44px; border-radius:13px; display:grid; place-items:center; background:#eaf0fc; color:#3155a0; font-size:14px; font-weight:800; letter-spacing:.03em; }
+.orvo-pm-panel__avatar { flex:0 0 44px; height:44px; border-radius:13px; display:grid; place-items:center; background:#eaf0fc; color:var(--color-primary,#13294b); font-size:14px; font-weight:800; letter-spacing:.03em; }
 .orvo-pm-panel__person { min-width:0; }
 .orvo-pm-panel__person h2 { font-size:17px; line-height:1.3; font-weight:750; margin:0 0 3px; color:var(--pm-ink); }
 .orvo-pm-panel__person p { font-size:13px; color:var(--pm-muted); margin:0; overflow-wrap:anywhere; }
@@ -18,7 +18,7 @@
 .orvo-pm-card:hover { border-color:#d5dfed; box-shadow:0 9px 25px rgba(20,39,70,.075); transform:translateY(-1px); }
 .orvo-pm-card__top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:23px; }
 .orvo-pm-card__icon { display:grid; place-items:center; height:45px; width:45px; flex:0 0 45px; border-radius:13px; }
-.orvo-pm-card__icon--card { color:#315fca; background:#ebf1ff; }
+.orvo-pm-card__icon--card { color:var(--color-primary,#13294b); background:#ebf1ff; }
 .orvo-pm-card__icon--bank { color:#426b64; background:#eaf5f1; }
 .orvo-pm-card__icon svg { width:23px; height:23px; }
 .orvo-pm-status { display:inline-flex; align-items:center; gap:7px; max-width:100%; border-radius:999px; padding:7px 10px; font-size:11px; line-height:1; font-weight:750; white-space:nowrap; }
@@ -30,11 +30,11 @@
 .orvo-pm-card__eyebrow { margin:0 0 7px; font-size:11px; font-weight:800; letter-spacing:.11em; text-transform:uppercase; color:#79869a; }
 .orvo-pm-card__name { margin:0 0 8px; color:var(--pm-ink); font-size:20px; line-height:1.3; font-weight:800; letter-spacing:-.025em; overflow-wrap:anywhere; }
 .orvo-pm-card__description { color:var(--pm-muted); margin:0; font-size:13px; line-height:1.55; }
-.orvo-pm-card__default { display:inline-block; margin-top:11px; padding:5px 9px; border-radius:6px; background:#f0f4fc; color:#355ba6; font-size:11px; font-weight:700; }
+.orvo-pm-card__default { display:inline-block; margin-top:11px; padding:5px 9px; border-radius:6px; background:#f0f4fc; color:var(--color-primary,#13294b); font-size:11px; font-weight:700; }
 .orvo-pm-card__footer { padding-top:20px; }
 .orvo-pm-card__security { display:flex; align-items:center; gap:7px; color:#78869a; font-size:11px; line-height:1.4; margin-bottom:15px; }
 .orvo-pm-card__security svg { flex:0 0 14px; height:14px; width:14px; }
-.orvo-pm-card__action { width:100%; min-height:43px; display:flex; align-items:center; justify-content:center; gap:9px; border:1px solid #d7e1f2; border-radius:10px; background:#f7faff; color:#2456bd; font:inherit; font-size:13px; font-weight:750; cursor:pointer; transition:background .2s,border-color .2s; }
+.orvo-pm-card__action { width:100%; min-height:43px; display:flex; align-items:center; justify-content:center; gap:9px; border:1px solid #d7e1f2; border-radius:10px; background:#f7faff; color:var(--color-primary,#13294b); font:inherit; font-size:13px; font-weight:750; cursor:pointer; transition:background .2s,border-color .2s; }
 .orvo-pm-card__action:hover { background:#ebf2ff; border-color:#b9cbeb; }
 .orvo-pm-card__action:focus-visible { outline:3px solid #95b7ff; outline-offset:3px; }
 .orvo-pm-card__action svg { width:16px; height:16px; }

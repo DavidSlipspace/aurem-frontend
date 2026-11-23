@@ -76,7 +76,7 @@ export function RemoveIpcmDialog({
         >
           {isInvitation
             ? "Remove invitation?"
-            : "Remove IPCM?"}
+            : "Remove Case Manager?"}
         </h2>
 
         <p>
@@ -91,7 +91,7 @@ export function RemoveIpcmDialog({
 
         {!isInvitation && (
           <p className="ipcm-dialog-note">
-            IPCMs assigned to an
+            Case Managers assigned to an
             active case or trip
             must be reassigned
             before they can be

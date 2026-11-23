@@ -104,3 +104,7 @@
   .trip-airport-group { padding: 14px; }
   .trips-header button { width: 100%; }
 }
+
+
+.trips-table-card { max-width: 100%; overflow-x: auto; }
+.trips-page :where(button,input,select,textarea):focus-visible { outline: 3px solid var(--color-accent,#5b8fd9); outline-offset: 2px; }

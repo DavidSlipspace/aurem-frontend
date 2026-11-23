@@ -56,3 +56,9 @@
 .ipcm-danger-button:hover { background: #912018; }
 @media (max-width: 800px) { .ipcms-content { width: calc(100% - 40px); padding: 28px 0 48px; } .ipcms-header, .ipcms-section-header { align-items: stretch; flex-direction: column; } .ipcms-header > button { align-self: flex-start; } .invite-ipcm-actions { flex-direction: column-reverse; } .invite-ipcm-actions button { width: 100%; } }
 @media (max-width: 480px) { .ipcms-content { width: calc(100% - 32px); } .invite-ipcm-card, .ipcm-dialog { padding: 20px; } .ipcm-dialog-actions { flex-direction: column-reverse; } .ipcm-dialog-actions button { width: 100%; } }
+
+
+/* Orvo directory finish */
+.ipcm-table-card { overflow-x: auto; max-width: 100%; }
+.ipcm-table-card table { min-width: 780px; }
+.ipcms-page :where(button, input):focus-visible { outline: 3px solid var(--color-accent,#5b8fd9); outline-offset: 2px; }
