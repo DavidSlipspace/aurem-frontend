@@ -4,7 +4,7 @@ import type { IpcmInvitationDetails } from "../types/ipcmOnboarding";
 import "./ipcmOnboarding.css";
 
 type IpcmOnboardingPageProps = { token: string };
-const Brand = () => <div className="ipcm-onboarding-brand"><img src="/svg/orvo-wordmark.svg" alt="Orvo" /></div>;
+const Brand = () => <div className="ipcm-onboarding-brand"><img src="/orvo-wordmark-white.svg" alt="Orvo" /></div>;
 
 export function IpcmOnboardingPage({ token }: IpcmOnboardingPageProps) {
   const [invitation, setInvitation] = useState<IpcmInvitationDetails | null>(null);

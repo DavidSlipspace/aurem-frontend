@@ -26,3 +26,7 @@
 .ipcm-password-help { margin:-5px 0 0; color:#58677c; font-size:12px; line-height:1.55; }
 .ipcm-onboarding-state { color:#58677c; font-size:15px; }
 @media(max-width:600px) { .ipcm-onboarding-name-grid { grid-template-columns:1fr; } }
+
+/* Official white wordmark displayed against Orvo navy. */
+.ipcm-onboarding-brand { display: inline-flex; align-items: center; padding: 13px 18px; border-radius: 10px; background: #13294b; }
+.ipcm-onboarding-brand img { width: 140px; max-width: 100%; height: auto; }
