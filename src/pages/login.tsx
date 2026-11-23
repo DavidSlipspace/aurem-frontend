@@ -249,7 +249,7 @@ export function LoginPage({
   return (
     <main className="login-page">
       <section className="login-card">
-        <div className="login-brand"><img src="/svg/orvo-wordmark.svg" alt="Orvo" /></div>
+        <div className="login-brand"><img src="/orvo-wordmark-white.svg" alt="Orvo" /></div>
 
         <div className="login-heading">
           <h1>{heading}</h1>
