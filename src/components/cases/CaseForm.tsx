@@ -23,13 +23,13 @@ type CaseFormProps = {
 
 export function CaseForm({ formData, options, isEditing, isSaving, isCaseManager = false, onFieldChange, onSubmit, onCancel }: CaseFormProps) {
   const selectedManager = options.caseManagers.find((manager) => manager.id === formData.caseManagerUserId);
+  const managerName = selectedManager ? `${selectedManager.firstName} ${selectedManager.lastName}`.trim() : "Assigned to you";
   return (
     <form className="case-form-card" onSubmit={onSubmit}>
       <div className="case-form-heading">
-        <div>
-          <h2>{isEditing ? "Edit Case" : "Create Case"}</h2>
-          <p>{isCaseManager ? "Manage the travelers associated with your case. Cases you create are assigned to you." : "Assign a Case Manager and the travelers associated with this case. The Case Manager sets the final approved budget."}</p>
-        </div>
+        <div className="case-section-eyebrow">CASE MANAGEMENT</div>
+        <h2>{isEditing ? "Edit Case" : "Create Case"}</h2>
+        <p>{isCaseManager ? "Manage the travelers associated with your case. Cases you create are assigned to you." : "Assign a Case Manager and the travelers associated with this case. The Case Manager sets the final approved budget."}</p>
       </div>
       <div className="case-form-grid">
         <label>Case Reference *
@@ -43,7 +43,7 @@ export function CaseForm({ formData, options, isEditing, isSaving, isCaseManager
         </label>
         <label>Case Manager *
           {isCaseManager ? (
-            <input value={selectedManager ? `${selectedManager.firstName} ${selectedManager.lastName}`.trim() : "Assigned to you"} readOnly aria-readonly="true" />
+            <input value={managerName} readOnly aria-readonly="true" />
           ) : (
             <select value={formData.caseManagerUserId} onChange={(e) => onFieldChange("caseManagerUserId", e.target.value)} required disabled={isSaving}>
               <option value="">Select a case manager</option>
