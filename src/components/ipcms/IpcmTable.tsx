@@ -93,7 +93,7 @@ function getName(
 
   return (
     name ||
-    "IPCM"
+    "Case Manager"
   );
 }
 

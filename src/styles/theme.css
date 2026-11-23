@@ -1,13 +1,14 @@
+/* Compatibility tokens for components importing the original theme. */
 :root {
-  --color-primary: #111827;
-  --color-primary-hover: #1f2937;
-  --color-background: #f5f7fb;
+  --color-primary: #13294b;
+  --color-primary-hover: #203e66;
+  --color-background: #f4f7fb;
   --color-surface: #ffffff;
-  --color-border: #d0d5dd;
-  --color-text-primary: #111827;
-  --color-text-secondary: #667085;
-  --color-error: #b42318;
-  --color-success: #027a48;
-  --color-table-header: #f9fafb;
-  --color-table-row-hover: #f3f4f6;
+  --color-border: #dce4ee;
+  --color-text-primary: #172b46;
+  --color-text-secondary: #62748a;
+  --color-error: #b42332;
+  --color-success: #28744d;
+  --color-table-header: #f1f5fa;
+  --color-table-row-hover: #edf3fa;
 }
