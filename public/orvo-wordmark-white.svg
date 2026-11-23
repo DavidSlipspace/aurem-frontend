@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 320 104" role="img" aria-label="Orvo, white">
+  <title>Orvo, white</title>
+  <path fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" d="M92.58 44.02A43 43 0 1 1 55.98 7.42"/>
+  <circle cx="80.41" cy="19.59" r="8" fill="#FFFFFF"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M119 35V93"/>
+    <path d="M119 57A22 22 0 0 1 141 35"/>
+    <path d="M165 35L197 93L229 35"/>
+    <circle cx="280" cy="64" r="29"/>
+  </g>
+</svg>

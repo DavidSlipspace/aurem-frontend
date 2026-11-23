@@ -1,12 +1,56 @@
-@import "./styles/theme.css";
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: var(--color-background);
+/* Orvo phase 1: shared foundation. The official logo blue is reserved for accents. */
+:root {
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --color-primary: #13294b;
+  --color-primary-hover: #203e66;
+  --color-primary-dark: #0e203b;
+  --color-accent: #5b8fd9;
+  --color-surface: #ffffff;
+  --color-background: #f4f7fb;
+  --color-bg: #f4f7fb;
+  --color-border: #dce4ee;
+  --color-text-primary: #172b46;
+  --color-text-secondary: #62748a;
+  --color-table-row-hover: #edf3fa;
+  --color-success: #28744d;
+  --color-danger: #b42332;
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: 0 4px 22px rgba(19, 41, 75, .055);
+  /* Compatibility aliases for existing page styles */
+  --text: var(--color-text-secondary);
+  --text-h: var(--color-text-primary);
+  --bg: var(--color-background);
+  --border: var(--color-border);
+  --accent: var(--color-primary);
+  --accent-bg: rgba(91,143,217,.10);
+  --accent-border: rgba(91,143,217,.35);
+  --code-bg: #eaf0f7;
+  --social-bg: #f1f5fa;
+  --shadow: var(--shadow-card);
+  --sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --heading: var(--sans);
+  --mono: ui-monospace, Consolas, monospace;
   color: var(--color-text-primary);
-  font-family: Arial, sans-serif;
+  background: var(--color-background);
 }
+*, *::before, *::after { box-sizing: border-box; }
+html { min-width: 320px; }
+body { margin: 0; min-width: 320px; background: var(--color-background); }
+#root { min-height: 100svh; width: 100%; margin: 0; display: flex; flex-direction: column; text-align: left; }
+h1, h2, h3 { font-family: var(--heading); color: var(--color-text-primary); letter-spacing: -.025em; }
+h1 { font-size: clamp(26px, 2.4vw, 34px); line-height: 1.2; font-weight: 750; margin: 0 0 10px; }
+h2 { font-size: clamp(19px, 1.8vw, 24px); line-height: 1.25; font-weight: 700; margin: 0 0 8px; }
+p { margin-top: 0; }
+button, input, select, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+:where(input, select, textarea):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+code { font-family: var(--mono); border-radius: 4px; padding: 3px 6px; background: var(--code-bg); }
