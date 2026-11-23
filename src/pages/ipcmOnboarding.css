@@ -1,185 +1,28 @@
-.ipcm-onboarding-page {
-  min-height: 100vh;
-  box-sizing: border-box;
-  padding: 48px 20px;
-  display: grid;
-  place-items: center;
-  background:
-    linear-gradient(
-      135deg,
-      #f8fafc 0%,
-      #eef2f7 100%
-    );
-}
 
-.ipcm-onboarding-card {
-  width: min(600px, 100%);
-  box-sizing: border-box;
-  padding: 38px;
-  border: 1px solid var(--color-border, #e4e7ec);
-  border-radius: 20px;
-  background: var(--color-surface, #ffffff);
-  box-shadow:
-    0 20px 45px
-    rgba(16, 24, 40, 0.08);
-}
+/* Orvo public account pages — navy #13294B, blue #5B8FD9 */
+.ipcm-onboarding-page { min-height:100vh; box-sizing:border-box; padding:40px 20px; display:grid; place-items:center; background:linear-gradient(145deg,#f4f7fb 0%,#e9eff8 100%); }
+.ipcm-onboarding-card { width:min(600px,100%); box-sizing:border-box; padding:36px; border:1px solid #dce4ef; border-radius:18px; background:#fff; box-shadow:0 18px 55px rgba(19,41,75,.09); color:#13294B; }
+.ipcm-onboarding-brand { display:block; margin:0 0 30px; }
+.ipcm-onboarding-brand img { display:block; width:140px; height:auto; max-width:100%; }
+.ipcm-onboarding-intro { margin:0 0 26px; }
+.ipcm-onboarding-intro h1 { margin:0 0 10px; color:#13294B; font-size:clamp(27px,4vw,34px); font-weight:750; letter-spacing:-.035em; line-height:1.2; }
+.ipcm-onboarding-intro p { margin:0; color:#58677c; font-size:14px; line-height:1.65; }
+.ipcm-onboarding-card form { display:flex; flex-direction:column; gap:16px; }
+.ipcm-onboarding-card label { display:flex; flex-direction:column; gap:7px; color:#263c5a; font-size:13px; font-weight:700; }
+.ipcm-onboarding-card input { width:100%; min-width:0; min-height:46px; box-sizing:border-box; padding:10px 13px; border:1px solid #cbd6e4; border-radius:9px; background:#fff; color:#13294B; font:inherit; font-size:14px; transition:border-color .15s,box-shadow .15s; }
+.ipcm-onboarding-card input:focus-visible { outline:none; border-color:#5B8FD9; box-shadow:0 0 0 3px rgba(91,143,217,.18); }
+.ipcm-onboarding-card button:focus-visible { outline:3px solid rgba(91,143,217,.55); outline-offset:3px; }
+.ipcm-onboarding-primary { width:100%; min-height:46px; margin:4px 0 0; padding:11px 16px; border:0; border-radius:9px; background:#13294B; color:#fff; font:inherit; font-size:14px; font-weight:750; cursor:pointer; transition:background .15s; }
+.ipcm-onboarding-primary:hover:not(:disabled) { background:#23436c; }
+.ipcm-onboarding-primary:disabled { opacity:.6; cursor:not-allowed; }
+.ipcm-onboarding-error { padding:12px 14px; border:1px solid #fecdca; border-radius:9px; background:#fef3f2; color:#b42318; font-size:13px; line-height:1.5; }
+@media(max-width:600px) { .ipcm-onboarding-page { padding:20px 14px; } .ipcm-onboarding-card { padding:28px 22px; } }
 
-.ipcm-onboarding-brand {
-  display: inline-flex;
-  margin-bottom: 30px;
-  padding: 9px 13px;
-  border-radius: 8px;
-  background: #111827;
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.ipcm-onboarding-intro {
-  margin-bottom: 28px;
-}
-
-.ipcm-onboarding-eyebrow {
-  margin: 0 0 8px;
-  color: #667085;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.ipcm-onboarding-intro h1 {
-  margin: 0 0 12px;
-  color: #101828;
-  font-size: clamp(28px, 5vw, 38px);
-  line-height: 1.15;
-  letter-spacing: -0.03em;
-}
-
-.ipcm-onboarding-intro > p:last-child {
-  max-width: 520px;
-  margin: 0;
-  color: #475467;
-  font-size: 15px;
-  line-height: 1.65;
-}
-
-.ipcm-onboarding-email {
-  margin-bottom: 26px;
-  padding: 14px 16px;
-  border: 1px solid #e4e7ec;
-  border-radius: 10px;
-  background: #f8fafc;
-}
-
-.ipcm-onboarding-email span {
-  display: block;
-  margin-bottom: 4px;
-  color: #667085;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.ipcm-onboarding-email strong {
-  color: #101828;
-  font-size: 14px;
-}
-
-.ipcm-onboarding-card form {
-  display: flex;
-  flex-direction: column;
-  gap: 17px;
-}
-
-.ipcm-onboarding-name-grid {
-  display: grid;
-  grid-template-columns:
-    repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.ipcm-onboarding-card label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: #344054;
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.ipcm-onboarding-card input {
-  width: 100%;
-  min-height: 44px;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  border: 1px solid #d0d5dd;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #101828;
-  font: inherit;
-}
-
-.ipcm-onboarding-card input:focus {
-  border-color: #111827;
-  outline: 2px solid rgba(17, 24, 39, 0.12);
-}
-
-.ipcm-password-help {
-  margin: -7px 0 0;
-  color: #667085;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.ipcm-onboarding-primary {
-  margin: 7px 0 0;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  background: #111827;
-  color: #ffffff;
-  font: inherit;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.ipcm-onboarding-primary:hover {
-  background: #293548;
-}
-
-.ipcm-onboarding-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.ipcm-onboarding-error {
-  padding: 12px 14px;
-  border: 1px solid #fecdca;
-  border-radius: 8px;
-  background: #fef3f2;
-  color: #b42318;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.ipcm-onboarding-state {
-  color: #667085;
-  font-size: 15px;
-}
-
-@media (max-width: 600px) {
-  .ipcm-onboarding-page {
-    padding: 20px 14px;
-  }
-
-  .ipcm-onboarding-card {
-    padding: 28px 22px;
-    border-radius: 16px;
-  }
-
-  .ipcm-onboarding-name-grid {
-    grid-template-columns: 1fr;
-  }
-}
+.ipcm-onboarding-eyebrow { margin:0 0 9px!important; color:#496c9b!important; font-size:11px!important; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+.ipcm-onboarding-email { margin-bottom:24px; padding:15px 17px; border:1px solid #dce4ef; border-radius:10px; background:#f4f7fb; overflow-wrap:anywhere; }
+.ipcm-onboarding-email span { display:block; margin-bottom:5px; color:#58677c; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.ipcm-onboarding-email strong { color:#13294B; font-size:14px; }
+.ipcm-onboarding-name-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.ipcm-password-help { margin:-5px 0 0; color:#58677c; font-size:12px; line-height:1.55; }
+.ipcm-onboarding-state { color:#58677c; font-size:15px; }
+@media(max-width:600px) { .ipcm-onboarding-name-grid { grid-template-columns:1fr; } }
