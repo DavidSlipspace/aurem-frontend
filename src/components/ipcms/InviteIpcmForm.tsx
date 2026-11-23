@@ -88,7 +88,7 @@ export function InviteIpcmForm({
                     .value
                 )
             }
-            placeholder="ipcm@example.com"
+            placeholder="manager@example.com"
             autoComplete="email"
             disabled={
               isSubmitting

@@ -251,3 +251,7 @@
   left: 14px;
   z-index: 1;
 }
+
+
+.traveler-multi-select__option:focus-within { background: var(--color-table-row-hover,#edf3fa); }
+.traveler-multi-select__chip { border-color: var(--color-border,#dce4ee); }

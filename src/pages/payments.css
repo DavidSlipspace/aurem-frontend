@@ -579,3 +579,11 @@
     width: 100%;
   }
 }
+
+/* Orvo brand alignment */
+.payments-header { text-align: left; }
+.payments-header > div { align-items: flex-start; }
+.payments-header > div > p:last-child { margin-left: 0; text-align: left; }
+.payment-modal { box-shadow: 0 24px 64px rgba(19,41,75,.18); }
+.payment-method-action:focus-visible, .payment-modal button:focus-visible { outline: 3px solid var(--color-accent,#5b8fd9); outline-offset: 2px; }
+@media (max-width: 600px) { .payments-content { width: calc(100% - 28px); } .ipcm-payment-panel { padding: 18px; } }
