@@ -142,7 +142,7 @@ export function IpcmsPage({
           setErrorMessage(
             error instanceof Error
               ? error.message
-              : "Unable to load IPCM profiles."
+              : "Unable to load Case Manager profiles."
           );
         } finally {
           setIsLoading(
@@ -207,7 +207,7 @@ export function IpcmsPage({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Unable to send the IPCM invitation."
+          : "Unable to send the Case Manager invitation."
       );
     } finally {
       setIsSendingInvite(
@@ -256,7 +256,7 @@ export function IpcmsPage({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Unable to resend the IPCM invitation."
+          : "Unable to resend the Case Manager invitation."
       );
     } finally {
       setResendingInvitationId(
@@ -337,7 +337,7 @@ export function IpcmsPage({
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Unable to remove the IPCM."
+          : "Unable to remove the Case Manager."
       );
 
       window.scrollTo({
@@ -426,8 +426,7 @@ export function IpcmsPage({
 
         {isLoading ? (
           <div className="ipcms-loading">
-            Loading IPCM
-            profiles...
+            Loading Case Manager Profiles...
           </div>
         ) : (
           <IpcmTable
