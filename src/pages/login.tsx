@@ -1,3 +1,4 @@
+import { PasswordRequirements, meetsPasswordRequirements } from "../components/common/PasswordRequirements";
 
 import {
   type FormEvent,
@@ -159,9 +160,9 @@ export function LoginPage({
       return;
     }
 
-    if (!newPassword) {
+    if (!meetsPasswordRequirements(newPassword)) {
       setErrorMessage(
-        "Please enter a new password."
+        "Please meet all password requirements."
       );
       return;
     }
@@ -265,6 +266,7 @@ export function LoginPage({
             <div className="password-field">
               <input
                 id="new-password"
+                aria-describedby="password-requirements"
                 type={
                   showNewPassword
                     ? "text"
@@ -334,11 +336,7 @@ export function LoginPage({
               </button>
             </div>
 
-            <p className="login-password-hint">
-              Choose a strong, unique password that
-              meets your organization's password
-              requirements.
-            </p>
+            <PasswordRequirements password={newPassword} confirmation={confirmNewPassword} />
 
             {errorMessage && (
               <div
@@ -352,7 +350,7 @@ export function LoginPage({
             <button
               type="submit"
               className="login-primary-button"
-              disabled={isLoading}
+              disabled={isLoading || !meetsPasswordRequirements(newPassword) || newPassword !== confirmNewPassword}
             >
               {isLoading
                 ? "Setting password..."
