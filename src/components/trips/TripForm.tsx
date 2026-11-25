@@ -57,7 +57,8 @@ export function TripForm({ formData, isAdmin, travelerProfiles, ipcms, isEditing
           <div><h3 id="trip-traveler-heading">Traveler details</h3><p>Select one or more travelers for this trip.</p></div>
         </div>
         <div className="trip-form-grid">
-          <div className="trip-traveler-picker"><TravelerMultiSelect label="Travelers" required options={eligibleTravelers.map((profile) => ({ id: profile.id, name: [profile.legalFirstName, profile.legalMiddleName, profile.legalLastName].filter(Boolean).join(" "), email: profile.email }))} selectedIds={formData.travelerProfileIds} onChange={(ids) => onFieldChange("travelerProfileIds", ids)} disabled={isSaving} emptyMessage="No active travelers available." /><button type="button" className="trip-new-traveler-button" onClick={onNewTraveler} disabled={isSaving}>+ New traveler</button></div>
+          <div className="trip-traveler-picker"><button type="button" className="trip-new-traveler-button" onClick={onNewTraveler} disabled={isSaving}>+ New traveler</button>
+            <TravelerMultiSelect label="Travelers" required options={eligibleTravelers.map((profile) => ({ id: profile.id, name: [profile.legalFirstName, profile.legalMiddleName, profile.legalLastName].filter(Boolean).join(" "), email: profile.email }))} selectedIds={formData.travelerProfileIds} onChange={(ids) => onFieldChange("travelerProfileIds", ids)} disabled={isSaving} emptyMessage="No active travelers available." /></div>
           <label>Trip purpose *
             <select value={formData.tripPurpose} onChange={(event) => onFieldChange("tripPurpose", event.target.value)} required disabled={isSaving}>
               <option value="">Select a purpose</option>
