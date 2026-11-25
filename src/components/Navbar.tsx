@@ -2,7 +2,7 @@ import type { UserResponse } from "../types/user";
 import { getRoleDisplayName, isAdmin, isCaseManager } from "../utils/userRoles";
 import "./Navbar.css";
 
-type Page = "cases" | "travelerProfiles" | "trips" | "ipcms" | "profile" | "payments";
+type Page = "travelerProfiles" | "trips" | "ipcms" | "profile" | "payments";
 
 type NavbarProps = {
   user: UserResponse;
@@ -15,7 +15,6 @@ export function Navbar({ user, activePage, onPageChange, onLogout }: NavbarProps
   const admin = isAdmin(user);
   const manager = isCaseManager(user);
   const links: { page: Page; label: string }[] = [
-    { page: "cases", label: manager ? "My Cases" : "Cases" },
     { page: "trips", label: manager ? "My Trips" : "Trips" },
   ];
   if (admin || manager) links.push({ page: "travelerProfiles", label: "Traveler Profiles" });
