@@ -1,13 +1,10 @@
 import { AirportAutocomplete } from "./AirportAutocomplete";
 import { TravelerMultiSelect } from "../common/TravelerMultiSelect";
 import type { FormEvent } from "react";
-import type { CaseResponse } from "../../types/case";
 import type { IpcmDirectoryItem } from "../../types/ipcm";
-import type { Trip } from "../../types/trip";
 import type { TravelerProfile } from "../../types/travelerProfile";
 
 export type TripFormState = {
-  caseId: string;
   travelerProfileIds: string[];
   ipcmUserId: string;
   tripPurpose: string;
@@ -24,7 +21,6 @@ export type TripFormState = {
   hotelProximityPreference: string;
   minimumHotelStarRating: string;
   budgetDollars: string;
-  budgetIsManual: boolean;
   companionTraveler: boolean;
   ipcmApprovalRequired: boolean;
   status: string;
@@ -32,11 +28,9 @@ export type TripFormState = {
 
 type TripFormProps = {
   formData: TripFormState;
-  cases: CaseResponse[];
+  isAdmin: boolean;
   travelerProfiles: TravelerProfile[];
   ipcms: IpcmDirectoryItem[];
-  trips: Trip[];
-  editingTripId: string | null;
   isEditing: boolean;
   isSaving: boolean;
   onFieldChange: <Field extends keyof TripFormState>(field: Field, value: TripFormState[Field]) => void;
@@ -44,21 +38,8 @@ type TripFormProps = {
   onCancel: () => void;
 };
 
-export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, editingTripId, isEditing, isSaving, onFieldChange, onSubmit, onCancel }: TripFormProps) {
-  const selectedCase = cases.find((item) => item.id === formData.caseId);
-  const allowedTravelerIds = new Set(selectedCase?.travelerProfileIds ?? []);
-  const eligibleTravelers = travelerProfiles.filter((profile) => allowedTravelerIds.has(profile.id));
-  void ipcms;
-  const approved = selectedCase?.approvedBudgetCents ?? null;
-  const caseTrips = trips.filter((trip) => trip.caseId === formData.caseId);
-  const otherTrips = caseTrips.filter((trip) => trip.id !== editingTripId);
-  const totalTrips = otherTrips.length + 1;
-  const manualOtherTotal = otherTrips.filter((trip) => trip.budgetIsManual).reduce((sum, trip) => sum + trip.budgetFilter, 0);
-  const autoOtherCount = otherTrips.filter((trip) => !trip.budgetIsManual).length;
-  const available = approved === null ? null : Math.max(0, approved - manualOtherTotal - (formData.budgetIsManual ? Math.round(Number(formData.budgetDollars || 0) * 100) : 0));
-  const autoShare = available === null ? null : Math.floor(available / (autoOtherCount + (formData.budgetIsManual ? 0 : 1) || 1));
-  const dollars = (cents: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
-
+export function TripForm({ formData, isAdmin, travelerProfiles, ipcms, isEditing, isSaving, onFieldChange, onSubmit, onCancel }: TripFormProps) {
+  const eligibleTravelers = travelerProfiles;
   return (
     <form className="trip-form-card" onSubmit={onSubmit}>
       <header className="trip-form-heading">
@@ -72,27 +53,18 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
       <section className="trip-form-section" aria-labelledby="trip-traveler-heading">
         <div className="trip-section-heading">
           <span className="trip-section-number">01</span>
-          <div><h3 id="trip-traveler-heading">Traveler details</h3><p>Assign the trip to a case and select one or more of its travelers.</p></div>
+          <div><h3 id="trip-traveler-heading">Traveler details</h3><p>Select one or more travelers for this trip.</p></div>
         </div>
         <div className="trip-form-grid">
-          <label>Case *
-            <select value={formData.caseId} onChange={(event) => onFieldChange("caseId", event.target.value)} required disabled={isSaving}>
-              <option value="">Select a case</option>
-              {cases.map((item) => <option key={item.id} value={item.id}>{item.caseReferenceId}</option>)}
-            </select>
-          </label>
-          <TravelerMultiSelect label="Travelers" required options={eligibleTravelers.map((profile) => ({ id: profile.id, name: [profile.legalFirstName, profile.legalMiddleName, profile.legalLastName].filter(Boolean).join(" "), email: profile.email }))} selectedIds={formData.travelerProfileIds} onChange={(ids) => onFieldChange("travelerProfileIds", ids)} disabled={isSaving} emptyMessage="Select a case with assigned active travelers." />
+          <TravelerMultiSelect label="Travelers" required options={eligibleTravelers.map((profile) => ({ id: profile.id, name: [profile.legalFirstName, profile.legalMiddleName, profile.legalLastName].filter(Boolean).join(" "), email: profile.email }))} selectedIds={formData.travelerProfileIds} onChange={(ids) => onFieldChange("travelerProfileIds", ids)} disabled={isSaving} emptyMessage="No active travelers available." />
           <label>Trip purpose *
             <select value={formData.tripPurpose} onChange={(event) => onFieldChange("tripPurpose", event.target.value)} required disabled={isSaving}>
               <option value="">Select a purpose</option>
               {["Monitoring", "Transfer", "Delivery", "Consultation", "Legal", "Other"].map((purpose) => <option key={purpose} value={purpose}>{purpose}</option>)}
             </select>
           </label>
-          <div className="trip-assigned-manager">
-            <span className="trip-field-label">Assigned case manager</span>
-            <strong>{selectedCase?.caseManagerName || "Select a case to view"}</strong>
-            <span>Automatically assigned from the selected case</span>
-          </div>
+          {isAdmin ? <label>Assigned Case Manager *<select required value={formData.ipcmUserId} onChange={e=>onFieldChange("ipcmUserId",e.target.value)} disabled={isSaving}><option value="">Select Case Manager</option>{ipcms.map(m=><option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>)}</select></label> : <div className="trip-assigned-manager">Assigned to you</div>}
+          <label>Primary traveler *<select required value={formData.travelerProfileIds[0] || ""} onChange={e=>onFieldChange("travelerProfileIds",[e.target.value,...formData.travelerProfileIds.filter(id=>id!==e.target.value)])}>{formData.travelerProfileIds.map(id=><option key={id} value={id}>{eligibleTravelers.find(p=>p.id===id)?.legalFirstName} {eligibleTravelers.find(p=>p.id===id)?.legalLastName}</option>)}</select></label>
         </div>
       </section>
 
@@ -163,29 +135,10 @@ export function TripForm({ formData, cases, travelerProfiles, ipcms, trips, edit
           <div><h3 id="trip-preferences-heading">Budget & preferences</h3><p>Set spending guidance and approval requirements.</p></div>
         </div>
         <div className="trip-form-grid">
-          <div className="trip-budget-controls">
-            <div className="trip-assigned-manager">
-              <span className="trip-field-label">Approved case budget</span>
-              <strong>{approved === null ? "Not approved" : dollars(approved)}</strong>
-              <span>{totalTrips} trip{totalTrips === 1 ? "" : "s"} including this one</span>
-              <span>Suggested case budget: {selectedCase?.suggestedBudgetCents == null ? "Not set" : dollars(selectedCase.suggestedBudgetCents)}</span>
-            </div>
-            <label className="trip-checkbox-field">
-              <input type="checkbox" checked={formData.budgetIsManual} onChange={(event) => { onFieldChange("budgetIsManual", event.target.checked); }} disabled={isSaving} />
-              <span>Override automatic trip budget</span>
-            </label>
-            {formData.budgetIsManual ? (
-              <label>Manual trip budget
-                <div className="currency-input"><span aria-hidden="true">$</span><input type="number" min="0" step="0.01" required placeholder="0.00" value={formData.budgetDollars} onChange={(event) => onFieldChange("budgetDollars", event.target.value)} disabled={isSaving} /></div>
-                <small>Other manual overrides total {dollars(manualOtherTotal)}. Automatic allocations adjust to the remaining budget.</small>
-              </label>
-            ) : (
-              <p className="trip-section-hint">Estimated automatic allocation: <strong>{autoShare === null ? "Awaiting approved case budget" : dollars(autoShare)}</strong>. Final amounts are calculated by the server.</p>
-            )}
-          </div>
+          <label>Shared trip budget<div className="currency-input"><span>$</span><input type="number" min="0" max="21474836.47" step="0.01" value={formData.budgetDollars} onChange={e=>onFieldChange("budgetDollars",e.target.value)} disabled={isSaving}/></div><small>Total budget for all travelers. Required before sending booking link.</small></label>
           <div className="trip-preference-options">
             <label className="trip-checkbox-field"><input type="checkbox" checked={formData.companionTraveler} onChange={(event) => onFieldChange("companionTraveler", event.target.checked)} disabled={isSaving} /><span>Companion traveling</span></label>
-            <label className="trip-checkbox-field"><input type="checkbox" checked={formData.ipcmApprovalRequired} onChange={(event) => onFieldChange("ipcmApprovalRequired", event.target.checked)} disabled={isSaving} /><span>Approval needed from {selectedCase?.caseManagerName || "assigned case manager"}</span></label>
+            <label className="trip-checkbox-field"><input type="checkbox" checked={formData.ipcmApprovalRequired} onChange={(event) => onFieldChange("ipcmApprovalRequired", event.target.checked)} disabled={isSaving} /><span>Approval needed from the assigned Case Manager</span></label>
           </div>
         </div>
       </section>

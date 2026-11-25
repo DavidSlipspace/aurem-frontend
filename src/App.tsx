@@ -6,9 +6,7 @@ import {
   LoginPage
 } from "./pages/login";
 
-import {
-  HomePage
-} from "./pages/home";
+
 
 import {
   TravelerProfilesPage
@@ -50,14 +48,11 @@ import type {
   UserResponse
 } from "./types/user";
 
-import type {
-  CaseResponse
-} from "./types/case";
+
 
 import "./App.css";
 
 type Page =
-  | "cases"
   | "travelerProfiles"
   | "trips"
   | "ipcms"
@@ -182,30 +177,20 @@ export default function App() {
       null
     );
 
-  const [
-    cases,
-    setCases
-  ] =
-    useState<
-      CaseResponse[]
-    >(
-      []
-    );
+
 
   const [
     activePage,
     setActivePage
   ] =
     useState<Page>(
-      "cases"
+      "trips"
     );
 
   function handleLoginSuccess(
     token: string,
     userData:
-      UserResponse,
-    caseData:
-      CaseResponse[]
+      UserResponse
   ) {
     setIdToken(
       token
@@ -215,12 +200,10 @@ export default function App() {
       userData
     );
 
-    setCases(
-      caseData
-    );
+
 
     setActivePage(
-      "cases"
+      "trips"
     );
   }
 
@@ -242,12 +225,10 @@ export default function App() {
       null
     );
 
-    setCases(
-      []
-    );
+
 
     setActivePage(
-      "cases"
+      "trips"
     );
   }
 
@@ -321,23 +302,7 @@ export default function App() {
         }
       />
 
-      {activePage ===
-        "cases" && (
-        <HomePage
-          idToken={
-            idToken
-          }
-          cases={
-            cases
-          }
-          user={
-            user
-          }
-          onCasesChanged={
-            setCases
-          }
-        />
-      )}
+
 
       {activePage ===
         "trips" && (
