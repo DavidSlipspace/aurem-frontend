@@ -23,6 +23,7 @@ export type TripFormState = {
   budgetDollars: string;
   companionTraveler: boolean;
   ipcmApprovalRequired: boolean;
+  approvingCaseManagerUserId: string;
   status: string;
 };
 
@@ -140,7 +141,8 @@ export function TripForm({ formData, isAdmin, travelerProfiles, ipcms, isEditing
           <label>Shared trip budget<div className="currency-input"><span>$</span><input type="number" min="0" max="21474836.47" step="0.01" value={formData.budgetDollars} onChange={e=>onFieldChange("budgetDollars",e.target.value)} disabled={isSaving}/></div><small>Total budget for all travelers. Required before sending booking link.</small></label>
           <div className="trip-preference-options">
             <label className="trip-checkbox-field"><input type="checkbox" checked={formData.companionTraveler} onChange={(event) => onFieldChange("companionTraveler", event.target.checked)} disabled={isSaving} /><span>Companion traveling</span></label>
-            <label className="trip-checkbox-field"><input type="checkbox" checked={formData.ipcmApprovalRequired} onChange={(event) => onFieldChange("ipcmApprovalRequired", event.target.checked)} disabled={isSaving} /><span>Approval needed from the assigned Case Manager</span></label>
+            <label className="trip-checkbox-field"><input type="checkbox" checked={formData.ipcmApprovalRequired} onChange={(event) => onFieldChange("ipcmApprovalRequired", event.target.checked)} disabled={isSaving} /><span>Case Manager approval required</span></label>
+            {formData.ipcmApprovalRequired && <label>Approving Case Manager *<select required value={formData.approvingCaseManagerUserId} onChange={e=>onFieldChange("approvingCaseManagerUserId",e.target.value)} disabled={isSaving}><option value="">Select approving Case Manager</option>{ipcms.map(m=><option key={m.id} value={m.id}>{m.firstName} {m.lastName}</option>)}</select><small>Select yourself or another Case Manager.</small></label>}
           </div>
         </div>
       </section>
