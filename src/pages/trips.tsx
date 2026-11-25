@@ -119,6 +119,7 @@ function createEmptyForm():
 
     ipcmApprovalRequired:
       false,
+    approvingCaseManagerUserId: "",
 
     status:
       "Created"
@@ -199,6 +200,7 @@ function createFormFromTrip(
 
     ipcmApprovalRequired:
       trip.ipcmApprovalRequired,
+    approvingCaseManagerUserId: trip.approvingCaseManagerUserId ?? "",
 
     status:
       trip.status
@@ -227,6 +229,7 @@ function buildRequestPayload(
     );
   }
 
+  if (formData.ipcmApprovalRequired && !formData.approvingCaseManagerUserId) throw new Error("Select an approving Case Manager.");
   const budgetValue = formData.budgetDollars.trim();
   if (budgetValue && ( !Number.isFinite(Number(budgetValue)) || Number(budgetValue) < 0)) {
     throw new Error("Enter a valid non-negative trip budget.");
@@ -325,6 +328,7 @@ function buildRequestPayload(
 
     ipcmApprovalRequired:
       formData.ipcmApprovalRequired,
+    approvingCaseManagerUserId: formData.ipcmApprovalRequired ? formData.approvingCaseManagerUserId : null,
 
     status:
       formData.status
@@ -592,6 +596,7 @@ export function TripsPage({
     }
 
     if (field === "ipcmUserId" && !isAdmin) return;
+    if (field === "ipcmApprovalRequired") { setFormData(current=>({...current, ipcmApprovalRequired: Boolean(value), approvingCaseManagerUserId: value ? current.approvingCaseManagerUserId : ""})); return; }
     if (field === "destinationCity") {
       destinationEditVersion.current += 1;
     }
@@ -1001,6 +1006,8 @@ export function TripsPage({
           </p>
         ) : (
           <TripsTable
+            currentUserId={user.id}
+            isAdmin={isAdmin}
             trips={
               trips
             }
