@@ -13,9 +13,7 @@ import {
   updateTrip
 } from "../api/tripApi";
 
-import {
-  getCases
-} from "../api/caseApi";
+
 
 import {
   getTravelerProfiles
@@ -38,9 +36,7 @@ import {
   TripsTable
 } from "../components/trips/TripsTable";
 
-import type {
-  CaseResponse
-} from "../types/case";
+
 
 import type {
   IpcmDirectoryItem
@@ -75,8 +71,6 @@ type TripsPageProps = {
 function createEmptyForm():
   TripFormState {
   return {
-    caseId:
-      "",
 
     travelerProfileIds:
       [],
@@ -118,7 +112,6 @@ function createEmptyForm():
 
     budgetDollars:
       "",
-    budgetIsManual: false,
 
     companionTraveler:
       false,
@@ -135,8 +128,6 @@ function createFormFromTrip(
   trip: Trip
 ): TripFormState {
   return {
-    caseId:
-      trip.caseId,
 
     travelerProfileIds:
       trip.travelerProfileIds?.length ? trip.travelerProfileIds : [trip.travelerProfileId].filter(Boolean),
@@ -190,10 +181,9 @@ function createFormFromTrip(
         ?.toString() ??
       "",
 
-    budgetIsManual: trip.budgetIsManual ?? true,
 
     budgetDollars:
-      (trip.budgetIsManual ?? true) && trip.budgetFilter >
+      trip.budgetFilter >
       0
         ? (
             trip.budgetFilter /
@@ -218,13 +208,7 @@ function buildRequestPayload(
   formData:
     TripFormState
 ): TripRequest {
-  if (
-    !formData.caseId
-  ) {
-    throw new Error(
-      "Select a case."
-    );
-  }
+
 
   if (
     formData.travelerProfileIds.length === 0
@@ -243,8 +227,8 @@ function buildRequestPayload(
   }
 
   const budgetValue = formData.budgetDollars.trim();
-  if (formData.budgetIsManual && (!budgetValue || !Number.isFinite(Number(budgetValue)) || Number(budgetValue) < 0)) {
-    throw new Error("Enter a valid non-negative manual trip budget.");
+  if (budgetValue && ( !Number.isFinite(Number(budgetValue)) || Number(budgetValue) < 0)) {
+    throw new Error("Enter a valid non-negative trip budget.");
   }
   if (formData.clinicZipCode.trim() && !/^\d{5}(?:-\d{4})?$/.test(formData.clinicZipCode.trim())) {
     throw new Error("Destination ZIP must be a valid US ZIP code.");
@@ -282,8 +266,6 @@ function buildRequestPayload(
         );
 
   return {
-    caseId:
-      formData.caseId,
 
     travelerProfileId:
       formData.travelerProfileIds[0],
@@ -335,8 +317,7 @@ function buildRequestPayload(
 
     minimumHotelStarRating,
 
-    budgetFilter: formData.budgetIsManual ? Math.round(Number(budgetValue) * 100) : null,
-    budgetIsManual: formData.budgetIsManual,
+    budgetFilter: budgetValue ? Math.round(Number(budgetValue) * 100) : null,
 
     companionTraveler:
       formData.companionTraveler,
@@ -365,13 +346,7 @@ export function TripsPage({
       Trip[]
     >([]);
 
-  const [
-    cases,
-    setCases
-  ] =
-    useState<
-      CaseResponse[]
-    >([]);
+
 
   const [
     travelerProfiles,
@@ -500,7 +475,6 @@ export function TripsPage({
           ) {
             const [
               tripsResponse,
-              casesResponse,
               travelerProfilesResponse,
               ipcmsResponse
             ] =
@@ -509,9 +483,7 @@ export function TripsPage({
                   idToken
                 ),
 
-                getCases(
-                  idToken
-                ),
+
 
                 getTravelerProfiles(
                   idToken
@@ -524,10 +496,6 @@ export function TripsPage({
 
             setTrips(
               tripsResponse.trips
-            );
-
-            setCases(
-              casesResponse.cases
             );
 
             setTravelerProfiles(
@@ -565,10 +533,6 @@ export function TripsPage({
 
           setTrips(
             tripsResponse.trips
-          );
-
-          setCases(
-            []
           );
 
           setTravelerProfiles(
@@ -625,7 +589,7 @@ export function TripsPage({
       return;
     }
 
-    if (field === "ipcmUserId") return;
+    if (field === "ipcmUserId" && !isAdmin) return;
     if (field === "destinationCity") {
       destinationEditVersion.current += 1;
     }
@@ -657,20 +621,7 @@ export function TripsPage({
       return;
     }
 
-    if (field === "caseId") {
-      const selected = cases.find((item) => item.id === value);
-      setFormData((current) => ({
-        ...current,
-        caseId: String(value),
-        travelerProfileIds: selected?.travelerProfileIds.length === 1
-          ? [...selected.travelerProfileIds]
-          : [],
-        budgetDollars: "",
-        budgetIsManual: false,
-        ipcmUserId: selected?.caseManagerUserId ?? ""
-      }));
-      return;
-    }
+
 
     setFormData(
       (
@@ -723,12 +674,7 @@ export function TripsPage({
       return;
     }
 
-    const selectedCase = cases.find((item) => item.id === trip.caseId);
-    if (!selectedCase) return;
-    setFormData({
-      ...createFormFromTrip(trip),
-      ipcmUserId: selectedCase.caseManagerUserId
-    });
+    setFormData(createFormFromTrip(trip));
 
     setEditingTripId(
       trip.id
@@ -801,15 +747,7 @@ export function TripsPage({
     );
 
     try {
-      const selectedCase = cases.find((item) => item.id === formData.caseId);
-      if (!selectedCase) throw new Error("Select an authorized case.");
-      if (formData.travelerProfileIds.length === 0 || formData.travelerProfileIds.some((id) => !selectedCase.travelerProfileIds.includes(id))) {
-        throw new Error("Select at least one traveler assigned to this case.");
-      }
-      const payload = buildRequestPayload({
-        ...formData,
-        ipcmUserId: selectedCase.caseManagerUserId
-      });
+      const payload = buildRequestPayload({...formData, ipcmUserId: isAdmin ? formData.ipcmUserId : user.id});
 
       if (
         editingTripId
@@ -1020,15 +958,11 @@ export function TripsPage({
               formData={
                 formData
               }
-              cases={
-                cases
-              }
+              isAdmin={isAdmin}
               travelerProfiles={
                 travelerProfiles
               }
               ipcms={ipcms}
-              trips={trips}
-              editingTripId={editingTripId}
               isEditing={
                 editingTripId !==
                 null

@@ -1,4 +1,3 @@
-import { PasswordRequirements, meetsPasswordRequirements } from "../components/common/PasswordRequirements";
 
 import {
   type FormEvent,
@@ -15,25 +14,20 @@ import {
   getUser
 } from "../api/userApi";
 
-import {
-  getCases
-} from "../api/caseApi";
+
 
 import type {
   UserResponse
 } from "../types/user";
 
-import type {
-  CaseResponse
-} from "../types/case";
+
 
 import "./login.css";
 
 type LoginPageProps = {
   onLoginSuccess: (
     idToken: string,
-    user: UserResponse,
-    cases: CaseResponse[]
+    user: UserResponse
   ) => void;
 };
 
@@ -87,13 +81,11 @@ export function LoginPage({
     const user =
       await getUser(idToken);
 
-    const casesResponse =
-      await getCases(idToken);
+
 
     onLoginSuccess(
       idToken,
-      user,
-      casesResponse.cases
+      user
     );
   }
 
@@ -160,9 +152,9 @@ export function LoginPage({
       return;
     }
 
-    if (!meetsPasswordRequirements(newPassword)) {
+    if (!newPassword) {
       setErrorMessage(
-        "Please meet all password requirements."
+        "Please enter a new password."
       );
       return;
     }
@@ -266,7 +258,6 @@ export function LoginPage({
             <div className="password-field">
               <input
                 id="new-password"
-                aria-describedby="password-requirements"
                 type={
                   showNewPassword
                     ? "text"
@@ -336,7 +327,11 @@ export function LoginPage({
               </button>
             </div>
 
-            <PasswordRequirements password={newPassword} confirmation={confirmNewPassword} />
+            <p className="login-password-hint">
+              Choose a strong, unique password that
+              meets your organization's password
+              requirements.
+            </p>
 
             {errorMessage && (
               <div
@@ -350,7 +345,7 @@ export function LoginPage({
             <button
               type="submit"
               className="login-primary-button"
-              disabled={isLoading || !meetsPasswordRequirements(newPassword) || newPassword !== confirmNewPassword}
+              disabled={isLoading}
             >
               {isLoading
                 ? "Setting password..."

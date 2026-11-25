@@ -149,8 +149,8 @@ export function TripsTable({
 }: TripsTableProps) {
   const columnCount =
     canManage
-      ? 14
-      : 12;
+      ? 13
+      : 11;
 
   return (
     <div className="trips-table-card">
@@ -159,10 +159,6 @@ export function TripsTable({
           <tr>
             <th>
               Trip Reference
-            </th>
-
-            <th>
-              Case
             </th>
 
             <th>
@@ -259,16 +255,10 @@ export function TripsTable({
                     </td>
 
                     <td>
-                      {
-                        trip.caseReferenceId
-                      }
-                    </td>
-
-                    <td>
                       <div className="trip-traveler-cell">
                         <strong>
                           {
-                            trip.travelerName
+                            trip.travelerNames?.join(", ") || trip.travelerName
                           }
                         </strong>
 
