@@ -6,6 +6,8 @@ type TripsTableProps = {
   trips:
     Trip[];
 
+  currentUserId: string;
+  isAdmin: boolean;
   canManage:
     boolean;
 
@@ -142,6 +144,7 @@ function formatDateTime(
 
 export function TripsTable({
   trips,
+  currentUserId, isAdmin,
   canManage,
   isSendingTripId,
   onEdit,
@@ -419,7 +422,7 @@ export function TripsTable({
                         }
                       >
                         {trip.ipcmApprovalRequired
-                          ? "Required"
+                          ? `Required — ${trip.approvingCaseManagerName ?? "Unassigned"}`
                           : "Not Required"}
                       </span>
                     </td>
@@ -435,6 +438,7 @@ export function TripsTable({
                     {canManage && (
                       <td>
                         <div className="trip-row-actions">
+                          {(isAdmin || trip.ipcmUserId === currentUserId) ? <>
                           <button
                             type="button"
                             className="trip-edit-button"
@@ -473,6 +477,7 @@ export function TripsTable({
                                 ? "Resend Link"
                                 : "Send to Traveler"}
                           </button>
+                          </> : <span>Approval review only</span>}
                         </div>
                       </td>
                     )}
