@@ -1,0 +1,8 @@
+.trip-new-traveler-dialog { width:min(760px, calc(100% - 32px)); max-height:90dvh; box-sizing:border-box; padding:0; border:1px solid #dce4ee; border-radius:16px; background:#fff; color:#13294b; overflow:auto; }
+.trip-new-traveler-dialog::backdrop { background:rgba(19,41,75,.55); }
+.trip-new-traveler-dialog .traveler-form-card { margin:0; border:0; box-shadow:none; }
+.trip-new-traveler-note,.trip-new-traveler-error { margin:0; padding:16px 24px; font-size:14px; background:#edf4fd; }
+.trip-new-traveler-error { color:#a32f28; background:#fff3f2; }
+.trip-traveler-picker { min-width:0; }
+.trip-traveler-picker .trip-new-traveler-button { margin-top:8px; background:#fff; color:#13294b; border:1px solid #b7cce4; border-radius:8px; padding:8px 12px; font:inherit; font-size:13px; font-weight:650; cursor:pointer; }
+.trip-traveler-picker .trip-new-traveler-button:disabled { opacity:.55; cursor:not-allowed; }
