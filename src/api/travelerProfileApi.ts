@@ -21,7 +21,7 @@ export async function getTravelerProfiles(idToken: string): Promise<TravelerProf
 export async function createTravelerProfile(
   idToken: string,
   payload: TravelerProfileRequest
-): Promise<void> {
+): Promise<{ id: string }> {
   const response = await fetch(`${baseUrl}/traveler-profiles`, {
     method: "POST",
     headers: {
@@ -36,6 +36,7 @@ export async function createTravelerProfile(
   if (!response.ok) {
     throw new Error(data.message ?? "Unable to create Traveler profile.");
   }
+  return data;
 }
 
 export async function updateTravelerProfile(

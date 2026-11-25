@@ -1,3 +1,4 @@
+import { NewTripTravelerDialog } from "../components/trips/NewTripTravelerDialog";
 import {
   type FormEvent,
   useCallback,
@@ -334,6 +335,7 @@ export function TripsPage({
   idToken,
   user
 }: TripsPageProps) {
+  const [showNewTraveler, setShowNewTraveler] = useState(false);
   const isAdmin = hasAdminRole(user);
   const isIpcm = isCaseManager(user);
   const canManageTrips = isAdmin || isIpcm;
@@ -958,6 +960,7 @@ export function TripsPage({
               formData={
                 formData
               }
+              onNewTraveler={() => setShowNewTraveler(true)}
               isAdmin={isAdmin}
               travelerProfiles={
                 travelerProfiles
@@ -981,6 +984,14 @@ export function TripsPage({
               }
             />
           )}
+
+        {canManageTrips && showForm && showNewTraveler && (
+          <NewTripTravelerDialog idToken={idToken} onCancel={() => setShowNewTraveler(false)} onCreated={(profile) => {
+            setTravelerProfiles(current => [...current.filter(p => p.id !== profile.id), profile]);
+            setFormData(current => ({...current, travelerProfileIds: [...new Set([...current.travelerProfileIds, profile.id])]}));
+            setShowNewTraveler(false);
+          }} />
+        )}
 
         {isPageLoading ? (
           <p className="trips-loading">
