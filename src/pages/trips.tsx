@@ -1,3 +1,4 @@
+import { TripFilters, filterTrips, emptyTripFilters } from "../components/common/DirectoryFilters";
 import { NewTripTravelerDialog } from "../components/trips/NewTripTravelerDialog";
 import {
   type FormEvent,
@@ -339,6 +340,7 @@ export function TripsPage({
   idToken,
   user
 }: TripsPageProps) {
+  const [filters, setFilters] = useState(emptyTripFilters);
   const [showNewTraveler, setShowNewTraveler] = useState(false);
   const isAdmin = hasAdminRole(user);
   const isIpcm = isCaseManager(user);
@@ -910,6 +912,7 @@ export function TripsPage({
     }
   }
 
+  const visibleTrips = filterTrips(trips, filters);
   return (
     <main className="trips-page">
       <section className="trips-content">
@@ -1005,11 +1008,13 @@ export function TripsPage({
               : "Loading trips..."}
           </p>
         ) : (
-          <TripsTable
+          <>
+          <TripFilters trips={trips} value={filters} onChange={setFilters} count={visibleTrips.length} />
+          {trips.length > 0 && visibleTrips.length === 0 ? <p className="directory-filter-empty">No trips match your filters.</p> : <TripsTable
             currentUserId={user.id}
             isAdmin={isAdmin}
             trips={
-              trips
+              visibleTrips
             }
             canManage={
               canManageTrips
@@ -1023,7 +1028,8 @@ export function TripsPage({
             onSendToTraveler={
               handleOpenSendDialog
             }
-          />
+          />}
+          </>
         )}
       </section>
 

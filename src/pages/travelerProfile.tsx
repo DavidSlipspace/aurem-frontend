@@ -1,3 +1,4 @@
+import { TravelerFilters, filterTravelers, emptyTravelerFilters } from "../components/common/DirectoryFilters";
 import { TravelerProfileForm } from "../components/common/TravelerProfileForm";
 import {
   useEffect,
@@ -47,6 +48,7 @@ export function TravelerProfilesPage({
     useState<TravelerProfileFormState>(emptyForm);
   const [editingProfileId, setEditingProfileId] =
     useState<string | null>(null);
+  const [filters, setFilters] = useState(emptyTravelerFilters);
   const [showForm, setShowForm] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] =
@@ -309,6 +311,7 @@ export function TravelerProfilesPage({
       setIsLoading(false);
     }
   }
+  const visibleProfiles = filterTravelers(profiles, filters);
   return (
     <main className="traveler-page">
       <section className="traveler-content">
@@ -340,6 +343,7 @@ export function TravelerProfilesPage({
         {showForm && (
 <TravelerProfileForm formData={formData} editingProfileId={editingProfileId} isLoading={isLoading} handleChange={handleChange} handlePhoneChange={handlePhoneChange} handleCancel={handleCancel} handleSubmit={handleSubmit} />
         )}
+        <TravelerFilters profiles={profiles} value={filters} onChange={setFilters} count={visibleProfiles.length} />
         <div className="traveler-table-card">
           <table>
             <thead>
@@ -355,8 +359,8 @@ export function TravelerProfilesPage({
               </tr>
             </thead>
             <tbody>
-              {profiles.length > 0 ? (
-                profiles.map((profile) => (
+              {visibleProfiles.length > 0 ? (
+                visibleProfiles.map((profile) => (
                   <tr key={profile.id}>
                     <td>
                       {profile.legalFirstName}{" "}
@@ -444,7 +448,7 @@ export function TravelerProfilesPage({
                     className="empty-state"
                     colSpan={8}
                   >
-                    No Traveler profiles found.
+                    {profiles.length ? "No travelers match your filters." : "No Traveler profiles found."}
                   </td>
                 </tr>
               )}
