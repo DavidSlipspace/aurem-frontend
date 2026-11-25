@@ -4,5 +4,5 @@
 .trip-new-traveler-note,.trip-new-traveler-error { margin:0; padding:16px 24px; font-size:14px; background:#edf4fd; }
 .trip-new-traveler-error { color:#a32f28; background:#fff3f2; }
 .trip-traveler-picker { min-width:0; }
-.trip-traveler-picker .trip-new-traveler-button { margin-top:8px; background:#fff; color:#13294b; border:1px solid #b7cce4; border-radius:8px; padding:8px 12px; font:inherit; font-size:13px; font-weight:650; cursor:pointer; }
+.trip-traveler-picker .trip-new-traveler-button { margin-bottom:8px; background:#fff; color:#13294b; border:1px solid #b7cce4; border-radius:8px; padding:8px 12px; font:inherit; font-size:13px; font-weight:650; cursor:pointer; }
 .trip-traveler-picker .trip-new-traveler-button:disabled { opacity:.55; cursor:not-allowed; }
